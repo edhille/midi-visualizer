@@ -67,7 +67,7 @@
 			}
 		}
 
-      //console.log(retByte.toString(16));
+      //console.log('RETBYTE: ', retByte.toString(16));
 
 		return retByte;
 	};

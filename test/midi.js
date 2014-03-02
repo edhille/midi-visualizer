@@ -72,7 +72,7 @@ describe('Midi', function() {
                midiTrack.size.should.equal(19);
             });
 
-            it('should have more that zero events', function() {
+            it('should have more than zero events', function() {
                midiTrack.events.should.have.length.above(0);
             });
          });

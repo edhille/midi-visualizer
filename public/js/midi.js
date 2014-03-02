@@ -101,6 +101,7 @@
          retBytes.push(nByte);
       } while ((nByte & BYTE_MASK) === BYTE_MASK);
 
+      //console.log('RETBYTES: ', retBytes.map(function(foo) { return foo.toString(16); }));
       return retBytes;
    };
 
@@ -117,6 +118,8 @@
             velocity: this.byteParser.nextByte()
          }
       });
+
+      //console.log('EVENT:', eventCode.toString(16), midiEvent.data.note.toString(16), midiEvent.data.velocity.toString(16));
 
       this._bytesParsed += 2;
       this.events.push(midiEvent);
@@ -230,43 +233,60 @@
 
    MidiTrack.prototype.parseEventData = function parseEventData(deltaTime) {
       var eventType = this.byteParser.nextByte(),
-          midiEvent;
+          midiEvent,
+          lastEvent;
 
       ++this._bytesParsed;
       
+      //console.log('EVENT: ', eventType.toString(16));
+
       if (eventType === META_EVENT) {
+         //console.log('parse meta...');
          this.parseMetaEvent(deltaTime, eventType);
       }
       else if ((eventType & SYSEX_EVENT_MASK) === SYSEX_EVENT_MASK) {
+         //console.log('parse system...');
          this.parseSysexEvent(deltaTime, eventType);
       }
       else if ((eventType & MIDI_EVENT_PITCH_WHEEL_MASK) === MIDI_EVENT_PITCH_WHEEL_MASK) {
+         //console.log('parse pitch wheel...');
          this.parsePitchWheel(deltaTime, eventType);
       }
       else if ((eventType & MIDI_EVENT_AFTERTOUCH_MASK) === MIDI_EVENT_AFTERTOUCH_MASK) {
+         //console.log('parse aftertouch...');
          this.parseAftertouch(deltaTime, eventType);
       }
       else if ((eventType & MIDI_EVENT_PROGRAM_CHANGE_MASK) === MIDI_EVENT_PROGRAM_CHANGE_MASK) {
+         //console.log('parse program change...');
          this.parseProgramChange(deltaTime, eventType);
       }
       else if ((eventType & MIDI_EVENT_CONTROL_MODE_CHANGE_MASK) === MIDI_EVENT_CONTROL_MODE_CHANGE_MASK) {
+         //console.log('parse control mode...');
          this.parseControlModeChange(deltaTime, eventType);
       }
       else if ((eventType & MIDI_EVENT_POLYPHONIC_AFTERTOUCH_MASK) === MIDI_EVENT_POLYPHONIC_AFTERTOUCH_MASK) {
+         //console.log('parse polyphonic aftertouch...');
          this.parsePolyphonicAftertouch(deltaTime, eventType);
       }
       else if ((eventType & MIDI_EVENT_NOTE_ON_MASK) === MIDI_EVENT_NOTE_ON_MASK) {
+         //console.log('parse note on...');
          this.parseNoteOn(deltaTime, eventType);
       }
       else if ((eventType & MIDI_EVENT_NOTE_OFF_MASK) === MIDI_EVENT_NOTE_OFF_MASK) {
+         //console.log('parse note off...');
          this.parseNoteOff(deltaTime, eventType);
       }
       else {
+         // Must be a running status event (i.e. same event type as last message)
+         lastEvent = this.events[this.events.length - 1];
+         //console.log('RUNNTING EVENT: ', lastEvent.code.toString(16), eventType.toString(16), deltaTime);
          midiEvent = new MidiEvent({
-            code: eventType,
+            code: lastEvent.code,
             delta: deltaTime,
             data: {
-               value: this.byteParser.nextByte()
+               note: eventType,
+               // TODO: get this to correctly handle non-note events...
+               velocity: this.byteParser.nextByte()
             }
          });
 
