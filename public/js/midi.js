@@ -231,12 +231,8 @@
       this.events.push(midiEvent);
    };
 
-   MidiTrack.prototype.parseEventData = function parseEventData(deltaTime) {
-      var eventType = this.byteParser.nextByte(),
-          midiEvent,
-          lastEvent;
-
-      ++this._bytesParsed;
+   MidiTrack.prototype.parseEventData = function parseEventData(deltaTime, eventType) {
+      var midiEvent, lastEvent;
       
       //console.log('EVENT: ', eventType.toString(16));
 
@@ -280,25 +276,21 @@
          // Must be a running status event (i.e. same event type as last message)
          lastEvent = this.events[this.events.length - 1];
          //console.log('RUNNTING EVENT: ', lastEvent.code.toString(16), eventType.toString(16), deltaTime);
-         midiEvent = new MidiEvent({
-            code: lastEvent.code,
-            delta: deltaTime,
-            data: {
-               note: eventType,
-               // TODO: get this to correctly handle non-note events...
-               velocity: this.byteParser.nextByte()
-            }
-         });
 
-         ++this._bytesParsed;
-         this.events.push(midiEvent);
+         this.byteParser.pushByte(eventType);
+         --this._bytesParsed;
+
+         this.parseEventData(deltaTime, lastEvent.code);
       }
    };
 
    MidiTrack.prototype.parseEvent = function parseEvent(bytesParsedSoFar) {
-      var deltaTime = this.parseDeltaTime();
+      var deltaTime = this.parseDeltaTime(),
+          eventType = this.byteParser.nextByte();
+
+      ++this._bytesParsed;
       
-      this.parseEventData(deltaTime);
+      this.parseEventData(deltaTime, eventType);
    };
 
 	MidiTrack.prototype.parseTrack = function parseTrack() {

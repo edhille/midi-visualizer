@@ -57,7 +57,7 @@ describe('Midi', function() {
             var midiTrack;
 
             beforeEach(function() {
-               midiTrack = midi.tracks[0];
+               midiTrack = midi.tracks[midi.tracks.length - 1];
             });
 
             afterEach(function() {
@@ -69,11 +69,11 @@ describe('Midi', function() {
             });
 
             it('should have a size', function() {
-               midiTrack.size.should.equal(19);
+               midiTrack.size.should.equal(21);
             });
 
-            it('should have more than zero events', function() {
-               midiTrack.events.should.have.length.above(0);
+            it('should have six events', function() {
+               midiTrack.events.length.should.equal(6);
             });
          });
 		});

@@ -86,6 +86,10 @@
 		return bytes;
 	};
 
+   ByteParser.prototype.pushByte = function pushByte(nextByte) {
+      this.currBytes.unshift(nextByte);
+   };
+
 	ByteParser.prototype.dump = function dump() {
 		return this.rawString.substring(this.currStringIndex);
 	};

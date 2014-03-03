@@ -3,7 +3,7 @@ var chai = require('chai'),
 	ByteParser = require('../public/js/byteParser.js');
 
 describe('byteParser', function() {
-	var asciiTestString, utf8TestString, byteParser;
+	var asciiTestString, byteParser;
 
 	chai.should();
 
@@ -112,4 +112,21 @@ describe('byteParser', function() {
 			byteParser.getBytes(10).length.should.equal(10);
 		});
 	});
+
+   describe('#pushByte', function() {
+      var lastByteRead;
+      
+      beforeEach(function() {
+         byteParser = new ByteParser(asciiTestString);
+
+         lastByteRead = byteParser.nextByte();
+
+         byteParser.pushByte(lastByteRead);
+      });
+
+      it('should get the last byte read if we push it back on the stack', function() {
+         byteParser.nextByte().should.equal(lastByteRead);
+         byteParser.nextByte().should.not.equal(lastByteRead);
+      });
+   });
 });
