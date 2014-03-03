@@ -101,7 +101,6 @@
          retBytes.push(nByte);
       } while ((nByte & BYTE_MASK) === BYTE_MASK);
 
-      //console.log('RETBYTES: ', retBytes.map(function(foo) { return foo.toString(16); }));
       return retBytes;
    };
 

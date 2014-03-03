@@ -75,6 +75,23 @@ describe('Midi', function() {
             it('should have six events', function() {
                midiTrack.events.length.should.equal(6);
             });
+
+            describe('MidiEvent', function() {
+               var midiEvent;
+               
+               beforeEach(function() {
+                  midiEvent = midiTrack.events[0];
+               });
+
+               it('should have an event code (program change)', function() {
+                  midiEvent.code.should.not.be.undefined;
+                  midiEvent.code.should.equal(0xc2);
+               });
+
+               it('should have program data', function() {
+                  midiEvent.data.program.should.equal(0x46);
+               });
+            });
          });
 		});
 	});
