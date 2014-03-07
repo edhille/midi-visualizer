@@ -25,11 +25,11 @@ describe('Midi', function() {
       it('should not throw an error starting with a valid Midi file', function() {
          expect(function() {
             new Midi({ midiString: midiData });
-         }).not.throw(Error);         
+         }).not.throw(Error);
       });
 
 		describe('default construction', function() {
-			
+
 			var midi;
 
 			beforeEach(function() {
@@ -78,7 +78,7 @@ describe('Midi', function() {
 
             describe('MidiEvent', function() {
                var midiEvent;
-               
+
                beforeEach(function() {
                   midiEvent = midiTrack.events[0];
                });
@@ -99,8 +99,28 @@ describe('Midi', function() {
 	describe('api', function() {
 		var midi;
 
-		beforeEach(function() {
-			midi = new Midi();
-		});
+      beforeEach(function() {
+         midi = new Midi({ midiString: midiData });
+      });
+
+      afterEach(function() {
+         midi = null;
+      });
+
+      describe('#getEventTimes', function() {
+        var eventTimes;
+
+        beforeEach(function() {
+          eventTimes = midi.getEventTimes();
+        });
+
+        afterEach(function() {
+          eventTimes = [];
+        });
+
+        it('should have 6 event times', function() {
+          eventTimes.length.should.equal(6);
+        });
+      });
 	});
 });

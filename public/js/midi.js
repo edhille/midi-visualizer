@@ -48,6 +48,7 @@
    function MidiEvent(params) {
       this.code = params.code;
       this.data = params.data;
+      this.delta = params.delta;
    }
 
    Object.defineProperties(MidiEvent, {
@@ -55,13 +56,19 @@
          value: 0,
          writable: false,
          configurable: false,
-         enumerable: true 
+         enumerable: true
+      },
+      delta: {
+         value: 0,
+         writable: false,
+         configurable: false,
+         enumerable: true
       },
       data: {
          value: {},
          writable: false,
          configurable: false,
-         enumerable: true 
+         enumerable: true
       }
    });
 
@@ -72,6 +79,7 @@
 
 		this.byteParser = params.byteParser; // or something bad should happen...
       this.events = [];
+      this.eventsByTime = {};
 
       this.parseTrack();
 	}
@@ -81,10 +89,16 @@
          value: null,
          writable: false,
          configurable: false,
-         enumerable: true
+         enumerable: false
       },
       events: {
          value: [],
+         writable: false,
+         configurable: false,
+         enumerable: true
+      },
+      eventsByTime: {
+         value: {},
          writable: false,
          configurable: false,
          enumerable: true
@@ -111,7 +125,7 @@
    MidiTrack.prototype.parseNoteToggle = function parseNoteToggle(deltaTime, eventCode) {
       var midiEvent = new MidiEvent({
          code: eventCode,
-         deltaTime: deltaTime,
+         delta: deltaTime,
          data: {
             note: this.byteParser.nextByte(),
             velocity: this.byteParser.nextByte()
@@ -121,7 +135,8 @@
       //console.log('EVENT:', eventCode.toString(16), midiEvent.data.note.toString(16), midiEvent.data.velocity.toString(16));
 
       this._bytesParsed += 2;
-      this.events.push(midiEvent);
+      
+      this.addEvent(midiEvent);
    };
 
    MidiTrack.prototype.parseNoteOff = function parseNoteOff(deltaTime, eventCode) {
@@ -143,7 +158,8 @@
       });
 
       this._bytesParsed += 2;
-      this.events.push(midiEvent);
+      
+      this.addEvent(midiEvent);
    };
 
    MidiTrack.prototype.parseControlModeChange = function parseControlModeChange(deltaTime, eventCode) {
@@ -157,7 +173,8 @@
       });
 
       this._bytesParsed += 2;
-      this.events.push(midiEvent);
+      
+      this.addEvent(midiEvent);
    };
 
    MidiTrack.prototype.parseProgramChange = function parseProgramChange(deltaTime, eventCode) {
@@ -170,7 +187,8 @@
       });
 
       ++this._bytesParsed;
-      this.events.push(midiEvent);
+      
+      this.addEvent(midiEvent);
    };
 
    MidiTrack.prototype.parseAftertouch = function parseAtertouch(deltaTime, eventCode) {
@@ -183,7 +201,8 @@
       });
 
       ++this._bytesParsed;
-      this.events.push(midiEvent);
+      
+      this.addEvent(midiEvent);
    };
 
    MidiTrack.prototype.parsePitchWheel = function parsePitchWheel(deltaTime, eventCode) {
@@ -197,12 +216,14 @@
       });
 
       this._bytesParsed += 2;
-      this.events.push(midiEvent);
+      
+      this.addEvent(midiEvent);
    };
 
    MidiTrack.prototype.parseSysexEvent = function parseSysexEvent(deltaTime, eventCode) {
-      var eventLength = parseByteArrayToNumber(this.parseNextVariableChunk()),
-          midiEvent = new MidiEvent({
+      var eventLength = parseByteArrayToNumber(this.parseNextVariableChunk());
+      
+      var midiEvent = new MidiEvent({
          code: eventCode,
          delta: deltaTime,
          data: {
@@ -211,13 +232,15 @@
       });
 
       this._bytesParsed += eventLength;
-      this.events.push(midiEvent);
+      
+      this.addEvent(midiEvent);
    };
 
    MidiTrack.prototype.parseMetaEvent = function parseMetaEvent(deltaTime, eventCode) {
       var metaType = this.byteParser.nextByte(),
-          eventLength = parseByteArrayToNumber(this.parseNextVariableChunk()),
-          midiEvent = new MidiEvent({
+          eventLength = parseByteArrayToNumber(this.parseNextVariableChunk());
+     
+      var midiEvent = new MidiEvent({
          code: eventCode,
          delta: deltaTime,
          data: {
@@ -227,12 +250,24 @@
 
       ++this._bytesParsed;
       this._bytesParsed += eventLength;
-      this.events.push(midiEvent);
+
+      this.addEvent(midiEvent);
+   };
+
+   MidiTrack.prototype.addEvent = function addEvent(event) {
+      this.events.push(event);
+      this._elapsedTime += event.delta;
+
+      if (!this.eventsByTime[this._elapsedTime]) {
+         this.eventsByTime[this._elapsedTime] = [];
+      }
+
+      this.eventsByTime[this._elapsedTime].push(event);
    };
 
    MidiTrack.prototype.parseEventData = function parseEventData(deltaTime, eventType) {
-      var midiEvent, lastEvent;
-      
+      var lastEvent;
+
       //console.log('EVENT: ', eventType.toString(16));
 
       if (eventType === META_EVENT) {
@@ -288,12 +323,13 @@
           eventType = this.byteParser.nextByte();
 
       ++this._bytesParsed;
-      
+
       this.parseEventData(deltaTime, eventType);
    };
 
 	MidiTrack.prototype.parseTrack = function parseTrack() {
 		this._bytesParsed = 0;
+      this._elapsedTime = 0;
 
 		this.chunkId = parseStringFromRawChars(this.byteParser.getBytes(4));
 		this.size = parseByteArrayToNumber(this.byteParser.getBytes(4));
@@ -302,15 +338,16 @@
          do {
             this.parseEvent();
          } while (this._bytesParsed < this.size);
-         
+
          delete this._bytesParsed;
+         delete this._timeElapsed;
 		}
 		else {
 			throw new Error('Could not find start of track header (probably have invalid data...)', this.byteParser.dump());
 		}
 	};
 
-   // Midi 
+   // Midi
 
 	function Midi(params) {
 		params = params || {};
@@ -324,7 +361,7 @@
 			ticksPerBeat: false,
 			framesPerSecond: false
 		};
-		
+
 		this.tracks = [];
 
 		if (params.midiString) {
@@ -393,6 +430,18 @@
 			this.tracks.push(track);
 		}
 	};
+
+   Midi.prototype.getEventTimes = function getEventTimes() {
+      var timesSeen = {};
+      
+      this.tracks.forEach(function extractTrackTimes(track) {
+         Object.keys(track.eventsByTime).forEach(function addEventTime(time) {
+            timesSeen[time] = true;
+         });
+      });
+
+      return Object.keys(timesSeen).sort();
+   };
 
    // export
 
