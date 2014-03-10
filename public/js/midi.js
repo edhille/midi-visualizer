@@ -42,6 +42,12 @@
          return charStr;
       }).join('');
 	}
+   
+   function sortNumeric(a, b) {
+      a = +a;
+      b = +b;
+      return a > b ? 1 : a < b ? -1 : 0;
+   }
 
    // MidiEvent
 
@@ -440,7 +446,17 @@
          });
       });
 
-      return Object.keys(timesSeen).sort();
+      return Object.keys(timesSeen).sort(sortNumeric);
+   };
+
+   Midi.prototype.getEventsAtTime = function getEventsAtTime(time) {
+      var events = [];
+
+      this.tracks.forEach(function extractTrackEvents(track) {
+         if (track.eventsByTime[time]) events.push(track.eventsByTime[time]);
+      });
+
+      return events;
    };
 
    // export

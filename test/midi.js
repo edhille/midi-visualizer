@@ -121,6 +121,34 @@ describe('Midi', function() {
         it('should have 6 event times', function() {
           eventTimes.length.should.equal(6);
         });
+
+        it('should have event times in sorted ascending order', function() {
+           // NOTE: we have to clone the array (which map does for us...)
+           var sortedEventTimes = eventTimes.map(function(e) { return e; }).sort(function (a, b) { return +a > +b ? 1 : +a < +b ? -1 : 0; });
+          eventTimes.should.deep.equal(sortedEventTimes);
+        });
+      });
+
+      describe('#getEventsAtTime', function() {
+         var eventTimes;
+
+         beforeEach(function() {
+            eventTimes = midi.getEventTimes();
+         });
+
+         afterEach(function() {
+            eventTimes = [];
+         });
+
+         it('should have eventTimes', function() {
+            eventTimes.length.should.be.greaterThan(0);
+         });
+
+         it('should be able to get events for each time', function() {
+            eventTimes.forEach(function testGetEvents(testTime) {
+               midi.getEventsAtTime(testTime).length.should.be.greaterThan(0);
+            });
+         });
       });
 	});
 });
