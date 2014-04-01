@@ -1,20 +1,15 @@
-(function($) {
+var oReq = new XMLHttpRequest();
+oReq.open("GET", "/vunder.mid", true);
+oReq.responseType = "arraybuffer";
 
-	var $loaderDeferred = $.ajax(
-		'/vunder.mid',
-		{
-			method: 'GET',
-			dataType: 'text'
-		}
-	);
+oReq.onload = function (oEvent) {
+  var arrayBuffer = oReq.response; // Note: not oReq.responseText
+  if (arrayBuffer) {
+    var byteArray = new Uint8Array(arrayBuffer);
+    var midi = new Midi({midiByteArray: byteArray});
 
-	$loaderDeferred.done(function(rawMidi) {
-		//var midi = new Midi({ midiString: rawMidi });
-		var byteParser = new ByteParser(rawMidi);
-		var nextByte = byteParser.nextByte();
+    console.log(midi);
+  }
+};
 
-		while (typeof nextByte !== 'undefined') {
-			console.log(nextByte);
-		}
-	});
-})(jQuery);
+oReq.send(null);

@@ -39,7 +39,7 @@ describe('byteParser', function() {
 	});
 
 	describe('utf-8 string', function() {
-		var utf8OneByteString, utf8TwoByteString;
+		var utf8OneByteString, utf8TwoByteString, utf16String;
 		
 		beforeEach(function() {
 			var i;
@@ -56,7 +56,14 @@ describe('byteParser', function() {
 				utf8TwoByteString += String.fromCharCode(i);
 			}
 
+         utf16String += utf8OneByteString;
+
+         for (i = 0xff; i < 0xffff; ++i) {
+            utf16String += String.fromCharCode(i);
+         }
+
 			//console.log('twoByte', utf8TwoByteString);
+			//console.log('fourByte', utf16String);
 		});
 
 		it('should be able to retrieve 256 bytes out of a string of only one-byte UTF-8 characters', function() {
@@ -88,6 +95,21 @@ describe('byteParser', function() {
 			byteCount.should.equal(260);
 			lastByte.should.equal(1);
 		});
+
+      it('should be able to retrieve ?? characters from a string of all UTF-16 characters', function() {
+         var byteParser = new ByteParser(utf16String),
+            byteCount = 0,
+            nextByte,
+            lastByte;
+
+          while ((nextByte = byteParser.nextByte()) !== null) {
+            byteCount++;
+            lastByte = nextByte;
+          }
+
+          byteCount.should.equal(65535);
+          lastByte.should.equal(1);
+      });
 	});
 
 	describe('#getBytes', function() {

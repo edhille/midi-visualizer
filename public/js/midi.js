@@ -373,6 +373,9 @@
 		if (params.midiString) {
 			this.parseString(params.midiString);
 		}
+      else if (params.midiByteArray) {
+         this.parseArray(params.midiByteArray);
+      }
 	}
 
    Object.defineProperties(Midi, {
@@ -402,6 +405,57 @@
 		}
 	};
 
+   function ByteStream(byteArray) {
+      this.byteArray = byteArray;
+      this.currIndex = 0;
+   }
+
+   Object.defineProperties(ByteStream, {
+      byteArray: {
+         value: [],
+         writable: false,
+         configurable: false,
+         enumerable: true
+      },
+      currIndex: {
+         value: 0,
+         writeable: false,
+         configurable: false,
+         enumerable: false
+      }
+   });
+
+   ByteStream.prototype.nextByte = function nextByte() {
+      return this.byteArray[this.currIndex++];
+   };
+
+   ByteStream.prototype.getBytes = function getBytes(count) {
+      var tmpArray = [],
+          i = 0;
+
+      for (i = 0; i < count; ++i) {
+         tmpArray.push(this.nextByte());
+      }
+
+      return tmpArray;
+   };
+
+   ByteStream.prototype.pushByte = function pushByte() {
+      --this.currIndex;
+   };
+
+   Midi.prototype.parseArray = function parseArray(midiByteArray) {
+      try {
+         this.byteParser = new ByteStream(midiByteArray);
+
+         this.parseHeader();
+         this.parseTracks();
+      }
+      catch(e) {
+         console.error('Error parsing midi byte array:', e);
+      }
+   };
+
 	Midi.prototype.parseHeader = function parseHeader() {
 		this.header.chunkId = parseStringFromRawChars(this.byteParser.getBytes(4));
 
@@ -426,12 +480,7 @@
           numTracksToParse = this.header.numberOfTracks || 0;
 
 		while (numTracksToParse--) {
-			try {
-				track = new MidiTrack({ byteParser: this.byteParser });
-			}
-			catch (e) {
-				throw new Error(e);
-			}
+			track = new MidiTrack({ byteParser: this.byteParser });
 
 			this.tracks.push(track);
 		}

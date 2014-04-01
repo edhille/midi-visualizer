@@ -3,7 +3,9 @@ var chai = require('chai'),
    expect = chai.expect,
 	ByteParser = require('../public/js/byteParser.js'),
 	Midi = require('../public/js/midi.js'),
-	fs = require('fs');
+	fs = require('fs'),
+   testFilePath = __dirname + '/../public/vunder.mid';
+   //testFilePath = __dirname + '/MIDIOkFormat1.mid';
 
 describe('Midi', function() {
 	var midiData;
@@ -13,7 +15,7 @@ describe('Midi', function() {
 	global.ByteParser = ByteParser;
 
 	beforeEach(function() {
-		midiData = fs.readFileSync(__dirname + '/MIDIOkFormat1.mid', { encoding: 'binary' });
+		midiData = fs.readFileSync(testFilePath, { encoding: 'binary' });
 	});
 
 	afterEach(function() {
@@ -89,6 +91,7 @@ describe('Midi', function() {
                });
 
                it('should have program data', function() {
+                  midiEvent.data.should.have.property('program');
                   midiEvent.data.program.should.equal(0x46);
                });
             });

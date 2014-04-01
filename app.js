@@ -1,4 +1,4 @@
-
+/* jshint laxcomma: true */
 /**
  * Module dependencies.
  */
