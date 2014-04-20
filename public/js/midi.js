@@ -49,6 +49,47 @@
       return a > b ? 1 : a < b ? -1 : 0;
    }
 
+   // ByteStream
+
+   function ByteStream(byteArray) {
+      this.byteArray = byteArray;
+      this.currIndex = 0;
+   }
+
+   Object.defineProperties(ByteStream, {
+      byteArray: {
+         value: [],
+         writable: false,
+         configurable: false,
+         enumerable: true
+      },
+      currIndex: {
+         value: 0,
+         writeable: false,
+         configurable: false,
+         enumerable: false
+      }
+   });
+
+   ByteStream.prototype.nextByte = function nextByte() {
+      return this.byteArray[this.currIndex++];
+   };
+
+   ByteStream.prototype.getBytes = function getBytes(count) {
+      var tmpArray = [],
+          i = 0;
+
+      for (i = 0; i < count; ++i) {
+         tmpArray.push(this.nextByte());
+      }
+
+      return tmpArray;
+   };
+
+   ByteStream.prototype.pushByte = function pushByte() {
+      --this.currIndex;
+   };
+
    // MidiEvent
 
    function MidiEvent(params) {
@@ -404,45 +445,6 @@
 			console.error('Error parsing midi:', e);
 		}
 	};
-
-   function ByteStream(byteArray) {
-      this.byteArray = byteArray;
-      this.currIndex = 0;
-   }
-
-   Object.defineProperties(ByteStream, {
-      byteArray: {
-         value: [],
-         writable: false,
-         configurable: false,
-         enumerable: true
-      },
-      currIndex: {
-         value: 0,
-         writeable: false,
-         configurable: false,
-         enumerable: false
-      }
-   });
-
-   ByteStream.prototype.nextByte = function nextByte() {
-      return this.byteArray[this.currIndex++];
-   };
-
-   ByteStream.prototype.getBytes = function getBytes(count) {
-      var tmpArray = [],
-          i = 0;
-
-      for (i = 0; i < count; ++i) {
-         tmpArray.push(this.nextByte());
-      }
-
-      return tmpArray;
-   };
-
-   ByteStream.prototype.pushByte = function pushByte() {
-      --this.currIndex;
-   };
 
    Midi.prototype.parseArray = function parseArray(midiByteArray) {
       try {
