@@ -25,7 +25,11 @@ function updateData() {
 }
 
 function setY(d, i, j) {
-   return yScale(d.note * (j + 1));
+   return yScale(d.note) + d.velocity;
+}
+
+function setX(d, i, j) {
+   return xScale(i);
 }
 
 var tracks;
@@ -33,7 +37,7 @@ var tracks;
 function initCircles(trackData) {
    stage = d3.selectAll('svg.stage');
    xScale = d3.scale.linear()
-      .domain([0, maxEvents * trackCount])
+      .domain([0, maxEvents])
       .range([0, stage.attr('width')]);
 
    yScale = d3.scale.linear()
@@ -50,13 +54,13 @@ function updateTracks() {
        .append('g')
        .classed('track', true)
        .selectAll('circle')
-       .data(function (track) { return track.events; }, function (d) { console.log('id', d.id); return d.id; });
+       .data(function (track) { return track.events; }, function (d) { return d.id; });
 
    events.enter()
        .append('circle')
        .attr('fill', function (d, i, j) { return d3.rgb(['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'][Math.floor(Math.random() * 6)]); })
-       .attr('cx', function (d, i, j) { return xScale(i * j); })
        .attr('cy', setY)
+       .attr('cx', 0)
        .attr('r',  function (d, i, j) { return d.velocity / 2; })
        .attr('opacity', 0)
        .transition()
@@ -64,6 +68,9 @@ function updateTracks() {
        .attr('opacity', 1)
        .transition()
        .duration(function (d) { return d.duration - 50; })
+       .attr('cx', function (d) { return stage.attr('width'); })
+       .transition()
+       .duration(100)
        .attr('opacity', 0)
        .each('end', function() { 
          d3.select(this).remove();
@@ -72,8 +79,8 @@ function updateTracks() {
 
 var frameCount = 0;
 function doIt() {
-   if (++frameCount < 10) {
-      console.log('doin it...', frameCount);
+   if (++frameCount < 100) {
+      // console.log('doin it...', frameCount);
       updateData();
       updateTracks();
       setTimeout(doIt, 1000);
