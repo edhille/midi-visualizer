@@ -60,10 +60,10 @@ function updateTracks() {
        .attr('r',  function (d, i, j) { return d.velocity / 2; })
        .attr('opacity', 0)
        .transition()
-       .duration(10)
+       .duration(function (d) { return d.duration > 100 ? 50 : 1; })
        .attr('opacity', 1)
        .transition()
-       .duration(function (d) { console.log('dur', d.duration); return d.duration * 10; })
+       .duration(function (d) { return d.duration - 50; })
        .attr('opacity', 0)
        .each('end', function() { 
          d3.select(this).remove();
