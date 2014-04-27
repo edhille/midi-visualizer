@@ -1,5 +1,21 @@
+var requestAnimationFrame = (function(){
+   return window.requestAnimationFrame  ||
+     window.webkitRequestAnimationFrame ||
+     window.mozRequestAnimationFrame    ||
+     window.oRequestAnimationFrame      ||
+     window.msRequestAnimationFrame     ||
+     function(callback){
+     window.setTimeout(callback, 1000 / 60);
+   };
+})();
 var ContextClass = (window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.oAudioContext || window.msAudioContext);
 var context;
+var paused = false;
+var lastTimestamp = 0;
+var animationClock = 0;
+var events = [];
+
+window.onclick = function() { paused = !paused; };
 
 if (ContextClass) {
    context = new ContextClass();
@@ -9,15 +25,56 @@ if (ContextClass) {
    console.error('Unable to setup audio context');
 }
 
+function animate(timestamp) {
+   var intTimestamp = Math.round(timestamp);
+   var delta = intTimestamp - lastTimestamp;
+   var prevAnimationClock = animationClock;
+   var eventsToRender = [];
+
+   if (lastTimestamp !== 0) animationClock += delta;
+
+   lastTimestamp = intTimestamp;
+
+   for (var i = prevAnimationClock; i <= animationClock; ++i) {
+      if (events[i]) {
+         eventsToRender.push(events[i]);
+         console.log(animationClock, eventsToRender);
+      }
+   }
+
+   if (!paused) requestAnimationFrame(animate);
+}
+
 function loadSound() {
    var request = new XMLHttpRequest();
    request.open('GET', '/bass.wav', true);
    request.responseType = 'arraybuffer';
 
    request.onload = function() {
-      context.decodeAudioData(request.response, function (buffer) {
-         playAudio(buffer);
-      }, function () { console.error('CRAP!', arguments); });
+      console.log('loading midi');
+
+      var oReq = new XMLHttpRequest();
+      oReq.open('GET', '/bass.mid', true);
+      oReq.responseType = 'arraybuffer';
+
+      oReq.onload = function (oEvent) {
+         console.log('midi loaded');
+
+         var arrayBuffer = oReq.response; // Note: not oReq.responseText
+         if (arrayBuffer) {
+            var byteArray = new Uint8Array(arrayBuffer);
+            var midi = new Midi({midiByteArray: byteArray});
+            console.log(midi);
+            events = midi.tracks[1].eventsByTime;
+            requestAnimationFrame(animate);
+         }
+
+         context.decodeAudioData(request.response, function (buffer) {
+            playAudio(buffer);
+         }, function () { console.error('CRAP!', arguments); });
+      };
+
+      oReq.send();
    };
 
    request.send();
