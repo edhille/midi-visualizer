@@ -11,6 +11,7 @@
    var MIDI_EVENT_PITCH_WHEEL_MASK = 0xE0;
    var SYSEX_EVENT_MASK = 0xF0;
    var META_EVENT = 0xFF;
+   var TEMPO_META_EVENT = 0x51;
 
    // Private utility functions
 
@@ -171,6 +172,7 @@
 
    MidiTrack.prototype.parseNoteToggle = function parseNoteToggle(deltaTime, eventCode) {
       var midiEvent = new MidiEvent({
+         type: 'NOTE_TOGGLE',
          code: eventCode,
          delta: deltaTime,
          data: {
@@ -287,6 +289,7 @@
       var metaType = this.byteParser.nextByte(),
           eventLength = parseByteArrayToNumber(this.parseNextVariableChunk());
      
+      // console.log('meta:', eventCode.toString(16), metaType.toString(16), eventLength);
       var midiEvent = new MidiEvent({
          code: eventCode,
          delta: deltaTime,
@@ -294,6 +297,11 @@
             bytes: this.byteParser.getBytes(eventLength)
          }
       });
+
+      if (TEMPO_META_EVENT === metaType) {
+         midiEvent.tempo = parseByteArrayToNumber(midiEvent.data.bytes);
+         this.tempo = midiEvent.tempo;
+      }
 
       ++this._bytesParsed;
       this._bytesParsed += eventLength;
@@ -306,6 +314,7 @@
       this._elapsedTime += event.delta;
 
       if (!this.eventsByTime[this._elapsedTime]) {
+         console.log('adding elapsed time', this._elapsedTime, event.delta);
          this.eventsByTime[this._elapsedTime] = [];
       }
 
@@ -387,7 +396,7 @@
          } while (this._bytesParsed < this.size);
 
          delete this._bytesParsed;
-         delete this._timeElapsed;
+         delete this._elapsedTime;
 		}
 		else {
 			throw new Error('Could not find start of track header (probably have invalid data...)', this.byteParser.dump());
@@ -505,6 +514,18 @@
 
       this.tracks.forEach(function extractTrackEvents(track) {
          if (track.eventsByTime[time]) events.push(track.eventsByTime[time]);
+      });
+
+      return events;
+   };
+
+   Midi.prototype.getEventsBetweenTimes = function getEventsBetweenTimes(startTime, endTime) {
+      var events = [];
+
+      this.tracks.forEach(function extractTrackEvents(track) {
+         for (var i = startTime, j = endTime; i < j; ++i) {
+            if (track.eventsByTime[i]) events = events.concat(track.eventsByTime[i]);
+         }
       });
 
       return events;

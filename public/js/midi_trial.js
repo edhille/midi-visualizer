@@ -8,11 +8,15 @@ var requestAnimationFrame = (function(){
      window.setTimeout(callback, 1000 / 60);
    };
 })();
+
 var ContextClass = (window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.oAudioContext || window.msAudioContext);
+
 var context;
 var paused = false;
+var firstTimestamp = 0;
 var lastTimestamp = 0;
 var animationClock = 0;
+var microsecondsPerTick = 0;
 var events = [];
 
 window.onclick = function() { paused = !paused; };
@@ -20,27 +24,33 @@ window.onclick = function() { paused = !paused; };
 if (ContextClass) {
    context = new ContextClass();
    loadSound();
-   setupVisualization();
+   // setupVisualization();
 } else {
    console.error('Unable to setup audio context');
 }
 
 function animate(timestamp) {
-   var intTimestamp = Math.round(timestamp);
-   var delta = intTimestamp - lastTimestamp;
-   var prevAnimationClock = animationClock;
+   firstTimestamp = firstTimestamp || timestamp;
+
+   var relativeTimestamp = timestamp - firstTimestamp;
+   var delta = relativeTimestamp - lastTimestamp;
    var eventsToRender = [];
+   var lowestEventTick = Math.floor(lastTimestamp) * 1000;
+   var highestEventTick = Math.ceil(relativeTimestamp) * 1000;
 
-   if (lastTimestamp !== 0) animationClock += delta;
-
-   lastTimestamp = intTimestamp;
-
-   for (var i = prevAnimationClock; i <= animationClock; ++i) {
+   for (var i = lowestEventTick; i < highestEventTick; ++i) {
       if (events[i]) {
-         eventsToRender.push(events[i]);
-         console.log(animationClock, eventsToRender);
+         eventsToRender.push(i);
       }
    }
+
+   if (eventsToRender.length) {
+      console.log('timestamp', timestamp, 'relative', relativeTimestamp, 'delta', delta);
+      console.log({ lastTimestamp: lastTimestamp, lowestEventTick: lowestEventTick, highestEventTick: highestEventTick });
+      console.log('eventTimes', eventsToRender);
+   }
+
+   lastTimestamp = relativeTimestamp;
 
    if (!paused) requestAnimationFrame(animate);
 }
@@ -51,26 +61,29 @@ function loadSound() {
    request.responseType = 'arraybuffer';
 
    request.onload = function() {
-      console.log('loading midi');
-
       var oReq = new XMLHttpRequest();
       oReq.open('GET', '/bass.mid', true);
       oReq.responseType = 'arraybuffer';
 
       oReq.onload = function (oEvent) {
-         console.log('midi loaded');
-
          var arrayBuffer = oReq.response; // Note: not oReq.responseText
+
          if (arrayBuffer) {
             var byteArray = new Uint8Array(arrayBuffer);
             var midi = new Midi({midiByteArray: byteArray});
-            console.log(midi);
+            var tempo = midi.tracks[0].tempo;
+            var noteToggleEventTimes = Object.keys(midi.tracks[1].eventsByTime);
+            microsecondsPerTick = tempo/midi.header.timeDivision;
+            // console.log('midi', midi);
+            // console.log('timeDivision', midi.header.timeDivision, 'tempo', tempo, 'microsecondsPerTick', microsecondsPerTick);
+            // console.log('eventOffsets', noteToggleEventTimes.join(', '));
+            // console.log('timeOffsets', noteToggleEventTimes.map(function(eventOffset){return eventOffset * microsecondsPerTick;}).join(', '));
             events = midi.tracks[1].eventsByTime;
             requestAnimationFrame(animate);
          }
 
          context.decodeAudioData(request.response, function (buffer) {
-            playAudio(buffer);
+            // playAudio(buffer);
          }, function () { console.error('CRAP!', arguments); });
       };
 
