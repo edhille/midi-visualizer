@@ -314,7 +314,7 @@
       this._elapsedTime += event.delta;
 
       if (!this.eventsByTime[this._elapsedTime]) {
-         console.log('adding elapsed time', this._elapsedTime, event.delta);
+         // console.log('adding elapsed time', this._elapsedTime, event.delta);
          this.eventsByTime[this._elapsedTime] = [];
       }
 
