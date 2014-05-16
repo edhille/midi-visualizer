@@ -8,3 +8,26 @@ circle {
    xfill: red;
 }
 
+.track {
+   width: 100px;
+   height: 100px;
+   position: absolute;
+}
+
+.track.on {
+   background-color: green;
+}
+
+.track.off {
+   background-color: red;
+}
+
+#track-1 {
+   top: 10px;
+   left: 10px;
+}
+
+#track-2 {
+   top: 110px;
+   left: 110px;
+}

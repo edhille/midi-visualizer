@@ -73,7 +73,6 @@
             handleAudioLoad.apply(null, arguments);
 
             myMidi();
-            // midiThirdParty();
          },
          handleLoadError
       );
@@ -87,17 +86,6 @@
          },
          handleLoadError
       );
-   }
-
-   function midiThirdParty() {
-      MIDI.loadPlugin(function () { console.log(arguments); });
-      MIDI.Player.loadFile('/bass.mid');
-      MIDI.Player.setAnimation(function animateMidiData(data) {
-         if (Object.keys(data.events).length > 0) {
-            console.log('data', data.now, _.clone(data.events[36]));
-         }
-      });
-      start();
    }
 
    // RUNTIME
@@ -131,10 +119,9 @@
 
    function start() {
       setTimeout(function delayStart() {
-         // root.requestAnimationFrame(draw);
          scheduleMidiAnimation(midi);
+         // root.requestAnimationFrame(draw);
          // playAudio();
-         // MIDI.Player.start();
       }, 2000);
    }
 
@@ -150,10 +137,11 @@
    }
 
    function drawEvent(events) {
-      var noteOnEvents = _.filter(events, function (event) { return event.type === 'NOTE_ON'; });
-      var elapsedTime;
+      var noteEvents = _.filter(events, function (event) { return event.type === 'NOTE_ON' || event.type === 'NOTE_OFF'; }),
+          elapsedTime,
+          element;
 
-      if (noteOnEvents.length > 0) {
+      if (noteEvents.length > 0) {
          if (!playing) {
             playing = true;
             audioSource.start(events.time);  
@@ -161,7 +149,21 @@
 
          elapsedTime = performance.now() - timingOffset;
 
-         console.log(events.time, elapsedTime, noteOnEvents);
+         console.log(events.time, elapsedTime, noteEvents);
+
+         noteEvents.map(function (event) {
+            element = document.getElementById('track-' + event.track); 
+
+            if (element) {
+               if (event.type === 'NOTE_ON') {
+                  element.className = element.className.replace(/ off/, ' on', 'g');
+               } else {
+                  element.className = element.className.replace(/ on/, ' off', 'g');
+               }
+            } else {
+               console.error('no DOM element for track ' + event.track);
+            }
+         });
       }
    }
 
