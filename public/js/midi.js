@@ -2,6 +2,7 @@
    'use strict';
 
    var BYTE_MASK = 0x80;
+   var HIGHBIT_MASK = 0x7F;
    var MIDI_EVENT_NOTE_OFF_MASK = 0x80;
    var MIDI_EVENT_NOTE_ON_MASK = 0x90;
    var MIDI_EVENT_POLYPHONIC_AFTERTOUCH_MASK = 0xA0;
@@ -12,10 +13,11 @@
    var SYSEX_EVENT_MASK = 0xF0;
    var META_EVENT = 0xFF;
    var TEMPO_META_EVENT = 0x51;
+   var TIME_SIG_META_EVENT = 0x58;
 
    // Private utility functions
 
-	function parseByteArrayToNumber(byteArray) {
+	function parseByteArrayToNumber(byteArray, isVariable) {
 		var number = 0,
 			i,
 			l,
@@ -24,14 +26,14 @@
 			test = [];
 
 		for (i = 0, l = byteArray.length; i < l; ++i) {
-			rawByteValue = byteArray[i];
-			bitshiftedValue = rawByteValue << (l-i-1) * 8;
+			rawByteValue = isVariable ? byteArray[i] & HIGHBIT_MASK : byteArray[i];
+			bitshiftedValue = rawByteValue << ((l-i-1) * (isVariable ? 7 : 8));
 			number += bitshiftedValue;
 			test.push(bitshiftedValue);
 		}
 
       if (false && test.length) {
-         console.log('byteArray', byteArray.map(function(i) {return parseInt(i, 8);}), 'test', test, 'number', number);
+         console.log('byteArray', byteArray.map(function(i) {return Number(i).toString(16);}), 'test', test.map(function(i){return Number(i).toString(16);}), 'number', number);
       }
 
 		return number;
@@ -94,12 +96,19 @@
    // MidiEvent
 
    function MidiEvent(params) {
+      this.type = params.type;
       this.code = params.code;
       this.data = params.data;
       this.delta = params.delta;
    }
 
    Object.defineProperties(MidiEvent, {
+      type: {
+         value: '',
+         writable: false,
+         configurable: false,
+         enumerable: true
+      },
       code: {
          value: 0,
          writable: false,
@@ -117,6 +126,17 @@
          writable: false,
          configurable: false,
          enumerable: true
+      },
+      tempo: {
+         configurable: false,
+         enumerable: true,
+         set: function setTempo(val) {
+            /* jshint eqnull: true */
+            if (this.tempo != null) {
+               this.tempo = val;
+            }
+            /* jshint eqnull: false */
+         }
       }
    });
 
@@ -127,7 +147,6 @@
 
 		this.byteParser = params.byteParser; // or something bad should happen...
       this.events = [];
-      this.eventsByTime = {};
 
       this.parseTrack();
 	}
@@ -141,12 +160,6 @@
       },
       events: {
          value: [],
-         writable: false,
-         configurable: false,
-         enumerable: true
-      },
-      eventsByTime: {
-         value: {},
          writable: false,
          configurable: false,
          enumerable: true
@@ -167,12 +180,12 @@
    };
 
    MidiTrack.prototype.parseDeltaTime = function parseDeltaTime() {
-      return parseByteArrayToNumber(this.parseNextVariableChunk());
+      return parseByteArrayToNumber(this.parseNextVariableChunk(), true);
    };
 
    MidiTrack.prototype.parseNoteToggle = function parseNoteToggle(deltaTime, eventCode) {
       var midiEvent = new MidiEvent({
-         type: 'NOTE_TOGGLE',
+         type: (eventCode & MIDI_EVENT_NOTE_ON_MASK) === MIDI_EVENT_NOTE_ON_MASK ? 'NOTE_ON' : 'NOTE_OFF',
          code: eventCode,
          delta: deltaTime,
          data: {
@@ -181,7 +194,7 @@
          }
       });
 
-      //console.log('EVENT:', eventCode.toString(16), midiEvent.data.note.toString(16), midiEvent.data.velocity.toString(16));
+      // console.log('EVENT:', eventCode.toString(16), midiEvent.data.note.toString(16), midiEvent.data.velocity.toString(16));
 
       this._bytesParsed += 2;
       
@@ -270,7 +283,7 @@
    };
 
    MidiTrack.prototype.parseSysexEvent = function parseSysexEvent(deltaTime, eventCode) {
-      var eventLength = parseByteArrayToNumber(this.parseNextVariableChunk());
+      var eventLength = parseByteArrayToNumber(this.parseNextVariableChunk(), true);
       
       var midiEvent = new MidiEvent({
          code: eventCode,
@@ -287,38 +300,40 @@
 
    MidiTrack.prototype.parseMetaEvent = function parseMetaEvent(deltaTime, eventCode) {
       var metaType = this.byteParser.nextByte(),
-          eventLength = parseByteArrayToNumber(this.parseNextVariableChunk());
+          dataByteLength = this.byteParser.nextByte(),
+          bytes = this.byteParser.getBytes(dataByteLength);
      
       // console.log('meta:', eventCode.toString(16), metaType.toString(16), eventLength);
       var midiEvent = new MidiEvent({
          code: eventCode,
          delta: deltaTime,
          data: {
-            bytes: this.byteParser.getBytes(eventLength)
+            bytes: bytes
          }
       });
 
       if (TEMPO_META_EVENT === metaType) {
+         console.log('tempo bytes', midiEvent.data.bytes);
          midiEvent.tempo = parseByteArrayToNumber(midiEvent.data.bytes);
-         this.tempo = midiEvent.tempo;
+      } else if (TIME_SIG_META_EVENT === metaType) {
+         midiEvent.timeSiganture = {
+            numerator: midiEvent.data.bytes[0],
+            denomiator: Math.pow(2, midiEvent.data.bytes[1]),
+            metronomeClicksPerTick: midiEvent.data.bytes[2],
+            thirtySecondNotesPerBeat: midiEvent.data.bytes[3]
+         };
+
+         console.log('time signature event', midiEvent);
       }
 
-      ++this._bytesParsed;
-      this._bytesParsed += eventLength;
+      this._bytesParsed += 2;
+      this._bytesParsed += dataByteLength;
 
       this.addEvent(midiEvent);
    };
 
    MidiTrack.prototype.addEvent = function addEvent(event) {
       this.events.push(event);
-      this._elapsedTime += event.delta;
-
-      if (!this.eventsByTime[this._elapsedTime]) {
-         // console.log('adding elapsed time', this._elapsedTime, event.delta);
-         this.eventsByTime[this._elapsedTime] = [];
-      }
-
-      this.eventsByTime[this._elapsedTime].push(event);
    };
 
    MidiTrack.prototype.parseEventData = function parseEventData(deltaTime, eventType) {
@@ -385,7 +400,6 @@
 
 	MidiTrack.prototype.parseTrack = function parseTrack() {
 		this._bytesParsed = 0;
-      this._elapsedTime = 0;
 
 		this.chunkId = parseStringFromRawChars(this.byteParser.getBytes(4));
 		this.size = parseByteArrayToNumber(this.byteParser.getBytes(4));
@@ -396,7 +410,6 @@
          } while (this._bytesParsed < this.size);
 
          delete this._bytesParsed;
-         delete this._elapsedTime;
 		}
 		else {
 			throw new Error('Could not find start of track header (probably have invalid data...)', this.byteParser.dump());
@@ -419,6 +432,7 @@
 		};
 
 		this.tracks = [];
+      this.eventsByTime = {};
 
 		if (params.midiString) {
 			this.parseString(params.midiString);
@@ -440,17 +454,20 @@
          writable: false,
          configurable: false,
          enumerable: true
+      },
+      eventsByTime: {
+         value: {},
+         writable: false,
+         configurable: false,
+         enumerable: true
       }
    });
 
 	Midi.prototype.parseString = function parseString(midiString) {
 		try {
 			this.byteParser = new ByteParser(midiString);
-
-			this.parseHeader();
-			this.parseTracks();
-		}
-		catch(e) {
+         this.parseData();
+		} catch(e) {
 			console.error('Error parsing midi:', e);
 		}
 	};
@@ -458,13 +475,16 @@
    Midi.prototype.parseArray = function parseArray(midiByteArray) {
       try {
          this.byteParser = new ByteStream(midiByteArray);
-
-         this.parseHeader();
-         this.parseTracks();
-      }
-      catch(e) {
+         this.parseData();
+      } catch(e) {
          console.error('Error parsing midi byte array:', e);
       }
+   };
+
+   Midi.prototype.parseData = function parseData() {
+      this.parseHeader();
+      this.parseTracks();
+      this.sortEventsByTime();
    };
 
 	Midi.prototype.parseHeader = function parseHeader() {
@@ -497,16 +517,39 @@
 		}
 	};
 
-   Midi.prototype.getEventTimes = function getEventTimes() {
-      var timesSeen = {};
-      
-      this.tracks.forEach(function extractTrackTimes(track) {
-         Object.keys(track.eventsByTime).forEach(function addEventTime(time) {
-            timesSeen[time] = true;
-         });
-      });
+   Midi.prototype.sortEventsByTime = function sortEventsByTime() {
+      var tempo = 500000, // default of 120bpm
+          tickInMicroSec = tempo / this.header.timeDivision;
 
-      return Object.keys(timesSeen).sort(sortNumeric);
+      this.tracks.forEach(function (track) {
+         var elapsedTimeInMicroSec = 0;
+
+         track.events.forEach(function (event) {
+            var eventTimeInMs = 0;
+
+            if (event.tempo) {
+               tempo = event.tempo;
+               tickInMicroSec = tempo / this.header.timeDivision;
+               // console.log('tempo', event.tempo, 'td', this.header.timeDivision, 'tms', tickInMicroSec, 'bpm', 60000000 / tempo);
+            }
+
+            elapsedTimeInMicroSec += event.delta * tickInMicroSec;
+
+            eventTimeInMs = elapsedTimeInMicroSec / 1000;
+
+            if (event.type && event.type === 'NOTE_ON') {
+               // console.log('delta', event.delta, 'elapsed', eventTimeInMs);
+            }
+
+            this.eventsByTime[eventTimeInMs] = this.eventsByTime[eventTimeInMs] || [];
+
+            this.eventsByTime[eventTimeInMs].push(event);
+         }, this);
+      }, this);
+   };
+
+   Midi.prototype.getEventTimes = function getEventTimes() {
+      return Object.keys(this.eventsByTime).sort(sortNumeric);
    };
 
    Midi.prototype.getEventsAtTime = function getEventsAtTime(time) {
@@ -522,11 +565,10 @@
    Midi.prototype.getEventsBetweenTimes = function getEventsBetweenTimes(startTime, endTime) {
       var events = [];
 
-      this.tracks.forEach(function extractTrackEvents(track) {
-         for (var i = startTime, j = endTime; i < j; ++i) {
-            if (track.eventsByTime[i]) events = events.concat(track.eventsByTime[i]);
-         }
-      });
+      // console.log(Math.round(startTime), Math.round(endTime));
+      for (var i = Math.round(startTime), j = Math.round(endTime); i < j; ++i) {
+         if (this.eventsByTime[i]) events = events.concat(this.eventsByTime[i]);
+      }
 
       return events;
    };
