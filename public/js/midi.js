@@ -147,6 +147,7 @@
 
 		this.byteParser = params.byteParser; // or something bad should happen...
       this.events = [];
+      this.index = params.index;
 
       this.parseTrack();
 	}
@@ -157,6 +158,12 @@
          writable: false,
          configurable: false,
          enumerable: false
+      },
+      index: {
+         value: 0,
+         writeable: false,
+         configurable: false,
+         enumerable: true
       },
       events: {
          value: [],
@@ -313,7 +320,7 @@
       });
 
       if (TEMPO_META_EVENT === metaType) {
-         console.log('tempo bytes', midiEvent.data.bytes);
+         // console.log('tempo bytes', midiEvent.data.bytes);
          midiEvent.tempo = parseByteArrayToNumber(midiEvent.data.bytes);
       } else if (TIME_SIG_META_EVENT === metaType) {
          midiEvent.timeSiganture = {
@@ -323,7 +330,7 @@
             thirtySecondNotesPerBeat: midiEvent.data.bytes[3]
          };
 
-         console.log('time signature event', midiEvent);
+         // console.log('time signature event', midiEvent);
       }
 
       this._bytesParsed += 2;
@@ -333,6 +340,7 @@
    };
 
    MidiTrack.prototype.addEvent = function addEvent(event) {
+      event.track = this.index;
       this.events.push(event);
    };
 
@@ -508,10 +516,11 @@
 
 	Midi.prototype.parseTracks = function parseTracks() {
 		var track,
+          trackIdx = 0,
           numTracksToParse = this.header.numberOfTracks || 0;
 
 		while (numTracksToParse--) {
-			track = new MidiTrack({ byteParser: this.byteParser });
+			track = new MidiTrack({ byteParser: this.byteParser, index: trackIdx++ });
 
 			this.tracks.push(track);
 		}
