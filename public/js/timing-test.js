@@ -89,45 +89,40 @@
 
    // RUNTIME
 
-   function draw(timeframe) {
-      lastTimeframe = lastTimeframe || timeframe;
-
-      var timeDelta = timeframe - lastTimeframe;
-      // console.log('delta', timeDelta, 'timeframe', timeframe, 'lastTimeFrame');
-      var events = _.filter(midi.getEventsBetweenTimes(relativeElapsedTime - timeDelta, relativeElapsedTime + timeDelta), function (event) { return event.type && event.type === 'NOTE_ON'; });
-      // var events = midi.getEventsBetweenTimes(relativeElapsedTime, relativeElapsedTime + timeDelta);
-
-      if (playing && events.length > 0) {
-         console.log({ delta: timeDelta, elapsed: relativeElapsedTime, inside: relativeElapsedTime - timeDelta, outside: relativeElapsedTime + timeDelta, events: events });
+   function handleClick(e) {
+      if (playing) {
+         pause();
+      } else {
+         resume();
       }
 
-      lastTimeframe = timeframe;
-
-      relativeElapsedTime += timeDelta;
-
-      root.requestAnimationFrame(draw);
-   }
-
-   function handleClick(e) {
       playing = !playing;
    }
 
-   function playAudio() {
-      audioSource.start(0);
+   function playAudio(startTime) {
+      audioSource.start(startTime);
+   }
+
+   function pause() {
+
+   }
+
+   function resume() {
+
    }
 
    function start() {
       setTimeout(function delayStart() {
          scheduleMidiAnimation(midi);
-         // root.requestAnimationFrame(draw);
-         // playAudio();
       }, 2000);
    }
 
    function scheduleMidiAnimation(midi) {
       // console.log(midi);
       timingOffset = performance.now();
+
       function sortNumeric(a, b) { return a - b; }
+
       Object.keys(midi.eventsByTime).map(Number).sort(sortNumeric).forEach(function (time) {
          var events = midi.eventsByTime[time];
          events.time = time;
@@ -142,7 +137,7 @@
       if (noteEvents.length > 0) {
          if (!playing) {
             playing = true;
-            // audioSource.start(events.time);  
+            playAudio(events.time);
          }
 
          // console.log(events.time, elapsedTime, noteEvents);
@@ -164,7 +159,13 @@
    }
 
    function run() {
-      var ContextClass = (window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.oAudioContext || window.msAudioContext);
+      var ContextClass = (
+            window.AudioContext || 
+            window.webkitAudioContext || 
+            window.mozAudioContext || 
+            window.oAudioContext || 
+            window.msAudioContext
+      );
 
       if (ContextClass) {
          context = new ContextClass();
