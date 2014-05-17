@@ -129,7 +129,9 @@
    }
 
    function drawEvent(events) {
-      var noteEvents = _.filter(events, function (event) { return event.type === 'NOTE_ON' || event.type === 'NOTE_OFF'; }),
+      function isNoteToggle(event) { return event.type === 'NOTE_ON' || event.type === 'NOTE_OFF'; }
+
+      var noteEvents = _.filter(events, isNoteToggle),
           element;
 
       if (noteEvents.length > 0) {
