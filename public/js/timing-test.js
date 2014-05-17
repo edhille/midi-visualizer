@@ -2,12 +2,10 @@
    'use strict';
 
    var root = this,
-       relativeElapsedTime = 0,
        timingOffset = 0,
        playing = false,
        audioSource,
        context,
-       lastTimeframe,
        midi;
 
    // MIDI
