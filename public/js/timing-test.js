@@ -2,14 +2,13 @@
    'use strict';
 
    var root = this,
-      relativeElapsedTime = 0,
-      timingOffset = 0,
-      playing = false,
-      ContextClass = (window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.oAudioContext || window.msAudioContext),
-      audioSource,
-      context,
-      lastTimeframe,
-      midi;
+       relativeElapsedTime = 0,
+       timingOffset = 0,
+       playing = false,
+       audioSource,
+       context,
+       lastTimeframe,
+       midi;
 
    // MIDI
 
@@ -138,18 +137,15 @@
 
    function drawEvent(events) {
       var noteEvents = _.filter(events, function (event) { return event.type === 'NOTE_ON' || event.type === 'NOTE_OFF'; }),
-          elapsedTime,
           element;
 
       if (noteEvents.length > 0) {
          if (!playing) {
             playing = true;
-            audioSource.start(events.time);  
+            // audioSource.start(events.time);  
          }
 
-         elapsedTime = performance.now() - timingOffset;
-
-         console.log(events.time, elapsedTime, noteEvents);
+         // console.log(events.time, elapsedTime, noteEvents);
 
          noteEvents.map(function (event) {
             element = document.getElementById('track-' + event.track); 
@@ -168,6 +164,8 @@
    }
 
    function run() {
+      var ContextClass = (window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.oAudioContext || window.msAudioContext);
+
       if (ContextClass) {
          context = new ContextClass();
       } else {
