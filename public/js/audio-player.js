@@ -88,14 +88,17 @@
    };
 
    AudioPlayer.prototype.play = function play(startTimeOffset, playbackHeadOffset, duration) {
+      var args = [];
+
       if (!this.isLoaded) return false; // nothing to play...
       if (this.isPlaying) return true; // already playing
 
-      startTimeOffset = startTimeOffset || 0;
-      playbackHeadOffset = playbackHeadOffset || 0;
+      args.push(startTimeOffset || 0);
+      args.push(playbackHeadOffset || 0);
 
-      // this.audioSource.start.apply(this.audioSource, [startTimeOffset, playbackHeadOffset, duration]);
-      this.audioSource.start.apply(this.audioSource);
+      if (duration) args.push(duration);
+
+      this.audioSource.start.apply(this.audioSource, args);
       this.isPlaying = true;
 
       return this.isPlaying;

@@ -11,8 +11,7 @@
          request.responseType = 'arraybuffer';
 
          request.addEventListener('load', function (e) {
-            if (params.success) params.success(e);
-            resolve(e);
+            params.success(e, resolve, reject);
          });
          request.addEventListener('error', reject);
 
@@ -20,7 +19,7 @@
       });
    }
 
-   function handleMidiLoad(e) {
+   function handleMidiLoad(e, resolve, reject) {
       var arrayBuffer = e.srcElement.response,
           byteArray;
 
@@ -28,15 +27,17 @@
          byteArray = new Uint8Array(arrayBuffer);
          /* jshint -W040:true */
          this.midi = new Heuristocratic.Midi({ midiByteArray: byteArray });
+         resolve();
       } else {
-         throw new Error('No midi data returned');
+         reject('No midi data returned');
       }
    }
 
-   function handleAudioLoad(e) {
-      /* jshint -W040:true */
+   function handleAudioLoad(e, resolve, reject) {
+      // turn off "this" warning and "reserved word" (for Promise.catch)
+      /* jshint -W040:true, -W024:true */
       this.audioPlayer = new Heuristocratic.AudioPlayer();
-      this.audioPlayer.loadData(e.srcElement.response);
+      this.audioPlayer.loadData(e.srcElement.response).then(resolve).catch(reject);
    }
 
    function runVisualization() {
