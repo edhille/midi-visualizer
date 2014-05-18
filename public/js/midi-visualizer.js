@@ -2,51 +2,22 @@
    'use strict';
 
    // internal helper functions (all assume "this" is an instance of MidiVisualizer)
-   function loadData(params) {
-      /* jshint -W040:true */
-      this._loadCount = 0;
-
-      loadAudio.call(this, params.audio_href);
-      loadMidi.call(this, params.midi_href);
-   }
-
-   function loadAudio(href) {
-      /* jshint -W040:true */
-      ++this._loadCount;
-
-      requestData({
-         href: href,
-         dataType: '',
-         success: handleAudioLoad.bind(this),
-         failure: handleLoadError
-      });
-   }
-
-   function loadMidi(href) {
-      /* jshint -W040:true */
-      ++this._loadCount;
-
-      requestData({
-         href: href,
-         success: handleMidiLoad.bind(this),
-         failure: handleLoadError
-      });
-   }
 
    function requestData(params) {
-      var request = new XMLHttpRequest();
+      return new Promise(function dataRequestPromise(resolve, reject) {
+         var request = new XMLHttpRequest();
 
-      request.open('GET', params.href, true);
-      request.responseType = 'arraybuffer';
+         request.open('GET', params.href, true);
+         request.responseType = 'arraybuffer';
 
-      request.addEventListener('load', params.success);
-      request.addEventListener('error', params.error);
+         request.addEventListener('load', function (e) {
+            if (params.success) params.success(e);
+            resolve(e);
+         });
+         request.addEventListener('error', reject);
 
-      request.send();
-   }
-
-   function handleLoadError(e) {
-      throw new Error(e);
+         request.send();
+      });
    }
 
    function handleMidiLoad(e) {
@@ -60,25 +31,17 @@
       } else {
          throw new Error('No midi data returned');
       }
-
-      if (--this._loadCount === 0) {
-         this.ready = true;
-      }
    }
 
    function handleAudioLoad(e) {
       /* jshint -W040:true */
-      this.audioPlayer = new Heuristocratic.AudioPlayer({
-         audioData: e.srcElement.response
-      });
-
-      if (--this._loadCount === 0) {
-         this.ready = true;
-      }
+      this.audioPlayer = new Heuristocratic.AudioPlayer();
+      this.audioPlayer.loadData(e.srcElement.response);
    }
 
    function runVisualization() {
       /* jshint -W040:true */
+      // TODO: should we have a startOffset to allow everything get situated?
       scheduleMidiAnimation.apply(this);
       this.audioPlayer.play();
    }
@@ -137,8 +100,7 @@
       this.isPlaying = false;
       this.timingOffset = 0;
       this.deferMs = params.defer_ms || 0;
-
-      loadData.call(this, params.config);
+      this.config = params.config;
    }
 
    Object.defineProperties(MidiVisualizer, {
@@ -180,13 +142,32 @@
       }
    });
 
-   MidiVisualizer.prototype.run = function () {
-      if (this.ready) {
-         runVisualization.apply(this);
-         return;
-      } 
+   MidiVisualizer.prototype.loadData = function loadData() {
+      var promises = [];
 
-      setTimeout(this.run.bind(this), this.deferMs);
+      promises.push(
+         requestData({
+            href: this.config.audio.href,
+            dataType: '',
+            success: handleAudioLoad.bind(this)
+         })
+      );
+      promises.push(
+         requestData({
+            href: this.config.midi.href,
+            success: handleMidiLoad.bind(this)
+         })
+      );
+
+      return Promise.all(promises).then((function setReady() { this.ready = true; }).bind(this));
+   };
+
+   MidiVisualizer.prototype.run = function run() {
+      if (!this.ready) return false;
+
+      runVisualization.apply(this);
+
+      return true;
    };
 
 	if (typeof module !== 'undefined' && module.exports) {

@@ -1,5 +1,5 @@
 /* jshint expr: true, es5: true */
-describe('MidiVisualiser', function() {
+describe('MidiVisualizer', function() {
 	chai.should();
 
    describe('constructor', function () {

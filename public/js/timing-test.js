@@ -34,12 +34,18 @@
       // loadData();
       visualizer = new Heuristocratic.MidiVisualizer({
          config: {
-            midi_href: '/test.mid',
-            audio_href: '/test.wav'
+            midi: {
+               href: '/test.mid'
+            },
+            audio: {
+               href: '/test.wav'
+            }
          }   
       });
 
-      visualizer.run();
+      visualizer.loadData().then(function () {
+         visualizer.run();
+      });
    }
 
    run();
