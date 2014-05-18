@@ -35,7 +35,7 @@
       },
       audioSource: {
          value: null, 
-         writable: false,
+         writable: true,
          configurable: false,
          enumerable: true
       },
@@ -51,7 +51,7 @@
       return this.audioSource.start.apply(this.audioSource, arguments);
    };
 
-   AudioPlayer.prototype.stop = function play(/* AudioBufferSourceNode.stparams */) {
+   AudioPlayer.prototype.pause = function play(/* AudioBufferSourceNode.stparams */) {
       return this.audioSource.stop.apply(this.audioSource, arguments);
    };
 
