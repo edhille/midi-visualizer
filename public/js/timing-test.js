@@ -4,7 +4,7 @@
    var root = this,
        timingOffset = 0,
        playing = false,
-       audioSource,
+       audioPlayer,
        context,
        midi;
 
@@ -28,7 +28,7 @@
 
       if (arrayBuffer) {
          byteArray = new Uint8Array(arrayBuffer);
-         midi = new Midi({ midiByteArray: byteArray });
+         midi = new Heuristocratic.Midi({ midiByteArray: byteArray });
          // console.log(midi);
       } else {
          throw new Error('No data returned');
@@ -49,11 +49,11 @@
    }
 
    function handleAudioLoad(e) {
-      context.decodeAudioData(e.srcElement.response, function setupAudioSource(buffer) {
-         audioSource = context.createBufferSource();
-         audioSource.buffer = buffer;
-         audioSource.connect(context.destination);
+      audioPlayer = new Heuristocratic.AudioPlayer({
+         audioData: e.srcElement.response
       });
+
+      console.log(audioPlayer);
    }
 
    // LOADING
@@ -68,7 +68,6 @@
       loadAudio(
          function success() {
             handleAudioLoad.apply(null, arguments);
-
             myMidi();
          },
          handleLoadError
@@ -98,7 +97,7 @@
    }
 
    function playAudio(offset, startTime) {
-      audioSource.start(offset, startTime);
+      audioPlayer.play(offset, startTime);
    }
 
    function pause() {
@@ -159,20 +158,6 @@
    }
 
    function run() {
-      var ContextClass = (
-            window.AudioContext || 
-            window.webkitAudioContext || 
-            window.mozAudioContext || 
-            window.oAudioContext || 
-            window.msAudioContext
-      );
-
-      if (ContextClass) {
-         context = new ContextClass();
-      } else {
-         throw new Error('Unable to setup audio context');
-      }
-
       root.addEventListener('click', handleClick);
 
       loadData();

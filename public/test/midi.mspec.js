@@ -27,7 +27,7 @@ describe('Midi', function() {
 
       it('should not throw an error starting with a valid Midi file', function () {
          expect(function () {
-            new Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
+            new Heuristocratic.Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
          }).not.throw(Error);
       });
 
@@ -36,7 +36,7 @@ describe('Midi', function() {
 			var midi;
 
 			beforeEach(function () {
-            midi = new Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
+            midi = new Heuristocratic.Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
 			});
 
 			afterEach(function () {
@@ -149,7 +149,7 @@ describe('Midi', function() {
 		var midi;
 
       beforeEach(function() {
-         midi = new Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
+         midi = new Heuristocratic.Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
       });
 
       afterEach(function() {

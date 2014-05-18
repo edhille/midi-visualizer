@@ -619,8 +619,8 @@
 
 	if (typeof module !== 'undefined' && module.exports) {
 		module.exports = Midi;
-	}
-	else if (window) {
-		window.Midi = window.Midi || Midi;
+	} else {
+      root.Heuristocratic = root.Heuristocratic || {};
+      root.Heuristocratic.Midi = Midi;
 	}
 })(this);
