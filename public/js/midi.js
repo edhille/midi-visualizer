@@ -1,4 +1,4 @@
-(function() {
+;(function(root) {
    'use strict';
 
    var BYTE_MASK = 0x80;
@@ -14,8 +14,14 @@
    var META_EVENT = 0xFF;
    var TEMPO_META_EVENT = 0x51;
    var TIME_SIG_META_EVENT = 0x58;
+   var INST_NAME_META_EVENT = 0x04;
+   var END_OF_TRACK_META_EVENT = 0x2F;
 
    // Private utility functions
+
+   function intToHexString(integer) {
+      return Number(integer).toString(16);
+   }
 
 	function parseByteArrayToNumber(byteArray, isVariable) {
 		var number = 0,
@@ -33,7 +39,7 @@
 		}
 
       if (false && test.length) {
-         console.log('byteArray', byteArray.map(function(i) {return Number(i).toString(16);}), 'test', test.map(function(i){return Number(i).toString(16);}), 'number', number);
+         // console.log('byteArray', byteArray.map(intToHexString), 'test', test.map(intToHexString), 'number', number);
       }
 
 		return number;
@@ -170,6 +176,25 @@
          writable: false,
          configurable: false,
          enumerable: true
+      },
+      instrumentName: {
+         get: function getInstrumentName() {
+            if (this._instrName) {
+               return this._instrName;
+            } else {
+               this._instrName = '';
+
+               this.tracks.filter(function filterTrackForInstrNameEvent(track) {
+                  track.events.filter(function filterEventsForInstrNameEvent(event) {
+                     return event.subtype === 'instrument_name';
+                  }).map(function cacheInstrName(event) { this._instrName = event.instrumentName; }, this);
+               }, this);
+
+               return this._instrName;
+            }
+         },
+         configurable: false,
+         enumerable: true
       }
    });
 
@@ -192,7 +217,7 @@
 
    MidiTrack.prototype.parseNoteToggle = function parseNoteToggle(deltaTime, eventCode) {
       var midiEvent = new MidiEvent({
-         type: (eventCode & MIDI_EVENT_NOTE_ON_MASK) === MIDI_EVENT_NOTE_ON_MASK ? 'NOTE_ON' : 'NOTE_OFF',
+         type: (eventCode & MIDI_EVENT_NOTE_ON_MASK) === MIDI_EVENT_NOTE_ON_MASK ? 'note_on' : 'note_off',
          code: eventCode,
          delta: deltaTime,
          data: {
@@ -307,11 +332,13 @@
 
    MidiTrack.prototype.parseMetaEvent = function parseMetaEvent(deltaTime, eventCode) {
       var metaType = this.byteParser.nextByte(),
-          dataByteLength = this.byteParser.nextByte(),
+          dataByteLength = parseByteArrayToNumber(this.parseNextVariableChunk(), true),
           bytes = this.byteParser.getBytes(dataByteLength);
      
-      // console.log('meta:', eventCode.toString(16), metaType.toString(16), eventLength);
+      // console.log('meta:', eventCode.toString(16), metaType.toString(16), dataByteLength, bytes);
+
       var midiEvent = new MidiEvent({
+         type: 'meta',
          code: eventCode,
          delta: deltaTime,
          data: {
@@ -319,18 +346,30 @@
          }
       });
 
-      if (TEMPO_META_EVENT === metaType) {
-         // console.log('tempo bytes', midiEvent.data.bytes);
-         midiEvent.tempo = parseByteArrayToNumber(midiEvent.data.bytes);
-      } else if (TIME_SIG_META_EVENT === metaType) {
-         midiEvent.timeSiganture = {
-            numerator: midiEvent.data.bytes[0],
-            denomiator: Math.pow(2, midiEvent.data.bytes[1]),
-            metronomeClicksPerTick: midiEvent.data.bytes[2],
-            thirtySecondNotesPerBeat: midiEvent.data.bytes[3]
-         };
-
-         // console.log('time signature event', midiEvent);
+      switch (metaType) {
+         case TEMPO_META_EVENT:
+            midiEvent.tempo = parseByteArrayToNumber(midiEvent.data.bytes);
+            midiEvent.subtype = 'tempo';
+            break;
+         case TIME_SIG_META_EVENT:
+            midiEvent.timeSignature = {
+               numerator: midiEvent.data.bytes[0],
+               denominator: Math.pow(2, midiEvent.data.bytes[1]),
+               metronomeClicksPerTick: midiEvent.data.bytes[2],
+               thirtySecondNotesPerBeat: midiEvent.data.bytes[3]
+            };
+            midiEvent.subtype = 'time_signature';
+            break;
+         case INST_NAME_META_EVENT:
+            this.instrumentName = midiEvent.instrumentName = bytes.map(function (charCode) { return String.fromCharCode(charCode); }).join('');
+            midiEvent.subtype = 'instrument_name';
+            break;
+         case END_OF_TRACK_META_EVENT:
+            midiEvent.subtype = 'end';
+            break;
+         default:
+            midiEvent.subtype = metaType;
+            break;
       }
 
       this._bytesParsed += 2;
@@ -558,17 +597,11 @@
    };
 
    Midi.prototype.getEventTimes = function getEventTimes() {
-      return Object.keys(this.eventsByTime).sort(sortNumeric);
+      return Object.keys(this.eventsByTime).map(Number).sort(sortNumeric);
    };
 
    Midi.prototype.getEventsAtTime = function getEventsAtTime(time) {
-      var events = [];
-
-      this.tracks.forEach(function extractTrackEvents(track) {
-         if (track.eventsByTime[time]) events.push(track.eventsByTime[time]);
-      });
-
-      return events;
+      return this.eventsByTime[time] || [];
    };
 
    Midi.prototype.getEventsBetweenTimes = function getEventsBetweenTimes(startTime, endTime) {
@@ -590,4 +623,4 @@
 	else if (window) {
 		window.Midi = window.Midi || Midi;
 	}
-})();
+})(this);

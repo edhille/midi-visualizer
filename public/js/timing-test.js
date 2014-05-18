@@ -97,8 +97,8 @@
       playing = !playing;
    }
 
-   function playAudio(startTime) {
-      audioSource.start(startTime);
+   function playAudio(offset, startTime) {
+      audioSource.start(offset, startTime);
    }
 
    function pause() {
@@ -129,7 +129,7 @@
    }
 
    function drawEvent(events) {
-      function isNoteToggle(event) { return event.type === 'NOTE_ON' || event.type === 'NOTE_OFF'; }
+      function isNoteToggle(event) { return event.type === 'note_on' || event.type === 'note_off'; }
 
       var noteEvents = _.filter(events, isNoteToggle),
           element;
@@ -137,7 +137,7 @@
       if (noteEvents.length > 0) {
          if (!playing) {
             playing = true;
-            playAudio(events.time);
+            playAudio(0, events.time);
          }
 
          // console.log(events.time, elapsedTime, noteEvents);
@@ -146,7 +146,7 @@
             element = document.getElementById('track-' + event.track); 
 
             if (element) {
-               if (event.type === 'NOTE_ON') {
+               if (event.type === 'note_on') {
                   element.className = element.className.replace(/ off/, ' on', 'g');
                } else {
                   element.className = element.className.replace(/ on/, ' off', 'g');
