@@ -2,6 +2,7 @@
    'use strict';
 
    var root = this,
+       playing = false,
        visualizer;
 
    // RUNTIME
@@ -43,7 +44,7 @@
          }   
       });
 
-      visualizer.loadData().then(function () {
+      visualizer.setStage().then(function () {
          visualizer.run();
       });
    }

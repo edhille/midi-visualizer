@@ -379,7 +379,7 @@
    };
 
    MidiTrack.prototype.addEvent = function addEvent(event) {
-      event.track = this.index;
+      event.trackIndex = this.index;
       this.events.push(event);
    };
 
