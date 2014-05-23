@@ -8,7 +8,6 @@
    function loadData(midiVisualizer) {
       var promises = [];
 
-      console.log('loading midi...');
       promises.push(
          requestData({
             href: midiVisualizer.config.audio.href,
@@ -16,7 +15,6 @@
             success: handleAudioLoad.bind(null, midiVisualizer)
          })
       );
-      console.log('loading audio...');
       promises.push(
          requestData({
             href: midiVisualizer.config.midi.href,
@@ -50,7 +48,6 @@
       if (arrayBuffer) {
          byteArray = new Uint8Array(arrayBuffer);
          midiVisualizer.midi = new Heuristocratic.Midi({ midiByteArray: byteArray });
-         console.log('midi loaded...');
          resolve();
       } else {
          reject('No midi data returned');
@@ -69,9 +66,7 @@
    }
 
    function prepDOM(midiVisualizer) {
-      console.log('prepDOM', midiVisualizer);
       midiVisualizer.midi.tracks.forEach(function prepTrackDOM(track, i) {
-         console.log('track', track);
          var trackElem = document.createElement('div');
          trackElem.setAttribute('class', 'track off');
          trackElem.setAttribute('id', 'track-' + i);
@@ -114,7 +109,7 @@
          // console.log(events.time, elapsedTime, noteEvents);
 
          noteEvents.map(function (event) {
-            var note, velocity;
+            var note, velocity, color, height;
 
             element = document.getElementById('track-' + event.trackIndex);
 
@@ -122,8 +117,11 @@
                if (event.type === 'note_on') {
                   note = event.data.note;
                   velocity = event.data.velocity;
+                  color = 'hsl(' + note + ',100%,50%)';
+                  height = Math.log(note) * 100;
+
                   element.className = element.className.replace(/ off/, ' on', 'g');
-                  element.setAttribute('style', 'background-color:rgb(' + (event.trackIndex * 100) + ',' + velocity + ',' + ((note * 100) % 255) + ');height:' + (Math.log(note) * 100) + 'px;');
+                  element.setAttribute('style', 'background-color:' + color + ';height:' + height + 'px;');
                } else {
                   element.className = element.className.replace(/ on/, ' off', 'g');
                   element.removeAttribute('style');
