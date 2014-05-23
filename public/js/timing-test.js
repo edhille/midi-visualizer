@@ -36,10 +36,12 @@
       visualizer = new Heuristocratic.MidiVisualizer({
          config: {
             midi: {
-               href: '/test.mid'
+               // href: '/test.mid'
+               href: '/vunder.mid'
             },
             audio: {
-               href: '/test.wav'
+               // href: '/test.wav'
+               href: '/vunderbar.wav'
             }
          }   
       });

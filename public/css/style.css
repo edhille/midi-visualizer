@@ -12,6 +12,7 @@ circle {
    width: 100px;
    height: 100px;
    position: absolute;
+   top: 0;
 }
 
 .track.on {
@@ -19,15 +20,45 @@ circle {
 }
 
 .track.off {
-   background-color: red;
+   background-color: white;
 }
 
 #track-1 {
-   top: 10px;
-   left: 10px;
+   left: 0;
 }
 
 #track-2 {
-   top: 110px;
-   left: 110px;
+   left: 100px;
+}
+
+#track-3 {
+   left: 200px;
+}
+
+#track-4 {
+   left: 300px;
+}
+
+#track-5 {
+   left: 400px;
+}
+
+#track-6 {
+   left: 500px;
+}
+
+#track-7 {
+   left: 600px;
+}
+
+#track-8 {
+   left: 700px;
+}
+
+#track-9 {
+   left: 800px;
+}
+
+#track-10 {
+   left: 900px;
 }

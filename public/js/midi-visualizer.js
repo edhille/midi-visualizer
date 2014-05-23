@@ -8,6 +8,7 @@
    function loadData(midiVisualizer) {
       var promises = [];
 
+      console.log('loading midi...');
       promises.push(
          requestData({
             href: midiVisualizer.config.audio.href,
@@ -15,6 +16,7 @@
             success: handleAudioLoad.bind(null, midiVisualizer)
          })
       );
+      console.log('loading audio...');
       promises.push(
          requestData({
             href: midiVisualizer.config.midi.href,
@@ -48,6 +50,7 @@
       if (arrayBuffer) {
          byteArray = new Uint8Array(arrayBuffer);
          midiVisualizer.midi = new Heuristocratic.Midi({ midiByteArray: byteArray });
+         console.log('midi loaded...');
          resolve();
       } else {
          reject('No midi data returned');
@@ -58,19 +61,21 @@
       // turn off "this" warning and "reserved word" (for Promise.catch)
       midiVisualizer.audioPlayer = new Heuristocratic.AudioPlayer();
       /* jshint -W024:true */
-      midiVisualizer.audioPlayer.loadData(e.srcElement.response).then(resolve).catch(reject);
+      midiVisualizer.audioPlayer.loadData(e.srcElement.response).then(function () {
+         resolve();   
+      }).catch(function (e) {
+         reject(e);
+      });
    }
 
    function prepDOM(midiVisualizer) {
+      console.log('prepDOM', midiVisualizer);
       midiVisualizer.midi.tracks.forEach(function prepTrackDOM(track, i) {
-         var trackElem;
-
-         if (track.hasOwnProperty('instrumentName')) {
-            trackElem = document.createElement('div');
-            trackElem.setAttribute('class', 'track off');
-            trackElem.setAttribute('id', 'track-' + i);
-            document.body.appendChild(trackElem);
-         }
+         console.log('track', track);
+         var trackElem = document.createElement('div');
+         trackElem.setAttribute('class', 'track off');
+         trackElem.setAttribute('id', 'track-' + i);
+         document.body.appendChild(trackElem);
       });
 
       midiVisualizer.ready = true;
@@ -109,16 +114,22 @@
          // console.log(events.time, elapsedTime, noteEvents);
 
          noteEvents.map(function (event) {
+            var note, velocity;
+
             element = document.getElementById('track-' + event.trackIndex);
 
             if (element) {
                if (event.type === 'note_on') {
+                  note = event.data.note;
+                  velocity = event.data.velocity;
                   element.className = element.className.replace(/ off/, ' on', 'g');
+                  element.setAttribute('style', 'background-color:rgb(' + (event.trackIndex * 100) + ',' + velocity + ',' + ((note * 100) % 255) + ')');
                } else {
                   element.className = element.className.replace(/ on/, ' off', 'g');
+                  element.removeAttribute('style');
                }
             } else {
-               console.error('no DOM element for track ' + event.track);
+               console.error('no DOM element for track ' + event.trackIndex);
             }
          });
       }
@@ -187,7 +198,12 @@
 
       promises.push(loadData(this));
 
-      return Promise.all(promises).then(prepDOM.bind(null, this));
+      // return Promise.all(promises).then(prepDOM.bind(null, this)).catch(function (e) { throw new Error(e); });
+      return Promise.all(promises).then(function () {
+         prepDOM(this);
+      }.bind(this)).catch(function (e) {
+         throw new Error(e);
+      });
    };
 
    MidiVisualizer.prototype.run = function run() {
