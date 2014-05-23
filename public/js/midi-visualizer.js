@@ -119,7 +119,7 @@
                   note = event.data.note;
                   velocity = event.data.velocity;
                   color = 'hsl(' + note + ',100%,50%)';
-                  height = Math.log(note) * 100;
+                  height = Math.pow(Math.log(note), 4);
 
                   element.className = element.className.replace(/ off/, ' on', 'g');
                   element.setAttribute('style', 'background-color:' + color + ';height:' + height + 'px;');

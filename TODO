@@ -8,3 +8,5 @@ Heuristocratic.MidiVisualizer
 - implement pause
 - implement resume
 - implement configurable filters (by track)
+- subdivide a polyphonic track into notes
+- subdivide drums in meaningful way
