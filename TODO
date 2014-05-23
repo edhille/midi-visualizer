@@ -2,6 +2,7 @@ Heuristocratic.Midi
 
 - calculate note length and add to note-on events
 - make parsing more functional
+- note tracks with no note events
 
 Heuristocratic.MidiVisualizer
 
