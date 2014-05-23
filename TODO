@@ -1,0 +1,10 @@
+Heuristocratic.Midi
+
+- calculate note length and add to note-on events
+- make parsing more functional
+
+Heuristocratic.MidiVisualizer
+
+- implement pause
+- implement resume
+- implement configurable filters (by track)

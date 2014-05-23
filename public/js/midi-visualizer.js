@@ -109,6 +109,7 @@
          // console.log(events.time, elapsedTime, noteEvents);
 
          noteEvents.map(function (event) {
+            // TODO: have filters (by track that are applied)
             var note, velocity, color, height;
 
             element = document.getElementById('track-' + event.trackIndex);
@@ -210,6 +211,14 @@
       runVisualization(this);
 
       return true;
+   };
+
+   MidiVisualizer.prototype.pause = function pause() {
+      throw new Error('TODO: Implement "pause"');
+   };
+
+   MidiVisualizer.prototype.resume = function resume() {
+      throw new Error('TODO: Implement "resume"');
    };
 
 	if (typeof module !== 'undefined' && module.exports) {
