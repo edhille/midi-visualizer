@@ -9,8 +9,7 @@ circle {
 }
 
 .track {
-   width: 100px;
-   height: 100px;
+   width: 150px;
    position: absolute;
    top: 0;
 }
@@ -28,37 +27,37 @@ circle {
 }
 
 #track-2 {
-   left: 100px;
+   left: 150px;
 }
 
 #track-3 {
-   left: 200px;
-}
-
-#track-4 {
    left: 300px;
 }
 
+#track-4 {
+   left: 450px;
+}
+
 #track-5 {
-   left: 400px;
-}
-
-#track-6 {
-   left: 500px;
-}
-
-#track-7 {
    left: 600px;
 }
 
+#track-6 {
+   left: 750px;
+}
+
+#track-7 {
+   left: 900px;
+}
+
 #track-8 {
-   left: 700px;
+   left: 1050px;
 }
 
 #track-9 {
-   left: 800px;
+   left: 1200px;
 }
 
 #track-10 {
-   left: 900px;
+   left: 1350px;
 }

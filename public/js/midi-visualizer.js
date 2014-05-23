@@ -123,7 +123,7 @@
                   note = event.data.note;
                   velocity = event.data.velocity;
                   element.className = element.className.replace(/ off/, ' on', 'g');
-                  element.setAttribute('style', 'background-color:rgb(' + (event.trackIndex * 100) + ',' + velocity + ',' + ((note * 100) % 255) + ')');
+                  element.setAttribute('style', 'background-color:rgb(' + (event.trackIndex * 100) + ',' + velocity + ',' + ((note * 100) % 255) + ');height:' + (Math.log(note) * 100) + 'px;');
                } else {
                   element.className = element.className.replace(/ on/, ' off', 'g');
                   element.removeAttribute('style');
