@@ -62,9 +62,7 @@
    }
 
    function prepDOM(midiVisualizer) {
-      console.log(midiVisualizer);
       midiVisualizer.midi.tracks.forEach(function prepTrackDOM(track, i) {
-         console.log('track', track);
          var trackElem;
 
          if (track.hasOwnProperty('instrumentName')) {
