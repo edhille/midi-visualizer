@@ -108,29 +108,7 @@
 
          // console.log(events.time, elapsedTime, noteEvents);
 
-         noteEvents.map(function (event) {
-            // TODO: have filters (by track that are applied)
-            var note, velocity, color, height;
-
-            element = document.getElementById('track-' + event.trackIndex);
-
-            if (element) {
-               if (event.type === 'note_on') {
-                  note = event.data.note;
-                  velocity = event.data.velocity;
-                  color = 'hsl(' + note + ',100%,50%)';
-                  height = Math.pow(Math.log(note), 4);
-
-                  element.className = element.className.replace(/ off/, ' on', 'g');
-                  element.setAttribute('style', 'background-color:' + color + ';height:' + height + 'px;');
-               } else {
-                  element.className = element.className.replace(/ on/, ' off', 'g');
-                  element.removeAttribute('style');
-               }
-            } else {
-               console.error('no DOM element for track ' + event.trackIndex);
-            }
-         });
+         midiVisualizer.pipelineRenderer.render(noteEvents);
       }
    }
 
@@ -145,6 +123,8 @@
       this.timingOffset = 0;
       this.deferMs = params.defer_ms || 0;
       this.config = params.config;
+
+      this.pipelineRenderer = Heuristocratic.midiRenderPipeline();
    }
 
    Object.defineProperties(MidiVisualizer, {
