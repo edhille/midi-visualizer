@@ -94,29 +94,6 @@
       ]
    };
 
-   var slice = Function.call.bind([].slice);
-
-   /**
-    * naive clone function for copying simple object/array/primitive data
-    */
-   function clone(obj_or_array) {
-      var prop, cloneObj = {};
-
-      if (obj_or_array instanceof Object) {
-         for (prop in obj_or_array) {
-            if (obj_or_array.hasOwnProperty(prop)) {
-               cloneObj[prop] = clone(obj_or_array[prop]);
-            }
-         }
-
-         return cloneObj;
-      } else if (obj_or_array instanceof Array) {
-         return obj_or_array.map(clone);
-      }
-
-      return obj_or_array;
-   }
-
    function draw(animParams) {
 
    }
