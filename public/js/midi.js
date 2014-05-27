@@ -617,10 +617,5 @@
 
    // export
 
-	if (typeof module !== 'undefined' && module.exports) {
-		module.exports = Midi;
-	} else {
-      root.Heuristocratic = root.Heuristocratic || {};
-      root.Heuristocratic.Midi = Midi;
-	}
+   utils.exporter(root, Midi, 'Heuristocratic.Midi');
 })(this);
