@@ -201,10 +201,5 @@
       throw new Error('TODO: Implement "resume"');
    };
 
-	if (typeof module !== 'undefined' && module.exports) {
-      module.exports = MidiVisualiser;
-	} else {
-      root.Heuristocratic = root.Heuristocratic || {};
-      root.Heuristocratic.MidiVisualizer = MidiVisualizer;
-	}
+   utils.exporter(root, MidiVisualizer, 'Heuristocratic.MidiVisualizer');
 })(this, document);

@@ -164,4 +164,4 @@
    }
 
    utils.exporter(root, midiRenderPipeline, 'Heuristocratic.midiRenderPipeline');
-})(window);
+})(this);

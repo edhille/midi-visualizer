@@ -1,16 +1,22 @@
 Heuristocratic.Midi
 
+- tests...
 - calculate note length and add to note-on events
 - make parsing more functional
 - denote tracks with no note events
 
 Heuristocratic.MidiVisualizer
 
+- tests...
 - implement configurable filters (by track)
 - implement pause/resume
 - subdivide drums in meaningful way
-- subdivide a polyphonic track into notes
 
 Heuristocratic.MidiRenderPipeline
+
+- subdivide a polyphonic track into notes
+- tests...
+
+Heuristocratic.utils
 
 - tests...
