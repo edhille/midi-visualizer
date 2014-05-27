@@ -54,13 +54,29 @@ describe('MidiRenderPipeline', function () {
          pipeline.render(events);
       });
 
-      it('should use the default rendering engine', function () {
-         mockDocument.should.not.be.null;
+      afterEach(function () {
+         mockDocument.restore();
+      });
+
+      it('should look for two DOM nodes', function () {
          mockDocument.callCount.should.equal(2);
+      });
+
+      it('should leave the classname of the DOM node to "off"', function () {
          mockElements.forEach(function (element) {
             element.className.should.match(/off/);
+         });
+      });
+
+      it('should have an appropriately formed id for each element', function () {
+         mockElements.forEach(function (element) {
             element.id.should.match(/track-\d/);
          });
       });
+   });
+
+   describe('custom render', function () {
+      
+      it('should be tested...');
    });
 });
