@@ -38,7 +38,6 @@
             if (element) {
                if (event.type === 'note_on') {
                   style = element.getAttribute('style') || '';
-                  console.log('style', style);
                   note = event.data.note;
                   color = 'hsl(' + note + ',100%,50%)';
 
@@ -65,7 +64,6 @@
             if (element) {
                if (event.type === 'note_on') {
                   style = element.getAttribute('style') || '';
-                  console.log('style', style);
                   note = event.data.note;
                   height = Math.pow(Math.log(note), 4);
 
@@ -111,7 +109,7 @@
    }
 
    function parseFilters(renderer, config) {
-      config = config || clone(FILTER_CONFIG_DEFAULTS);
+      config = config || utils.clone(FILTER_CONFIG_DEFAULTS);
 
       var configFilters = config.filters || FILTER_CONFIG_DEFAULTS.filters,
          filters = Object.keys(configFilters).map(function(key){return configFilters[key];});
@@ -121,7 +119,7 @@
             return renderer[filterEntry];
          } else {
             return function() {
-               var args = slice(arguments),
+               var args = utils.slice(arguments),
                   next = args.pop();
 
                return next.apply(null, args);
@@ -144,7 +142,7 @@
                filtersCount = filters.length;
 
             function next() {
-               var args = slice(arguments).concat([next]);
+               var args = utils.slice(arguments).concat([next]);
 
                if (stackIndex < filtersCount) {
                   filters[stackIndex++].apply(null, args);
@@ -165,10 +163,5 @@
       return pipeline;
    }
 
-	if (typeof module !== 'undefined' && module.exports) {
-      module.exports = MidiRenderPipeline;
-	} else {
-      root.Heuristocratic = root.Heuristocratic || {};
-      root.Heuristocratic.midiRenderPipeline = midiRenderPipeline;
-	}
+   utils.exporter(root, midiRenderPipeline, 'Heuristocratic.midiRenderPipeline');
 })(window);
