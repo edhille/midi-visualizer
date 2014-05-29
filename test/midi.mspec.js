@@ -1,9 +1,12 @@
 /* jshint expr: true, es5: true */
-var fs = require('fs');
-var chai = require('../public/js/chai.js');
-var MidiParser = require('../lib/midi-parser.js');
+
+var fs = require('fs'),
+    chai = require('../public/js/chai.js'),
+    MidiParser = require('../lib/midi-parser.js');
 
 describe('MidiParser', function() {
+   'use strict';
+
    var expect = chai.expect;
 	var midiData;
 

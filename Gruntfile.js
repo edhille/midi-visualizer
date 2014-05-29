@@ -1,84 +1,83 @@
 /* jshint globalstrict: true, node: true */
-'use strict';
 
-var request = require('request');
+module.exports = function(grunt) {
+   'use strict';
 
-module.exports = function (grunt) {
-  // show elapsed time at the end
-  require('time-grunt')(grunt);
-  // load all grunt tasks
-  require('load-grunt-tasks')(grunt);
+   // show elapsed time at the end
+   require('time-grunt')(grunt);
 
-  grunt.loadNpmTasks('grunt-mocha-test');
+   require('matchdep').filterAll('grunt-*').forEach(grunt.loadNpmTasks);
 
-  var reloadPort = 35729, files;
+	var webpack = require('webpack');
+	var webpackConfig = require(__dirname + '/webpack.config.js');
 
-  grunt.initConfig({
-    pkg: grunt.file.readJSON('package.json'),
-    develop: {
-      server: {
-        file: 'app.js'
-      }
-    },
-    watch: {
-      options: {
-        nospawn: true,
-        livereload: reloadPort
+	grunt.initConfig({
+      pkg: grunt.file.readJSON('package.json'),
+      mochaTest: {
+         test: {
+            options: {
+              reporter: 'spec'
+            },
+            src: ['test/**/*.js']
+         }
       },
-      server: {
-        files: [
-          'app.js',
-          'routes/*.js'
-        ],
-        tasks: ['develop', 'delayed-livereload']
-      },
-      js: {
-        files: ['public/js/*.js'],
-        options: {
-          livereload: reloadPort
-        }
-      },
-      css: {
-        files: ['public/css/*.css'],
-        options: {
-          livereload: reloadPort
-        }
-      },
-      jade: {
-        files: ['views/*.jade'],
-        options: {
-          livereload: reloadPort
-        }
-      }
-    },
-    mochaTest: {
-       test: {
-          options: {
-            reporter: 'spec'
-          },
-          src: ['test/**/*.js']
-       }
-    }
-  });
+		webpack: {
+			options: webpackConfig,
+			build: {
+				plugins: webpackConfig.plugins.concat(
+					new webpack.DefinePlugin({
+						'process.env': {
+							'NODE_ENV': JSON.stringify('production')
+						}
+					}),
+					new webpack.optimize.DedupePlugin(),
+					new webpack.optimize.UglifyJsPlugin()
+				)
+			},
+			'build-dev': {
+				devtool: 'sourcemap',
+				debug: true
+			}
+		},
+      // TODO: this does not work...
+		'webpack-dev-server': {
+			options: {
+				webpack: webpackConfig,
+            // contentBase: 'http://localhost/',
+            contentBase: __dirname
+				// publicPath: webpackConfig.output.publicPath
+			},
+			start: {
+				keepAlive: true,
+				webpack: {
+					devtool: 'eval',
+					debug: true
+				}
+			}
+		},
+		watch: {
+			app: {
+				files: ['app/**/*', 'web_modules/**/*'],
+				tasks: ['webpack:build-dev'],
+				options: {
+					spawn: false
+				}
+			}
+		}
+	});
 
-  grunt.config.requires('watch.server.files');
-  files = grunt.config('watch.server.files');
-  files = grunt.file.expand(files);
+	// The development server (the recommended option for development)
+   // grunt.registerTask("default", ["webpack-dev-server:start"]);
 
-  grunt.registerTask('delayed-livereload', 'Live reload after the node server has restarted.', function () {
-    var done = this.async();
-    setTimeout(function () {
-      request.get('http://localhost:' + reloadPort + '/changed?files=' + files.join(','),  function (err, res) {
-          var reloaded = !err && res.statusCode === 200;
-          if (reloaded) {
-            grunt.log.ok('Delayed live reload successful.');
-          } else {
-            grunt.log.error('Unable to make a delayed live reload.');
-          }
-          done(reloaded);
-        });
-    }, 500);
-  });
+	// Build and watch cycle (another option for development)
+	// Advantage: No server required, can run app from filesystem
+	// Disadvantage: Requests are not blocked until bundle is available,
+	//               can serve an old app on too fast refresh
+	grunt.registerTask('dev', ['webpack:build-dev', 'watch:app', 'webpack-dev-server:start']);
 
-  grunt.registerTask('default', ['mochaTest']);
+	// Production build
+	grunt.registerTask('build', ['webpack:build']);
+
+   // run tests by default
+   grunt.registerTask('default', ['mochaTest']);
 };

@@ -1,5 +1,5 @@
 {
-  "name": "javascript",
+  "name": "midi-visualizer",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -8,7 +8,8 @@
   "dependencies": {
     "express": "~3.3.4",
     "jade": "~0.34.0",
-    "d3": "~3.3.4"
+    "d3": "~3.3.4",
+    "sinon": "*"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -17,8 +18,10 @@
     "request": "~2.27.0",
     "time-grunt": "~0.1.1",
     "load-grunt-tasks": "~0.2.0",
+    "matchdep": "*",
     "mocha": "~1.13.0",
     "chai": "~1.8.1",
-    "grunt-mocha-test": "~0.9.0"
+    "grunt-mocha-test": "~0.9.0",
+    "grunt-webpack": "*"
   }
 }

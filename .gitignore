@@ -1,5 +1,6 @@
 .DS_Store
 *.swp
 *.swo
+*.js.map
 node_modules
 bundle.js
