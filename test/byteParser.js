@@ -1,6 +1,6 @@
 /* jshint expr: true */
 var chai = require('chai'),
-	ByteParser = require('../public/js/byteParser.js');
+	ByteParser = require('../lib/byteParser.js');
 
 describe('byteParser', function() {
 	var asciiTestString, byteParser;
