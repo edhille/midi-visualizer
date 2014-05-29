@@ -1,18 +1,22 @@
 /* jshint expr: true, es5: true */
 var fs = require('fs');
 var chai = require('../public/js/chai.js');
-var Midi = require('../lib/midi-parser.js');
+var MidiParser = require('../lib/midi-parser.js');
 
-describe('Midi', function() {
+describe('MidiParser', function() {
    var expect = chai.expect;
 	var midiData;
 
 	chai.should();
 
 	before(function(done) {
-      fs.readFile('../public/test.mid', function (err, data) {
-          midiData = new Uint8Array(data);
-          done();
+      fs.readFile(__dirname + '/../public/test.mid', function (err, data) {
+         if (err) {
+            throw new Error(err);
+         }
+
+         midiData = new Uint8Array(data);
+         done();
       });
 	});
 
@@ -20,7 +24,7 @@ describe('Midi', function() {
 
       it('should not throw an error starting with a valid Midi file', function () {
          expect(function () {
-            new Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
+            new MidiParser({ midiByteArray: midiData.subarray(0, midiData.length) });
          }).not.throw(Error);
       });
 
@@ -29,7 +33,7 @@ describe('Midi', function() {
 			var midi;
 
 			beforeEach(function () {
-            midi = new Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
+            midi = new MidiParser({ midiByteArray: midiData.subarray(0, midiData.length) });
 			});
 
 			afterEach(function () {
@@ -142,7 +146,7 @@ describe('Midi', function() {
 		var midi;
 
       beforeEach(function() {
-         midi = new Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
+         midi = new MidiParser({ midiByteArray: midiData.subarray(0, midiData.length) });
       });
 
       afterEach(function() {
