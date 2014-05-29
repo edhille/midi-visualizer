@@ -1,6 +1,11 @@
 /* jshint expr: true, es5: true */
+var midiPipelineRenderer = require('../lib/midi-visualizer-pipeline.js');
+var chai = require('../public/js/chai.js');
+var utils = require('../lib/utils.js');
+var sinon = require('sinon');
+
 describe('MidiRenderPipeline', function () {
-   'use strict';
+   var expect = chai.expect;
 
 	chai.should();
 
@@ -28,6 +33,11 @@ describe('MidiRenderPipeline', function () {
       trackIndex: 1
    };
 
+   // TODO: is this the way to mock document?
+   global.document = {
+      getElementById: function(){}
+   };
+
    describe('default render', function () {
       var events, pipeline, mockDocument, mockElements;
 
@@ -49,7 +59,7 @@ describe('MidiRenderPipeline', function () {
             return mockElements[mockElements.length - 1];
          });
 
-         pipeline = Heuristocratic.midiRenderPipeline();
+         pipeline = midiPipelineRenderer();
 
          pipeline.render(events);
       });

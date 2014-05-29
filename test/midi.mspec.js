@@ -1,33 +1,26 @@
 /* jshint expr: true, es5: true */
+var fs = require('fs');
+var chai = require('../public/js/chai.js');
+var Midi = require('../lib/midi-parser.js');
+
 describe('Midi', function() {
+   var expect = chai.expect;
 	var midiData;
 
 	chai.should();
 
 	before(function(done) {
-      var oReq = new XMLHttpRequest();
-
-      oReq.open('GET', '/test.mid', true);
-      oReq.responseType = 'arraybuffer';
-
-      oReq.onload = function (oEvent) {
-        var arrayBuffer = oReq.response; // Note: not oReq.responseText
-
-        if (arrayBuffer) {
-          midiData = new Uint8Array(arrayBuffer);
-
+      fs.readFile('../public/test.mid', function (err, data) {
+          midiData = new Uint8Array(data);
           done();
-        }
-      };
-
-      oReq.send(null);
+      });
 	});
 
 	describe('construction', function () {
 
       it('should not throw an error starting with a valid Midi file', function () {
          expect(function () {
-            new Heuristocratic.Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
+            new Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
          }).not.throw(Error);
       });
 
@@ -36,7 +29,7 @@ describe('Midi', function() {
 			var midi;
 
 			beforeEach(function () {
-            midi = new Heuristocratic.Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
+            midi = new Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
 			});
 
 			afterEach(function () {
@@ -149,7 +142,7 @@ describe('Midi', function() {
 		var midi;
 
       beforeEach(function() {
-         midi = new Heuristocratic.Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
+         midi = new Midi({ midiByteArray: midiData.subarray(0, midiData.length) });
       });
 
       afterEach(function() {
