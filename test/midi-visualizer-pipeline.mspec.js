@@ -1,4 +1,7 @@
-/* jshint expr: true, es5: true */
+/* jshint expr: true */
+/* globals describe: true, beforeEach: true, afterEach: true, it: true, document: true */
+'use strict';
+
 var midiPipelineRenderer = require('../lib/midi-visualizer/render-pipeline.js');
 var chai = require('../public/js/chai.js');
 var utils = require('../lib/utils.js');

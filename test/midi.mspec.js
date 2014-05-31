@@ -1,11 +1,12 @@
 /* jshint expr: true, es5: true */
+/* globals describe: true, before: true, beforeEach: true, afterEach: true, it: true, Uint8Array: true */
+'use strict';
 
 var fs = require('fs'),
     chai = require('../public/js/chai.js'),
     MidiParser = require('../lib/midi-parser.js');
 
 describe('MidiParser', function() {
-   'use strict';
 
    var expect = chai.expect;
 	var midiData;
