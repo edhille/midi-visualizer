@@ -3,4 +3,5 @@
 *.swo
 *.js.map
 node_modules
+build
 bundle.js
