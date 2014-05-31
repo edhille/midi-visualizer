@@ -1,5 +1,5 @@
 /* jshint expr: true, es5: true */
-var midiPipelineRenderer = require('../lib/midi-visualizer-pipeline.js');
+var midiPipelineRenderer = require('../lib/midi-visualizer/render-pipeline.js');
 var chai = require('../public/js/chai.js');
 var utils = require('../lib/utils.js');
 var sinon = require('sinon');
