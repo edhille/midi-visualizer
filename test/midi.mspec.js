@@ -1,5 +1,5 @@
 /* jshint expr: true, es5: true */
-/* globals describe: true, before: true, beforeEach: true, afterEach: true, it: true, Uint8Array: true */
+/* globals describe: true, before: true, beforeEach: true, afterEach: true, it: true, Uint8Array: true, xit: true */
 'use strict';
 
 var fs = require('fs'),
@@ -28,7 +28,7 @@ describe('MidiParser', function() {
 
       it('should not throw an error starting with a valid Midi file', function () {
          expect(function () {
-            new MidiParser({ midiByteArray: midiData.subarray(0, midiData.length) });
+            new MidiParser(midiData.subarray(0, midiData.length));
          }).not.throw(Error);
       });
 
@@ -37,7 +37,7 @@ describe('MidiParser', function() {
 			var midi;
 
 			beforeEach(function () {
-            midi = new MidiParser({ midiByteArray: midiData.subarray(0, midiData.length) });
+            midi = new MidiParser(midiData.subarray(0, midiData.length));
 			});
 
 			afterEach(function () {
@@ -45,8 +45,8 @@ describe('MidiParser', function() {
 			});
 
 			it('should have a valid number of tracks', function () {
-				midi.tracks.length.should.equal(midi.header.numberOfTracks);
-            midi.header.numberOfTracks.should.equal(3);
+            midi.header.trackCount.should.equal(3);
+				midi.tracks.length.should.equal(midi.header.trackCount);
 			});
 
 			it('should have a valid time division', function () {
@@ -54,7 +54,7 @@ describe('MidiParser', function() {
 			});
 
 			it('should have a valid number of frames per second', function () {
-				midi.header.framesPerSecond.should.be.true;
+				midi.header.isFramesPerSecond.should.be.true;
 			});
 
          describe('MidiTrack', function () {
@@ -67,14 +67,6 @@ describe('MidiParser', function() {
 
                afterEach(function () {
                   midiTrack = null;
-               });
-
-               it('should have a valid chunkId', function () {
-                  midiTrack.chunkId.should.equal('MTrk');
-               });
-
-               it('should have a size', function() {
-                  midiTrack.size.should.equal(19);
                });
 
                it('should have 3 events', function () {
@@ -108,14 +100,6 @@ describe('MidiParser', function() {
                   midiTrack = null;
                });
 
-               it('should have a valid chunkId', function () {
-                  midiTrack.chunkId.should.equal('MTrk');
-               });
-
-               it('should have a size', function() {
-                  midiTrack.size.should.equal(153);
-               });
-
                it('should have an instrument name', function () {
                   midiTrack.instrumentName.should.equal('01');
                });
@@ -131,8 +115,11 @@ describe('MidiParser', function() {
                      events = null;
                   });
 
-                  it('should have thiry-four events', function() {
+                  it('should have thirty-four events', function() {
                      // instrument name + 16 "on" + 16 "off" + end
+                     // var counts = {on: 0, off: 0};
+                     // console.log(events.map(function (e) { ++counts[e.subtype]; return e.type + ' ' + e.subtype; }));
+                     // console.log(counts);
                      events.length.should.equal(34);
                   });
 
@@ -150,7 +137,7 @@ describe('MidiParser', function() {
 		var midi;
 
       beforeEach(function() {
-         midi = new MidiParser({ midiByteArray: midiData.subarray(0, midiData.length) });
+         midi = new MidiParser(midiData.subarray(0, midiData.length));
       });
 
       afterEach(function() {
