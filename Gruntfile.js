@@ -13,6 +13,16 @@ module.exports = function(grunt) {
 
 	grunt.initConfig({
       pkg: grunt.file.readJSON('package.json'),
+      express: {
+         options: {
+            script: 'app.js'
+         },
+         prod: {
+            options: {
+               node_env: 'production'
+            }
+         }
+      },
       mochaTest: {
          test: {
             options: {
@@ -80,4 +90,7 @@ module.exports = function(grunt) {
 
    // run tests by default
    grunt.registerTask('default', ['mochaTest']);
+
+   // Heroku deploy
+   grunt.registerTask('heroku', ['webpack:build', 'express:prod']);
 };

@@ -6,9 +6,10 @@
     "start": "node app"
   },
   "dependencies": {
+    "d3": "~3.3.4",
     "express": "~3.3.4",
-    "jade": "~0.34.0",
-    "d3": "~3.3.4"
+    "grunt-express-server": "^0.4.17",
+    "jade": "~0.34.0"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -46,6 +47,6 @@
   },
   "homepage": "https://github.com/edhille/midi-visualizer",
   "engines": {
-      "node": "0.10.x"
+    "node": "0.10.x"
   }
 }
