@@ -9,12 +9,13 @@
   "dependencies": {
     "d3": "~3.3.4",
     "express": "~3.3.4",
-    "grunt-express-server": "^0.4.17",
-    "jade": "~0.34.0",
-    "underscore": "^1.6.0",
     "grunt": "~0.4.1",
+    "grunt-cli": "^0.1.13",
+    "grunt-express-server": "^0.4.17",
+    "grunt-webpack": "*",
+    "jade": "~0.34.0",
     "load-grunt-tasks": "~0.2.0",
-    "grunt-webpack": "*"
+    "underscore": "^1.6.0"
   },
   "devDependencies": {
     "grunt-develop": "~0.2.2",
