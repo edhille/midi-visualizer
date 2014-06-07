@@ -6,6 +6,7 @@ var midiPipelineRenderer = require('../lib/midi-visualizer/render-pipeline.js');
 var chai = require('../public/js/chai.js');
 var utils = require('../lib/utils.js');
 var sinon = require('sinon');
+var _ = require('underscore');
 
 describe('MidiRenderPipeline', function () {
    var expect = chai.expect;
@@ -19,21 +20,23 @@ describe('MidiRenderPipeline', function () {
    // test data
 
    var NOTE_ON_EVENT = {
-      type: 'note_on',
+      type: 'note',
+      subtype: 'on',
       code: 0x90,
       delta: 0,
       data: { velocity: 100 },
       tempo: null,
-      trackIndex: 1
+      track: 1
    };
 
    var NOTE_OFF_EVENT = {
-      type: 'note_off',
+      type: 'note',
+      subtype: 'off',
       code: 0x80,
       delta: 1,
       data: {},
       tempo: null,
-      trackIndex: 1
+      track: 1
    };
 
    // TODO: is this the way to mock document?
@@ -45,21 +48,29 @@ describe('MidiRenderPipeline', function () {
       var events, pipeline, mockDocument, mockElements;
 
       beforeEach(function () {
+         var i = 0;
+
          events = [];
          events.push(clone(NOTE_ON_EVENT));
          events.push(clone(NOTE_OFF_EVENT));
 
          mockElements = [];
          mockDocument = sinon.stub(document, 'getElementById', function (id) {
-            mockElements.push(sinon.stub({
-               removeAttribute: function(){},
-               getAttribute: function(){},
-               setAttribute: function(){},
-               className: 'off',
-               id: id
-            }));
+            var element = _.findWhere(mockElements, { id: id });
 
-            return mockElements[mockElements.length - 1];
+            if (!element) {
+               element = sinon.stub({
+                  removeAttribute: function(){},
+                  getAttribute: function(){},
+                  setAttribute: function(){},
+                  className: '',
+                  id: id
+               });
+
+               mockElements.push(element);
+            }
+
+            return element;
          });
 
          pipeline = midiPipelineRenderer();
@@ -77,6 +88,7 @@ describe('MidiRenderPipeline', function () {
 
       it('should leave the classname of the DOM node to "off"', function () {
          mockElements.forEach(function (element) {
+            console.log('======> ' + element.className);
             element.className.should.match(/off/);
          });
       });

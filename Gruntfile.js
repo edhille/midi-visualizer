@@ -15,12 +15,17 @@ module.exports = function(grunt) {
       pkg: grunt.file.readJSON('package.json'),
       express: {
          options: {
-            script: 'app.js'
+            script: 'app.js',
+            port: 5000
          },
          prod: {
             options: {
+               background: true,
                node_env: 'production'
             }
+         },
+         dev: {
+            options: {}
          }
       },
       mochaTest: {
@@ -39,9 +44,9 @@ module.exports = function(grunt) {
 						'process.env': {
 							'NODE_ENV': JSON.stringify('production')
 						}
-					}),
-					new webpack.optimize.DedupePlugin(),
-					new webpack.optimize.UglifyJsPlugin()
+					})//,
+					// new webpack.optimize.DedupePlugin(),
+					// new webpack.optimize.UglifyJsPlugin()
 				)
 			},
 			'build-dev': {
@@ -89,7 +94,7 @@ module.exports = function(grunt) {
 	grunt.registerTask('build', ['webpack:build']);
 
    // run tests by default
-   grunt.registerTask('default', ['mochaTest']);
+   grunt.registerTask('default', ['build', 'mochaTest']);
 
    // Heroku deploy
    grunt.registerTask('heroku', ['webpack:build', 'express:prod']);
