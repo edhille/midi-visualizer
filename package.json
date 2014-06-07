@@ -10,21 +10,21 @@
     "express": "~3.3.4",
     "grunt-express-server": "^0.4.17",
     "jade": "~0.34.0",
-    "underscore": "^1.6.0"
+    "underscore": "^1.6.0",
+    "grunt": "~0.4.1",
+    "load-grunt-tasks": "~0.2.0",
+    "grunt-webpack": "*"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
     "grunt-develop": "~0.2.2",
     "grunt-contrib-watch": "~0.5.3",
     "request": "~2.27.0",
     "time-grunt": "~0.1.1",
-    "load-grunt-tasks": "~0.2.0",
     "matchdep": "*",
     "mocha": "~1.13.0",
     "chai": "~1.8.1",
     "sinon": "*",
-    "grunt-mocha-test": "~0.9.0",
-    "grunt-webpack": "*"
+    "grunt-mocha-test": "~0.9.0"
   },
   "description": "Midi Visualizer (not at all ready for anything)",
   "main": "app.js",
