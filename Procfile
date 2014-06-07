@@ -1,1 +1,1 @@
-worker: grunt heroku
+web: npm start
