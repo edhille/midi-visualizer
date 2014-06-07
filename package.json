@@ -23,5 +23,29 @@
     "sinon": "*",
     "grunt-mocha-test": "~0.9.0",
     "grunt-webpack": "*"
+  },
+  "description": "Midi Visualizer (not at all ready for anything)",
+  "main": "app.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edhille/midi-visualizer.git"
+  },
+  "keywords": [
+    "Midi",
+    "Audio",
+    "Visualization"
+  ],
+  "author": "tedhille@gmail.com",
+  "license": "GPL",
+  "bugs": {
+    "url": "https://github.com/edhille/midi-visualizer/issues"
+  },
+  "homepage": "https://github.com/edhille/midi-visualizer",
+  "engines": {
+      "node": "0.10.x"
   }
 }
