@@ -3,5 +3,6 @@
 *.swo
 *.js.map
 node_modules
+npm-debug.log
 build
 bundle.js
