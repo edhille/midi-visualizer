@@ -88,7 +88,6 @@ describe('MidiRenderPipeline', function () {
 
       it('should leave the classname of the DOM node to "off"', function () {
          mockElements.forEach(function (element) {
-            console.log('======> ' + element.className);
             element.className.should.match(/off/);
          });
       });

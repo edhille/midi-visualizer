@@ -133,6 +133,8 @@ describe('MidiParser', function() {
 
 							events.filter(noteOnFilter).length.should.equal(events.filter(noteOffFilter).length);
 						});
+
+						it('TODO: more events....');
 					});
 				});
 			});
