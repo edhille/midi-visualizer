@@ -1,6 +1,6 @@
 midi-parser
 
-- tests...
+- tests...(there are not tests for a lot of midi events...)
 - calculate note length and add to note-on events
 - denote tracks with no note events
 

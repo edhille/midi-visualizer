@@ -1,4 +1,4 @@
-/* jshint globalstrict: true, node: true */
+// /* jshint globalstrict: true, node: true */
 
 module.exports = function(grunt) {
    'use strict';
@@ -72,7 +72,7 @@ module.exports = function(grunt) {
 		},
 		watch: {
 			app: {
-				files: ['app/**/*', 'web_modules/**/*'],
+				files: ['lib/**/*'],
 				tasks: ['webpack:build-dev'],
 				options: {
 					spawn: false
@@ -81,14 +81,9 @@ module.exports = function(grunt) {
 		}
 	});
 
-	// The development server (the recommended option for development)
-   // grunt.registerTask("default", ["webpack-dev-server:start"]);
-
-	// Build and watch cycle (another option for development)
-	// Advantage: No server required, can run app from filesystem
-	// Disadvantage: Requests are not blocked until bundle is available,
-	//               can serve an old app on too fast refresh
-	grunt.registerTask('dev', ['webpack:build-dev', 'watch:app', 'webpack-dev-server:start']);
+	// TODO: see if it's even worth it to set up a webpack-dev-server...
+	// grunt.registerTask('dev', ['webpack:build-dev', 'watch:app', 'webpack-dev-server:start']);
+	grunt.registerTask('dev', ['webpack:build-dev', 'express:dev', 'watch:app']);
 
 	// Production build
 	grunt.registerTask('build', ['webpack:build']);
