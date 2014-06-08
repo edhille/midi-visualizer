@@ -15,7 +15,3 @@ midi-visualizer/render-pipeline
 
 - subdivide a polyphonic track into notes
 - tests...
-
-utils
-
-- tests...
