@@ -1,3 +1,4 @@
+/* vim: set expandtab ts=3 sw=3: */
 /* jshint expr: true */
 /* globals describe: true, beforeEach: true, afterEach: true, it: true, document: true */
 'use strict';

@@ -1,4 +1,4 @@
-/* vim: set expandtab ts=3 sw=3 */
+/* vim: set expandtab ts=3 sw=3: */
 /* jshint expr: true, es5: true */
 /* globals describe: true, before: true, beforeEach: true, afterEach: true, it: true, Uint8Array: true, xit: true */
 'use strict';

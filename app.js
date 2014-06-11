@@ -1,3 +1,4 @@
+/* vim: set expandtab ts=3 sw=3: */
 /* jshint laxcomma: true */
 /**
  * Module dependencies.
