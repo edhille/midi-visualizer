@@ -25,7 +25,7 @@ describe('MidiRenderPipeline', function () {
       subtype: 'on',
       code: 0x90,
       delta: 0,
-      data: { velocity: 100 },
+      data: { note: 100, velocity: 100 },
       tempo: null,
       track: 1
    };
@@ -35,7 +35,7 @@ describe('MidiRenderPipeline', function () {
       subtype: 'off',
       code: 0x80,
       delta: 1,
-      data: {},
+      data: { note: 100 },
       tempo: null,
       track: 1
    };
@@ -64,7 +64,7 @@ describe('MidiRenderPipeline', function () {
                   removeAttribute: function(){},
                   getAttribute: function(){},
                   setAttribute: function(){},
-                  className: '',
+                  className: 'off',
                   id: id
                });
 
@@ -76,19 +76,23 @@ describe('MidiRenderPipeline', function () {
 
          pipeline = midiPipelineRenderer();
 
-         pipeline.render(events);
+         events.map(function (event) {
+            pipeline.render(pipeline.transformMidiData([event]));
+         });
+         
       });
 
       afterEach(function () {
          mockDocument.restore();
       });
 
-      it('should look for two DOM nodes', function () {
+      it('should look for DOM node twice (once for each event)', function () {
          mockDocument.callCount.should.equal(2);
       });
 
       it('should leave the classname of the DOM node to "off"', function () {
          mockElements.forEach(function (element) {
+            console.log('CLASSNAME: ' + element.className);
             element.className.should.match(/off/);
          });
       });
