@@ -4,9 +4,9 @@
 'use strict';
 
 var fs = require('fs'),
-	chai = require('chai'),
-	utils = require('../lib/utils.js'),
-	MidiParser = require('../lib/midi-parser.js');
+    chai = require('chai'),
+    utils = require('../lib/utils.js'),
+    MidiParser = require('../lib/midi-parser.js');
 
 describe('MidiParser', function() {
 
@@ -17,9 +17,7 @@ describe('MidiParser', function() {
 
 	before(function(done) {
 		fs.readFile(__dirname + '/../public/test.mid', function (err, data) {
-			if (err) {
-				throw new Error(err);
-			}
+			if (err) throw new Error(err);
 
 			midiData = new Uint8Array(data);
 			done();
@@ -133,6 +131,14 @@ describe('MidiParser', function() {
 
 							events.filter(noteOnFilter).length.should.equal(events.filter(noteOffFilter).length);
 						});
+
+                  it('should track the length of a note', function () {
+                     var onNotes = events.filter(function (event) { return event.type === 'note' && event.subtype === 'on'; });
+
+                     onNotes.forEach(function (event) {
+                        event.length.should.equal(250000);
+                     });
+                  });
 
 						it('TODO: more events....');
 					});
