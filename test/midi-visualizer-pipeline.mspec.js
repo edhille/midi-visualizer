@@ -3,11 +3,11 @@
 /* globals describe: true, beforeEach: true, afterEach: true, it: true, document: true */
 'use strict';
 
-var midiPipelineRenderer = require('../lib/midi-visualizer/render-pipeline.js');
-var chai = require('../public/js/chai.js');
-var utils = require('../lib/utils.js');
-var sinon = require('sinon');
-var _ = require('underscore');
+var _ = require('underscore'),
+    chai = require('chai'),
+    sinon = require('sinon'),
+    midiPipelineRenderer = require('../lib/midi-visualizer/render-pipeline.js'),
+    utils = require('../lib/utils.js');
 
 describe('MidiRenderPipeline', function () {
    var expect = chai.expect;

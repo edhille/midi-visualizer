@@ -4,7 +4,7 @@
 'use strict';
 
 var fs = require('fs'),
-	chai = require('../public/js/chai.js'),
+	chai = require('chai'),
 	utils = require('../lib/utils.js'),
 	MidiParser = require('../lib/midi-parser.js');
 

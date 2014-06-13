@@ -3,9 +3,9 @@
 /* globals describe: true, before: true, beforeEach: true, afterEach: true, it: true, Uint8Array: true, xit: true */
 'use strict';
 
-var chai = require('../public/js/chai.js'),
-	expect = chai.expect,
-	midiPipelineRenderFactory = require('../lib/midi-visualizer/renderers.js');
+var chai = require('chai'),
+    expect = chai.expect,
+    midiPipelineRenderFactory = require('../lib/midi-visualizer/renderers.js');
 
 describe('midi-visualizer pipeline-renderer factory', function () {
 

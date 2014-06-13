@@ -3,7 +3,7 @@
 /* globals describe: true, before: true, beforeEach: true, afterEach: true, it: true, expect: true */
 'use strict';
 
-var chai = require('../public/js/chai.js'),
+var chai = require('chai'),
     sinon = require('sinon'),
     utils = require('../lib/utils.js');
 
