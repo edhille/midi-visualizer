@@ -11,7 +11,8 @@ var _ = require('underscore'),
     utils = require('../lib/utils.js');
 
 describe('MidiRenderPipeline', function () {
-   var expect = chai.expect;
+   var expect = chai.expect,
+      MockRenderer;
 
 	chai.should();
 
@@ -41,8 +42,15 @@ describe('MidiRenderPipeline', function () {
       track: 1
    };
 
+   beforeEach(function () {
+      MockRenderer = function MockRenderer() {};
+      MockRenderer.prototype = Object.create(AbstractRenderer.prototype);
+      MockRenderer.prototype.render = sinon.spy();
+      MockRenderer.prototype.filters = { testFilter: sinon.stub() };
+   });
+
    describe('transform/render pipeline', function () {
-      var events, pipeline, spyFilter, MockRenderer;
+      var events, pipeline, spyFilter;
 
       beforeEach(function () {
          var i = 0, filterCallCount = 0;
@@ -51,10 +59,6 @@ describe('MidiRenderPipeline', function () {
          events.push(clone(NOTE_ON_EVENT));
          events.push(clone(NOTE_OFF_EVENT));
 
-         MockRenderer = function MockRenderer() {};
-         MockRenderer.prototype = Object.create(AbstractRenderer.prototype);
-         MockRenderer.prototype.render = sinon.spy();
-         MockRenderer.prototype.filters = { testFilter: sinon.stub() };
          MockRenderer.prototype.filters.testFilter.onCall(0).returns({ callCount: ++filterCallCount });
          MockRenderer.prototype.filters.testFilter.onCall(1).returns({ callCount: ++filterCallCount });
 
@@ -82,8 +86,28 @@ describe('MidiRenderPipeline', function () {
 
    describe('error conditions', function () {
 
-      describe('when no renderer provided', function () {
-         expect(midiPipelineRenderer()).to.throw(Error);
+      it('should throw Error when no config provided', function () {
+         expect(function () {
+            midiPipelineRenderer();
+         }).to.throw(Error);
+      });
+
+      it('should throw Error when no renderer or filters provided', function () {
+         expect(function () {
+            midiPipelineRenderer({});
+         }).to.throw(/renderer/);
+      });
+
+      it('should throw Error when no filters provided', function () {
+         expect(function () {
+            midiPipelineRenderer({ renderer: MockRenderer });
+         }).to.throw(/filters/);
+      });
+
+      it('should throw Error when renderer is not instance of MidiVisualizer.Renderer.Abstract', function () {
+         expect(function () {
+            midiPipelineRenderer({ renderer: function(){} });
+         }).to.throw(/instance/);
       });
    });
 });
