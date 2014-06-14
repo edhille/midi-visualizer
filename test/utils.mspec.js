@@ -142,4 +142,40 @@ describe('utils', function() {
          lastMatchDispatchees[1].called.should.be.true;
       });
    });
+
+   describe('#hideProperty', function () {
+      var TestConstructor, testObj;
+
+      beforeEach(function () {
+         TestConstructor = function(visible, hidden) {
+            this.visible = visible;
+            this.hidden = hidden;
+         };
+
+         testObj = new TestConstructor('SHOULD BE VISIBLE', 'SHOULD BE HIDDEN');
+
+         utils.hideProperty(testObj, 'hidden');
+
+      });
+
+      it('should see "visible" property', function () {
+         var i, visibleSeen = false;
+
+         for (i in testObj) {
+            if (i === 'visible') visibleSeen = true;
+         }
+
+         visibleSeen.should.be.true;
+      });
+
+      it('should not see "hidden" property', function () {
+         var i, hiddenSeen = false;
+
+         for (i in testObj) {
+            if (i === 'hidden') hiddenSeen = true;
+         }
+
+         hiddenSeen.should.be.false;
+      });
+   });
 });

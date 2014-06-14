@@ -6,6 +6,7 @@
 var _ = require('underscore'),
     chai = require('chai'),
     sinon = require('sinon'),
+    AbstractRenderer = require('../lib/midi-visualizer/renderer/abstract.js'),
     midiPipelineRenderer = require('../lib/midi-visualizer/render-pipeline.js'),
     utils = require('../lib/utils.js');
 
@@ -45,36 +46,28 @@ describe('MidiRenderPipeline', function () {
       getElementById: function(){}
    };
 
-   describe('default render', function () {
-      var events, pipeline, mockDocument, mockElements;
+   describe('transform/render pipeline', function () {
+      var events, pipeline, spyFilter, MockRenderer;
 
       beforeEach(function () {
-         var i = 0;
+         var i = 0, filterCallCount = 0;
 
          events = [];
          events.push(clone(NOTE_ON_EVENT));
          events.push(clone(NOTE_OFF_EVENT));
 
-         mockElements = [];
-         mockDocument = sinon.stub(document, 'getElementById', function (id) {
-            var element = _.findWhere(mockElements, { id: id });
+         MockRenderer = function MockRenderer() {};
+         MockRenderer.prototype = Object.create(AbstractRenderer.prototype);
+         MockRenderer.prototype.render = sinon.spy();
+         MockRenderer.prototype.filters = { testFilter: sinon.stub() };
+         MockRenderer.prototype.filters.testFilter.onCall(0).returns({ callCount: ++filterCallCount });
+         MockRenderer.prototype.filters.testFilter.onCall(1).returns({ callCount: ++filterCallCount });
 
-            if (!element) {
-               element = sinon.stub({
-                  removeAttribute: function(){},
-                  getAttribute: function(){},
-                  setAttribute: function(){},
-                  className: 'off',
-                  id: id
-               });
-
-               mockElements.push(element);
-            }
-
-            return element;
+         spyFilter = sinon.spy();
+         pipeline = midiPipelineRenderer({
+            renderer: MockRenderer,
+            filters: ['testFilter']
          });
-
-         pipeline = midiPipelineRenderer();
 
          events.map(function (event) {
             pipeline.render(pipeline.transformMidiData([event]));
@@ -82,24 +75,13 @@ describe('MidiRenderPipeline', function () {
          
       });
 
-      afterEach(function () {
-         mockDocument.restore();
+      it('should call the configured filter', function () {
+         MockRenderer.prototype.filters.testFilter.calledWith([events[0]], {}, function(){}); 
+         MockRenderer.prototype.filters.testFilter.calledWith([events[1]], {}, function(){});
       });
 
-      it('should look for DOM node twice (once for each event)', function () {
-         mockDocument.callCount.should.equal(2);
-      });
-
-      it('should leave the classname of the DOM node to "off"', function () {
-         mockElements.forEach(function (element) {
-            element.className.should.match(/off/);
-         });
-      });
-
-      it('should have an appropriately formed id for each element', function () {
-         mockElements.forEach(function (element) {
-            element.id.should.match(/track-\d/);
-         });
+      it('should call render', function () {
+         MockRenderer.prototype.render.calledWith({ callCount: 2 }); 
       });
    });
 
