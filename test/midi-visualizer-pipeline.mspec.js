@@ -85,7 +85,7 @@ describe('MidiRenderPipeline', function () {
    });
 
    describe('error conditions', function () {
-
+      /* jshint -W024:true */
       it('should throw Error when no config provided', function () {
          expect(function () {
             midiPipelineRenderer();
@@ -109,5 +109,6 @@ describe('MidiRenderPipeline', function () {
             midiPipelineRenderer({ renderer: function(){} });
          }).to.throw(/instance/);
       });
+      /* jshint -W024:false */
    });
 });

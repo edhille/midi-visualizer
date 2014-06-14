@@ -25,7 +25,7 @@ describe('midi-visualizer', function () {
    });
 
 	describe('error conditions', function () {
-
+      /* jshint -W024:true */
 		it('should throw error when no params', function () {
 			expect(function () {
 				new MidiVisualizer();
@@ -37,6 +37,7 @@ describe('midi-visualizer', function () {
 				new MidiVisualizer({});
 			}).to.throw(/config/);
 		});
+      /* jshint -W024:false */
 	});
 
 	describe('default construction', function () {
