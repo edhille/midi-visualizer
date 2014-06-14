@@ -41,11 +41,6 @@ describe('MidiRenderPipeline', function () {
       track: 1
    };
 
-   // TODO: is this the way to mock document?
-   global.document = {
-      getElementById: function(){}
-   };
-
    describe('transform/render pipeline', function () {
       var events, pipeline, spyFilter, MockRenderer;
 
@@ -85,8 +80,10 @@ describe('MidiRenderPipeline', function () {
       });
    });
 
-   describe('custom render', function () {
-      
-      it('should be tested...');
+   describe('error conditions', function () {
+
+      describe('when no renderer provided', function () {
+         expect(midiPipelineRenderer()).to.throw(Error);
+      });
    });
 });
