@@ -98,12 +98,6 @@ describe('MidiRenderPipeline', function () {
          }).to.throw(/renderer/);
       });
 
-      it('should throw Error when no filters provided', function () {
-         expect(function () {
-            midiPipelineRenderer({ renderer: MockRenderer });
-         }).to.throw(/filters/);
-      });
-
       it('should throw Error when renderer is not instance of MidiVisualizer.Renderer.Abstract', function () {
          expect(function () {
             midiPipelineRenderer({ renderer: function(){} });
