@@ -4,8 +4,9 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-circle {
-   xfill: red;
+svg: {
+   width: 100%;
+   height: 100%;
 }
 
 .track {
