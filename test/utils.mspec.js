@@ -178,4 +178,29 @@ describe('utils', function() {
          hiddenSeen.should.be.false;
       });
    });
+
+   describe('#memoize', function () {
+      it('should be able to wrap a function that does calculation and only do calculation once', function () {
+         var stub = sinon.stub(),
+            memoizedFn = utils.memoize(stub);
+
+         stub.onCall(0).returns('a');
+         stub.onCall(1).returns('b');
+
+         memoizedFn();
+         memoizedFn();
+
+         stub.callCount.should.equal(1);
+      });
+
+      it('should call wrapped function only once, even if called function does not return a value', function () {
+         var spy = sinon.spy(),
+            memoizedFn = utils.memoize(spy);
+
+         memoizedFn();
+         memoizedFn();
+
+         spy.callCount.should.equal(1);
+      });
+   });
 });
