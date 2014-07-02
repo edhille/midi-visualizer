@@ -6,7 +6,6 @@ midi-visualizer
 
 - tests...
 - implement configurable filters (by track)
-- implement pause/resume
 - subdivide drums in meaningful way
 
 midi-visualizer/render-pipeline
