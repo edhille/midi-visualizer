@@ -129,6 +129,21 @@ describe('audio-player', function () {
                   it('should not report elapsed time, but only play time', function () {
                      audioPlayer.getPlayheadTime().should.equal(15000);
                   });
+
+                  describe('after second pause', function () {
+                     
+                     beforeEach(function () {
+                        mockAudioContext.createBufferSource.onCall(2).returns(mockAudioSource);
+                        audioPlayer.pause();
+                        mockAudioContext.currentTime = 30; // 30s of time elapsed
+                        audioPlayer.play();
+                        mockAudioContext.currentTime = 35; // add 5s more playback
+                     });
+
+                     it('should not report elapsed time, but only play time', function () {
+                        audioPlayer.getPlayheadTime().should.equal(20000);
+                     });
+                  });
                });
             });
          });
