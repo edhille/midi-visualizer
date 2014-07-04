@@ -10,10 +10,9 @@ var chai = require('chai'),
     AbstractRenderer = require('../lib/midi-visualizer/renderer/abstract.js'),
     MidiVisualizer = require('../lib/midi-visualizer.js');
 
-describe('midi-visualizer', function () {
+describe('MidiVisualizer', function () {
    var expect = chai.expect,
       MockRenderer;
-
 
 	chai.should();
 
@@ -37,7 +36,6 @@ describe('midi-visualizer', function () {
 				new MidiVisualizer({});
 			}).to.throw(/config/);
 		});
-      /* jshint -W024:false */
 	});
 
 	describe('default construction', function () {

@@ -7,7 +7,7 @@ var AudioPlayer = require('../lib/audio-player.js'),
     chai = require('chai'),
     sinon = require('sinon');
 
-describe('audio-player', function () {
+describe('AudioPlayer', function () {
    var MockContextClass, mockAudioContext, audioPlayer;
 
 	chai.should();
