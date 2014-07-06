@@ -8,6 +8,10 @@ var fs = require('fs'),
     utils = require('../lib/utils.js'),
     MidiParser = require('../lib/midi-parser.js');
 
+function cloneArray(array) {
+   return array.subarray(0, array.length);
+}
+
 describe('MidiParser', function() {
 
 	var expect = chai.expect,
@@ -16,7 +20,7 @@ describe('MidiParser', function() {
 	chai.should();
 
 	before(function(done) {
-		fs.readFile(__dirname + '/../public/test.mid', function (err, data) {
+		fs.readFile(__dirname + '/minimal-valid-midi.mid', function (err, data) {
 			if (err) throw new Error(err);
 
 			midiData = new Uint8Array(data);
@@ -28,7 +32,7 @@ describe('MidiParser', function() {
 
 		it('should not throw an error starting with a valid Midi file', function () {
 			expect(function () {
-				new MidiParser(midiData.subarray(0, midiData.length));
+				new MidiParser(cloneArray(midiData));
 			}).not.throw(Error);
 		});
 
@@ -37,7 +41,7 @@ describe('MidiParser', function() {
 			var midi;
 
 			beforeEach(function () {
-				midi = new MidiParser(midiData.subarray(0, midiData.length));
+				midi = new MidiParser(cloneArray(midiData));
 			});
 
 			afterEach(function () {
@@ -118,10 +122,6 @@ describe('MidiParser', function() {
 						});
 
 						it('should have thirty-four events', function() {
-							// instrument name + 16 "on" + 16 "off" + end
-							// var counts = {on: 0, off: 0};
-							// console.log(events.map(function (e) { ++counts[e.subtype]; return e.type + ' ' + e.subtype; }));
-							// console.log(counts);
 							events.length.should.equal(34);
 						});
 
@@ -151,7 +151,7 @@ describe('MidiParser', function() {
 		var midi;
 
 		beforeEach(function() {
-			midi = new MidiParser(midiData.subarray(0, midiData.length));
+			midi = new MidiParser(cloneArray(midiData));
 		});
 
 		afterEach(function() {
