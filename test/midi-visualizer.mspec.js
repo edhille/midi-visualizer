@@ -5,14 +5,14 @@
 'use strict';
 
 var chai = require('chai'),
+    expect = chai.expect,
     sinon = require('sinon'),
     utils = require('../lib/utils.js'),
     AbstractRenderer = require('../lib/midi-visualizer/renderer/abstract.js'),
     MidiVisualizer = require('../lib/midi-visualizer.js');
 
 describe('MidiVisualizer', function () {
-   var expect = chai.expect,
-      MockRenderer;
+   var MockRenderer;
 
 	chai.should();
 

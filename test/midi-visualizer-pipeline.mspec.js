@@ -5,14 +5,14 @@
 
 var _ = require('underscore'),
     chai = require('chai'),
+    expect = chai.expect,
     sinon = require('sinon'),
     AbstractRenderer = require('../lib/midi-visualizer/renderer/abstract.js'),
     midiPipelineRenderer = require('../lib/midi-visualizer/render-pipeline.js'),
     utils = require('../lib/utils.js');
 
 describe('MidiRenderPipeline', function () {
-   var expect = chai.expect,
-      MockRenderer;
+   var MockRenderer;
 
 	chai.should();
 
