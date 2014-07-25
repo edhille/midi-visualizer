@@ -6,7 +6,7 @@ module.exports = function(grunt) {
    // show elapsed time at the end
    require('time-grunt')(grunt);
 
-   require('matchdep').filterAll('grunt-*').forEach(grunt.loadNpmTasks);
+   require('matchdep').filterAll(['grunt-*', '!grunt-cli']).forEach(grunt.loadNpmTasks);
 
 	var webpack = require('webpack');
 	var webpackConfig = require(__dirname + '/webpack.config.js');
@@ -34,6 +34,14 @@ module.exports = function(grunt) {
               reporter: 'spec'
             },
             src: ['test/**/*.js']
+         }
+      },
+      mocha_istanbul: {
+         coverage: {
+            src: 'test',
+            options: {
+               mask: '*.mspec.js'
+            }
          }
       },
 		webpack: {
@@ -93,4 +101,7 @@ module.exports = function(grunt) {
 
    // Heroku deploy
    grunt.registerTask('heroku', ['webpack:build', 'express:prod']);
+
+   // Instanbul coverage
+   grunt.registerTask('coverage', ['mocha_instanbul']);
 };

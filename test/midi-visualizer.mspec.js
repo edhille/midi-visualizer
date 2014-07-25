@@ -11,6 +11,50 @@ var chai = require('chai'),
     AbstractRenderer = require('../lib/midi-visualizer/renderer/abstract.js'),
     MidiVisualizer = require('../lib/midi-visualizer.js');
 
+function setupMockXhr() {
+   var instances = [],
+       origXMLHttpRequest = global.XMLHttpRequest;
+
+   global.XMLHttpRequest = function _mockXMLHttpRequest() {
+      var addEventListener = sinon.stub();
+
+      addEventListener.callsArgWithAsync(1, { srcElement: { response: {} } });
+
+      instances.push({
+         open: sinon.stub(),
+         responseType: '',
+         addEventListener: addEventListener,
+         send: sinon.stub()
+      });
+
+      return instances[instances.length - 1];
+   };
+
+   global.XMLHttpRequest.__getInstances = function _getXmlHttpInstances() { return instances; };
+   global.XMLHttpRequest.restore = function _restoreXmlHttpRequest() {
+      global.XMLHttpRequest = origXMLHttpRequest;
+   };
+
+   return global.XMLHttpRequest;
+}
+
+function setupMockAudioContext() {
+   var origWindow = global.window;
+
+   global.window = {};
+   global.window.AudioContext = function _mockAudioContext() {
+      return {
+         decodeAudio: sinon.stub()
+      };
+   };
+
+   global.window.AudioContext.restore = function _restoreAudioContext() {
+      global.window = origWindow;
+   };
+
+   return global.window.AudioContext;
+}
+
 describe('MidiVisualizer', function () {
    var MockRenderer;
 
@@ -56,30 +100,47 @@ describe('MidiVisualizer', function () {
 	});
 
    describe('api', function () {
-      var midiVisualizer;
+      var midiVisualizer,
+         xhr,
+         audioContext;
 
 		beforeEach(function () {
+         xhr = setupMockXhr();
+         audioContext = setupMockAudioContext();
+
 			midiVisualizer = new MidiVisualizer({
 				config: {
 					renderer: MockRenderer,
-					filters: [MockRenderer.prototype.filters.testFilter]
+					filters: [MockRenderer.prototype.filters.testFilter],
+               audio: {
+                  href: '/path/to/audio.mp3'
+               },
+               midi: {
+                  href: '/path/to/midi.mid'
+               }
 				}
 			});
 		});
+
+      afterEach(function () {
+         xhr.restore();
+         audioContext.restore();
+      });
       
       describe('#setStage', function () {
-         var spyCallback,
-            promise;
+         var called;
 
-         beforeEach(function () {
-            spyCallback = sinon.spy();
-
-            // TODO: can't do Promises in node...
-            // promise = midiVisualizer.setStage(spyCallback);
+         beforeEach(function (done) {
+            called = false;
+            midiVisualizer.setStage(function _stageSet() {
+               console.log('done...');
+               called = true;
+               done();
+            });
          });
 
-         xit('should return a promise', function () {
-            promise.should.be.instanceof(Promise);
+         it('should call our callback', function () {
+            called.should.be.true;
          });
       });
    });
