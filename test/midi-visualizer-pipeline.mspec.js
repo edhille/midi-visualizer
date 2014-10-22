@@ -9,7 +9,7 @@ var _ = require('underscore'),
     sinon = require('sinon'),
     AbstractRenderer = require('../lib/midi-visualizer/renderer/abstract.js'),
     midiPipelineRenderer = require('../lib/midi-visualizer/render-pipeline.js'),
-    utils = require('../lib/utils.js');
+    utils = require('funtils');
 
 describe('MidiRenderPipeline', function () {
    var MockRenderer;

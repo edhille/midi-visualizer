@@ -7,7 +7,6 @@
 var chai = require('chai'),
     expect = chai.expect,
     sinon = require('sinon'),
-    utils = require('../lib/utils.js'),
     AbstractRenderer = require('../lib/midi-visualizer/renderer/abstract.js'),
     MidiVisualizer = require('../lib/midi-visualizer.js');
 

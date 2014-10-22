@@ -9,6 +9,7 @@
   "dependencies": {
     "d3": "~3.3.4",
     "express": "~3.3.4",
+    "funtils": "0.0.1",
     "grunt": "~0.4.1",
     "grunt-cli": "^0.1.13",
     "grunt-express-server": "^0.4.17",
