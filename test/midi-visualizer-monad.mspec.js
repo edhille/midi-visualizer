@@ -11,7 +11,8 @@ var fs = require('fs'),
     midiParser = require('func-midi-parser'),
     visualizer = require('../lib/midi-visualizer-monad.js'),
     types = visualizer.types,
-    State = types.MidiVisualizerState;
+    State = types.MidiVisualizerState,
+    AnimEvent = types.AnimEvent;
 
 describe('midiVisualizer', function () {
 
@@ -59,6 +60,9 @@ describe('midiVisualizer', function () {
         
         it('should have ??? events');
 
-        it('should have only AnimEvent events');
+        it('should have only AnimEvent events', function () {
+            var allEvents = Object.keys(animEvents).reduce(function (acc, key) { return acc.concat(animEvents[key]); }, []);
+            expect(allEvents.every(function (event) { return event instanceof AnimEvent; })).to.be.true; 
+        });
     });
 });
