@@ -1,14 +1,16 @@
-midi-parser
-
-- tests...(there are not tests for a lot of midi events...)
-
-midi-visualizer
-
-- tests...
-- implement configurable filters (by track)
-- subdivide drums in meaningful way
-
-midi-visualizer/render-pipeline
-
-- subdivide a polyphonic track into notes
-- tests...
+_ - remove webpack code
+_ - remove express code
+_ - remove vunderbar midi
+_ - remove midi spec doc
+_ - move monad.js to npm library
+_ - move audio-player to npm library
+_ - move utils to npm library
+_ - test 3 monadic laws
+_ - implement event scheduling
+_ - implement event un-scheduling
+_ - implement audio player play/pause
+_ - implement d3 set-up
+_ - implement threejs set-up
+_ - set up song repos (with webpack/express/vunderbar)
+_ - implement vunderbar d3 set-up
+_ - implement vunderbar threejs set-up
