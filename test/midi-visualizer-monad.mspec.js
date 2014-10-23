@@ -41,28 +41,31 @@ describe('midiVisualizer', function () {
     describe('transformMidiData', function () {
         var transformMidi = visualizer.transformMidi,
             midiData = {},
-            animEvents = {};
+            animEventsByTime = {},
+            animEvents = [];
 
         beforeEach(function (done) {
             fs.readFile(__dirname + '/minimal-valid-midi.mid', function (err, data) {
                 if (err) throw new Error(err);
 
                 midiData = midiParser.parse(new Uint8Array(data));
-                animEvents = visualizer.transformMidi(midiData);
+                animEventsByTime = visualizer.transformMidi(midiData);
+                animEvents = Object.keys(animEventsByTime).reduce(function (acc, key) {
+                    return acc.concat(animEventsByTime[key]);
+                }, []);
 
                 done();
             });
         });
         
-        it('should have grouped events by time', function () {
-            expect(Object.keys(animEvents)).to.have.lengthOf(80);
+        it('should have more events than time slots', function () {
+            expect(animEvents.length).to.be.above(Object.keys(animEventsByTime).length);
         });
-        
-        it('should have ??? events');
 
         it('should have only AnimEvent events', function () {
-            var allEvents = Object.keys(animEvents).reduce(function (acc, key) { return acc.concat(animEvents[key]); }, []);
-            expect(allEvents.every(function (event) { return event instanceof AnimEvent; })).to.be.true; 
+            expect(animEvents.every(function (event) { return event instanceof AnimEvent; })).to.be.true; 
         });
+
+        it('should do what when handed gibberish?');
     });
 });
