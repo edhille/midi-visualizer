@@ -3,9 +3,11 @@ _ - remove express code
 _ - remove vunderbar midi
 _ - remove midi spec doc
 _ - move monad.js to npm library
+_ - make audio-player more functional (monad?)
 _ - move audio-player to npm library
 _ - move utils to npm library
 _ - test 3 monadic laws
+_ - implement simple wrapper for development (load data, set up audio player, parse midi, set visualizer state, run)
 _ - implement event scheduling
 _ - implement event un-scheduling
 _ - implement audio player play/pause
