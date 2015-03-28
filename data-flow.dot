@@ -1,0 +1,8 @@
+digraph midi_viz_data_flow {
+	node [shape = box];
+
+	entry [label = "entry.js"];
+	visualizerWrapper [label = "midi-visualizer.js"];
+
+	entry -> visualizerWrapper;
+}
