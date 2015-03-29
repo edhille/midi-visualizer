@@ -1,12 +1,18 @@
-/* vim: set expandtab ts=3 sw=3: */
 /* jshint expr: true, es5: true */
-/* globals describe: true, before: true, beforeEach: true, afterEach: true, it: true, Uint8Array: true */
+/* globals Uint8Array: true */
 'use strict';
 
-var AudioPlayer = require('../lib/audio-player.js'),
-    chai = require('chai'),
-    expect = chai.expect,
-    sinon = require('sinon');
+var Code = require('code');
+var Lab = require('lab');
+var lab = exports.lab = Lab.script();
+
+var describe = lab.describe;
+var beforeEach = lab.beforeEach;
+var it = lab.it;
+var expect = Code.expect;
+
+var AudioPlayer = require('../src/audio-player.js');
+var sinon = require('sinon-es6');
 
 function setupMockAudioSource(mockAudioContext) {
    var mockAudioSource = {
@@ -41,30 +47,32 @@ function loadPlayer(audioPlayer, callback, mockAudioContext) {
 describe('AudioPlayer', function () {
    var MockContextClass, mockAudioContext, audioPlayer;
 
-	chai.should();
+   beforeEach(function (done) {
+		mockAudioContext = {
+			currentTime: 0,
+			decodeAudioData: sinon.stub()
+		};
 
-   beforeEach(function () {
-      mockAudioContext = {
-         currentTime: 0,
-         decodeAudioData: sinon.stub()
-      };
+		MockContextClass = sinon.stub();
+		MockContextClass.returns(mockAudioContext);
 
-      MockContextClass = sinon.stub();
-      MockContextClass.returns(mockAudioContext);
+		audioPlayer = new AudioPlayer({
+			ContextClass: MockContextClass
+		});
 
-      audioPlayer = new AudioPlayer({
-         ContextClass: MockContextClass
-      });
+		done();
    });
 
    describe('construction', function () {
       
-      it('should not be loaded', function () {
-         audioPlayer.isLoaded.should.be.false;
+      it('should not be loaded', function (done) {
+		expect(audioPlayer.isLoaded).to.be.false();
+		done();
       });
 
-      it('should not be loading', function () {
-         audioPlayer.isLoading.should.be.false;
+      it('should not be loading', function (done) {
+		expect(audioPlayer.isLoading).to.be.false();
+		done();
       });
    });
 
@@ -76,34 +84,41 @@ describe('AudioPlayer', function () {
             setTimeout(done, 0);
          }, mockAudioContext);
 
-         audioPlayer.isLoading.should.be.true;
-         audioPlayer.isLoaded.should.be.false;
+         expect(audioPlayer.isLoading).to.be.true();
+         expect(audioPlayer.isLoaded).to.be.false();
       });
 
-      it('should no longer be loading', function () {
-         audioPlayer.isLoading.should.be.false;
+      it('should no longer be loading', function (done) {
+		expect(audioPlayer.isLoading).to.be.false();
+		done();
       });
 
-      it('should reflect that data is loaded', function () {
-         audioPlayer.isLoaded.should.be.true;
+      it('should reflect that data is loaded', function (done) {
+		expect(audioPlayer.isLoaded).to.be.true();
+		done();
       });
 
-      it('should pass data to context for decoding', function () {
-         mockAudioContext.decodeAudioData.called.should.be.true;
+      it('should pass data to context for decoding', function (done) {
+		expect(mockAudioContext.decodeAudioData.called).to.be.true();
+		done();
       });
 
       describe('error handling', function() {
          
-         it('should throw an error if no audio source is provided', function () {
-            (function validateAudioSourceRequired() {
+         it('should throw an error if no audio source is provided', function (done) {
+            expect(function validateAudioSourceRequired() {
                audioPlayer.loadData();
-            }).should.throw(Error);
+            }).to.throw(Error);
+
+			done();
          });
          
-         it('should throw an error if no callback is provided', function () {
-            (function validateAudioSourceRequired() {
+         it('should throw an error if no callback is provided', function (done) {
+            expect(function validateAudioSourceRequired() {
                audioPlayer.loadData({});
-            }).should.throw(Error);
+            }).to.throw(Error);
+
+			done();
          });
 
          it('should callback with an error if we are already loading', function (done) {
@@ -112,7 +127,7 @@ describe('AudioPlayer', function () {
             audioPlayer.loadData({}, function () {});
             
             audioPlayer.loadData({}, function (e) {
-               e.should.equal('Already loading audio data');
+               expect(e).to.equal('Already loading audio data');
                done();
             });
          });
@@ -122,7 +137,7 @@ describe('AudioPlayer', function () {
             mockAudioContext.decodeAudioData.throws();
 
             audioPlayer.loadData({}, function(e) {
-               e.should.match(/error decoding audio/);
+               expect(e).to.match(/error decoding audio/);
                done();
             });
          });
@@ -134,18 +149,21 @@ describe('AudioPlayer', function () {
       describe('when not yet loaded', function () {
          var playReturn;
 
-         beforeEach(function () {
+         beforeEach(function (done) {
             setupMockAudioSource(mockAudioContext);
 
             playReturn = audioPlayer.play();
+			done();
          });
 
-         it('should return false', function () {
-            playReturn.should.be.false;
+         it('should return false', function (done) {
+            expect(playReturn).to.be.false();
+			done();
          });
 
-         it('should not attempt to create an AudioBuffer', function () {
-            mockAudioContext.createBufferSource.called.should.be.false;
+         it('should not attempt to create an AudioBuffer', function (done) {
+            expect(mockAudioContext.createBufferSource.called).to.be.false();
+			done();
          });
       });
 
@@ -164,12 +182,14 @@ describe('AudioPlayer', function () {
             }, mockAudioContext);
          });
 
-         it('should return true', function () {
-            playReturn.should.be.true;
+         it('should return true', function (done) {
+            expect(playReturn).to.be.true();
+			done();
          });
 
-         it('should not attempt to create an AudioBuffer', function () {
-            mockAudioContext.createBufferSource.called.should.be.false;
+         it('should not attempt to create an AudioBuffer', function (done) {
+            expect(mockAudioContext.createBufferSource.called).to.be.false();
+			done();
          });
       });
 
@@ -184,12 +204,14 @@ describe('AudioPlayer', function () {
       describe('when not yet loaded', function () {
          var pauseReturn;
 
-         beforeEach(function () {
+         beforeEach(function (done) {
             pauseReturn = audioPlayer.pause();
+			done();
          });
 
-         it('should return false', function () {
-            pauseReturn.should.be.false;
+         it('should return false', function (done) {
+            expect(pauseReturn).to.be.false();
+			done();
          });
       });
 
@@ -204,8 +226,9 @@ describe('AudioPlayer', function () {
             }, mockAudioContext);
          });
 
-         it('should return true', function () {
-            pauseReturn.should.be.true;
+         it('should return true', function (done) {
+            expect(pauseReturn).to.be.true();
+			done();
          });
       });
 
@@ -221,16 +244,18 @@ describe('AudioPlayer', function () {
             }, mockAudioContext);
          });
          
-         it('should stop the audio source', function () {
-            mockAudioSource.stop.called.should.be.true;
+         it('should stop the audio source', function (done) {
+            expect(mockAudioSource.stop.called).to.be.true();
+			done();
          });
       });
    });
 
    describe('#getPlayheadTime', function () {
 
-      it('should return zero if data has not yet loaded', function () {
-         audioPlayer.getPlayheadTime().should.equal(0);
+      it('should return zero if data has not yet loaded', function (done) {
+		expect(audioPlayer.getPlayheadTime()).to.equal(0);
+		done();
       });
 
       describe('after data loaded', function () {
@@ -240,63 +265,77 @@ describe('AudioPlayer', function () {
             audioPlayer.loadData({}, done);
          });
 
-         it('should indicate we are not playing', function () {
-            audioPlayer.isPlaying.should.be.false;
+         it('should indicate we are not playing', function (done) {
+            expect(audioPlayer.isPlaying).to.be.false();
+			done();
          });
 
-         it('should start at zero', function () {
-            audioPlayer.getPlayheadTime().should.equal(0);
+         it('should start at zero', function (done) {
+            expect(audioPlayer.getPlayheadTime()).to.equal(0);
+			done();
          });
 
          describe('playing', function () {
             var mockAudioSource;
 
-            beforeEach(function () {
-               mockAudioSource = setupMockAudioSource(mockAudioContext);
+            beforeEach(function (done) {
+				mockAudioSource = setupMockAudioSource(mockAudioContext);
 
-               audioPlayer.play();
+				audioPlayer.play();
+
+				done();
             });
 
-            it('should indicate we are playing', function () {
-               audioPlayer.isPlaying.should.be.true;
+            it('should indicate we are playing', function (done) {
+				expect(audioPlayer.isPlaying).to.be.true();
+				done();
             });
 
             describe('after some period of playback', function () {
 
-               beforeEach(function () {
-                  mockAudioContext.currentTime = 10; // 10s into play   
+               beforeEach(function (done) {
+				mockAudioContext.currentTime = 10; // 10s into play   
+
+				done();
                });
                
-               it('should report playback in milliseconds', function () {
-                  audioPlayer.getPlayheadTime().should.equal(10000);
+               it('should report playback in milliseconds', function (done) {
+				expect(audioPlayer.getPlayheadTime()).to.equal(10000);
+				done();
                });
 
                describe('after first pause', function () {
                   
-                  beforeEach(function () {
-                     mockAudioSource = setupMockAudioSource(mockAudioContext);
-                     audioPlayer.pause();
-                     mockAudioContext.currentTime = 20; // 20s of time elapsed
-                     audioPlayer.play();
-                     mockAudioContext.currentTime = 25; // add 5s more playback
+                  beforeEach(function (done) {
+					mockAudioSource = setupMockAudioSource(mockAudioContext);
+					audioPlayer.pause();
+					mockAudioContext.currentTime = 20; // 20s of time elapsed
+					audioPlayer.play();
+					mockAudioContext.currentTime = 25; // add 5s more playback
+
+					done();
                   });
 
-                  it('should not report elapsed time, but only play time', function () {
-                     audioPlayer.getPlayheadTime().should.equal(15000);
+                  it('should not report elapsed time, but only play time', function (done) {
+					expect(audioPlayer.getPlayheadTime()).to.equal(15000);
+					done();
                   });
 
                   describe('after second pause', function () {
                      
-                     beforeEach(function () {
+                     beforeEach(function (done) {
                         mockAudioSource = setupMockAudioSource(mockAudioContext);
                         audioPlayer.pause();
                         mockAudioContext.currentTime = 30; // 30s of time elapsed
                         audioPlayer.play();
                         mockAudioContext.currentTime = 35; // add 5s more playback
+
+						done();
                      });
 
-                     it('should not report elapsed time, but only play time', function () {
-                        audioPlayer.getPlayheadTime().should.equal(20000);
+                     it('should not report elapsed time, but only play time', function (done) {
+                        expect(audioPlayer.getPlayheadTime()).to.equal(20000);
+						done();
                      });
                   });
                });

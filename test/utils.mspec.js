@@ -1,35 +1,42 @@
 /* vim: set expandtab ts=3 sw=3: */
 /* jshint expr: true, es5: true */
-/* globals describe: true, before: true, beforeEach: true, afterEach: true, it: true, expect: true */
 'use strict';
 
-var chai = require('chai'),
-    sinon = require('sinon'),
-    utils = require('../lib/utils.js');
+var Code = require('code');
+var Lab = require('lab');
+var lab = exports.lab = Lab.script();
+
+var describe = lab.describe;
+var beforeEach = lab.beforeEach;
+var it = lab.it;
+var expect = Code.expect;
+
+var sinon = require('sinon-es6');
+var utils = require('../lib/utils.js');
 
 describe('utils', function() {
-
-   chai.should();
 
    describe('#clone', function () {
       var clone = utils.clone;
 
       describe('things that are neither objects, arrays, strings, booleans, or numbers', function () {
 
-         it('should simple return a function', function () {
+         it('should simple return a function', function (done) {
             var testFn = function () { return 'FN'; },
                 cloneFn = clone(testFn);
 
-            testFn.should.equal(cloneFn);
+            expect(testFn).to.equal(cloneFn);
 
-            testFn().should.equal(cloneFn());
+            expect(testFn()).to.equal(cloneFn());
+
+            done();
          });
       });
 
       describe('objects, arrays, strings, booleans, and numbers', function () {
          var origObj, testObj;
 
-         beforeEach(function () {
+         beforeEach(function (done) {
              origObj = {
                  testStr: 'TEST STRING',
                  testArrStr: ['TEST', 'ARRAY'],
@@ -38,37 +45,43 @@ describe('utils', function() {
              };
             
              testObj = clone(origObj);         
+
+             done();
          });
 
-         it('should simply return a string', function () {
+         it('should simply return a string', function (done) {
             var testStr = 'TEST STRING',
                 cloneStr = clone(testStr);
 
-            testStr.should.equal(cloneStr);
+            expect(testStr).to.equal(cloneStr);
+
+            done();
          });
 
-         it('should effectively clone an object with subproperties', function () {
+         it('should effectively clone an object with subproperties', function (done) {
             // better not be the same...
-            testObj.should.not.equal(origObj);
+            expect(testObj).to.not.equal(origObj);
 
-            testObj.testStr.should.equal(origObj.testStr);
-            testObj.testObj.test.should.equal(origObj.testObj.test);
+            expect(testObj.testStr).to.equal(origObj.testStr);
+            expect(testObj.testObj.test).to.equal(origObj.testObj.test);
             
-            testObj.testArrStr.join('').should.equal(origObj.testArrStr.join(''));
+            expect(testObj.testArrStr.join('')).to.equal(origObj.testArrStr.join(''));
 
             var flattenKeys = function (arr) { 
                return arr.reduce(function (keys, elem) { return keys.concat(Object.keys(elem)); }, []).join('');
             };
 
-            flattenKeys(testObj.testArrObj).should.equal(flattenKeys(origObj.testArrObj));
+            expect(flattenKeys(testObj.testArrObj)).to.equal(flattenKeys(origObj.testArrObj));
 
             testObj.testObj.test = 'CHANGED';
 
-            testObj.testObj.test.should.not.equal(origObj.testObj.test);
+            expect(testObj.testObj.test).not.to.equal(origObj.testObj.test);
 
             testObj.testArrObj[0].id = 'CHANGED';
 
-            testObj.testArrObj[0].id.should.not.equal(origObj.testArrObj[0].id); 
+            expect(testObj.testArrObj[0].id).to.not.equal(origObj.testArrObj[0].id); 
+
+            done();
          });
       });
    });
@@ -76,28 +89,40 @@ describe('utils', function() {
    describe('#existy', function () {
       var existy = utils.existy;
 
-      it('should report Boolean(true) as existing', function () {
-         existy(true).should.be.true;
+      it('should report Boolean(true) as existing', function (done) {
+         expect(existy(true)).to.be.true();
+
+         done();
       });
 
-      it('should report Boolean(false) as existing', function () {
-         existy('').should.be.true;
+      it('should report Boolean(false) as existing', function (done) {
+         expect(existy('')).to.be.true();
+
+         done();
       });
 
-      it('should report empty string as existing', function () {
-         existy('').should.be.true;
+      it('should report empty string as existing', function (done) {
+         expect(existy('')).to.be.true();
+
+         done();
       });
 
-      it('should report 0 as existing', function () {
-         existy(0).should.be.true;
+      it('should report 0 as existing', function (done) {
+         expect(existy(0)).to.be.true();
+
+         done();
       });
 
-      it('should report null as NOT existing', function () {
-         existy(null).should.be.false;
+      it('should report null as NOT existing', function (done) {
+         expect(existy(null)).to.be.false();
+
+         done();
       });
 
-      it('should report undefined as NOT existing', function () {
-         existy(undefined).should.be.false;
+      it('should report undefined as NOT existing', function (done) {
+         expect(existy(undefined)).to.be.false();
+
+         done();
       });
    });
 
@@ -117,36 +142,42 @@ describe('utils', function() {
          return dispatchees;
       };
 
-      beforeEach(function () {
+      beforeEach(function (done) {
          firstMatchDispatchees = makeDispatchees(['FIRST CALLED', 'MIDDLE CALLED', 'LAST CALLED']);
          middleMatchDispatchees = makeDispatchees([null, 'MIDDLE CALLED', 'LAST CALLED']);
          lastMatchDispatchees = makeDispatchees([null, null, 'LAST CALLED']);
+         done();
       });
 
-      it('should get return from first dispatchee', function () {
-         dispatch.apply(dispatch, firstMatchDispatchees)('TEST FIRST').should.equal('FIRST CALLED');
+      it('should get return from first dispatchee', function (done) {
+         expect(dispatch.apply(dispatch, firstMatchDispatchees)('TEST FIRST')).to.equal('FIRST CALLED');
+         done();
       });
 
-      it('should get return from middle dispatchee', function () {
+      it('should get return from middle dispatchee', function (done) {
 
-         dispatch.apply(dispatch, middleMatchDispatchees)('TEST MIDDLE').should.equal('MIDDLE CALLED');
+         expect(dispatch.apply(dispatch, middleMatchDispatchees)('TEST MIDDLE')).to.equal('MIDDLE CALLED');
 
-         middleMatchDispatchees[0].called.should.be.true;
+         expect(middleMatchDispatchees[0].called).to.be.true();
+
+         done();
       });
 
-      it('should get return from last dispatchee', function () {
+      it('should get return from last dispatchee', function (done) {
 
-         dispatch.apply(dispatch, lastMatchDispatchees)('TEST LAST').should.equal('LAST CALLED');
+         expect(dispatch.apply(dispatch, lastMatchDispatchees)('TEST LAST')).equal('LAST CALLED');
 
-         lastMatchDispatchees[0].called.should.be.true;
-         lastMatchDispatchees[1].called.should.be.true;
+         expect(lastMatchDispatchees[0].called).to.be.true();
+         expect(lastMatchDispatchees[1].called).to.be.true();
+
+         done();
       });
    });
 
    describe('#hideProperty', function () {
       var TestConstructor, testObj;
 
-      beforeEach(function () {
+      beforeEach(function (done) {
          TestConstructor = function(visible, hidden) {
             this.visible = visible;
             this.hidden = hidden;
@@ -156,31 +187,36 @@ describe('utils', function() {
 
          utils.hideProperty(testObj, 'hidden');
 
+         done();
       });
 
-      it('should see "visible" property', function () {
+      it('should see "visible" property', function (done) {
          var i, visibleSeen = false;
 
          for (i in testObj) {
             if (i === 'visible') visibleSeen = true;
          }
 
-         visibleSeen.should.be.true;
+         expect(visibleSeen).to.be.true();
+
+         done();
       });
 
-      it('should not see "hidden" property', function () {
+      it('should not see "hidden" property', function (done) {
          var i, hiddenSeen = false;
 
          for (i in testObj) {
             if (i === 'hidden') hiddenSeen = true;
          }
 
-         hiddenSeen.should.be.false;
+         expect(hiddenSeen).to.be.false();
+
+         done();
       });
    });
 
    describe('#memoize', function () {
-      it('should be able to wrap a function that does calculation and only do calculation once', function () {
+      it('should be able to wrap a function that does calculation and only do calculation once', function (done) {
          var stub = sinon.stub(),
             memoizedFn = utils.memoize(stub);
 
@@ -190,17 +226,21 @@ describe('utils', function() {
          memoizedFn();
          memoizedFn();
 
-         stub.callCount.should.equal(1);
+         expect(stub.callCount).to.equal(1);
+
+         done();
       });
 
-      it('should call wrapped function only once, even if called function does not return a value', function () {
+      it('should call wrapped function only once, even if called function does not return a value', function (done) {
          var spy = sinon.spy(),
             memoizedFn = utils.memoize(spy);
 
          memoizedFn();
          memoizedFn();
 
-         spy.callCount.should.equal(1);
+         expect(spy.callCount).to.equal(1);
+
+         done();
       });
    });
 });
