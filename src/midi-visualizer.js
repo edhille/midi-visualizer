@@ -1,22 +1,21 @@
 'use strict';
 
-var midiParser = require('func-midi-parser');
+// var midiParser = require('func-midi-parser');
 
 import {
-	partial,
+	// partial,
 	monad
 } from 'funtils';
-
-export * from './data-types';
 
 function playVisualizer(state) {
 	state.audioPlayer.play();
 
 	return state.next({
-		playing: true,
+		isPlaying: true,
 		renderer: state.renderer.scheduleAnimation(state.audioPlayer.getPlayheadTime())
 	});
 }
 
+export * from './data-types';
 export var visualizer = monad();
 visualizer.lift('play', playVisualizer);

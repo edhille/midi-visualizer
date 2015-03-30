@@ -12,6 +12,7 @@ var expect = Code.expect;
 var sinon = require('sinon-es6');
 
 var AudioPlayer = require('../src/audio-player');
+
 import {visualizer, MidiVisualizerState} from '../src/midi-visualizer';
 
 describe('midi-visualizer', function () {
@@ -42,15 +43,34 @@ describe('midi-visualizer', function () {
 	});
 
 	describe('#play', function () {
+		var state;
+
 		beforeEach(function (done) {
 			midiVisualizer = midiVisualizer.play();
+			state = midiVisualizer.value();
 
+			done();
+		});
+
+		it('should set the state to playing', function (done) {
+			expect(state.isPlaying).to.be.true();
 			done();
 		});
 
 		it('should start the audioPlayer', function (done) {
 			expect(audioPlayerStub.play.called).to.be.true();
 
+			done();
+		});
+
+		it('should start get the audioPlayer playhead time', function (done) {
+			expect(audioPlayerStub.getPlayheadTime.called).to.be.true();
+
+			done();
+		});
+
+		it('should ask renderer to schedule animations', function (done) {
+			expect(rendererStub.scheduleAnimation.called).to.be.true();
 			done();
 		});
 	});
