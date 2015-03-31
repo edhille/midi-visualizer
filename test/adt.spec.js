@@ -1,15 +1,8 @@
 /* globals Uint8Array: true */
 'use strict';
 
-var Code = require('code');
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
-
-var describe = lab.describe;
-var beforeEach = lab.beforeEach;
-var afterEach = lab.afterEach;
-var it = lab.it;
-var expect = Code.expect;
+var chai = require('chai');
+var expect = chai.expect;
 
 import {ADT} from '../src/adt';
 

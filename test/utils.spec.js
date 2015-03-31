@@ -2,16 +2,10 @@
 /* jshint expr: true, es5: true */
 'use strict';
 
-var Code = require('code');
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
+var chai = require('chai');
+var expect = chai.expect;
 
-var describe = lab.describe;
-var beforeEach = lab.beforeEach;
-var it = lab.it;
-var expect = Code.expect;
-
-var sinon = require('sinon-es6');
+var sinon = require('sinon');
 var utils = require('../lib/utils.js');
 
 describe('utils', function() {
@@ -90,37 +84,37 @@ describe('utils', function() {
       var existy = utils.existy;
 
       it('should report Boolean(true) as existing', function (done) {
-         expect(existy(true)).to.be.true();
+         expect(existy(true)).to.be.true;
 
          done();
       });
 
       it('should report Boolean(false) as existing', function (done) {
-         expect(existy('')).to.be.true();
+         expect(existy('')).to.be.true;
 
          done();
       });
 
       it('should report empty string as existing', function (done) {
-         expect(existy('')).to.be.true();
+         expect(existy('')).to.be.true;
 
          done();
       });
 
       it('should report 0 as existing', function (done) {
-         expect(existy(0)).to.be.true();
+         expect(existy(0)).to.be.true;
 
          done();
       });
 
       it('should report null as NOT existing', function (done) {
-         expect(existy(null)).to.be.false();
+         expect(existy(null)).to.be.false;
 
          done();
       });
 
       it('should report undefined as NOT existing', function (done) {
-         expect(existy(undefined)).to.be.false();
+         expect(existy(undefined)).to.be.false;
 
          done();
       });
@@ -158,7 +152,7 @@ describe('utils', function() {
 
          expect(dispatch.apply(dispatch, middleMatchDispatchees)('TEST MIDDLE')).to.equal('MIDDLE CALLED');
 
-         expect(middleMatchDispatchees[0].called).to.be.true();
+         expect(middleMatchDispatchees[0].called).to.be.true;
 
          done();
       });
@@ -167,8 +161,8 @@ describe('utils', function() {
 
          expect(dispatch.apply(dispatch, lastMatchDispatchees)('TEST LAST')).equal('LAST CALLED');
 
-         expect(lastMatchDispatchees[0].called).to.be.true();
-         expect(lastMatchDispatchees[1].called).to.be.true();
+         expect(lastMatchDispatchees[0].called).to.be.true;
+         expect(lastMatchDispatchees[1].called).to.be.true;
 
          done();
       });
@@ -197,7 +191,7 @@ describe('utils', function() {
             if (i === 'visible') visibleSeen = true;
          }
 
-         expect(visibleSeen).to.be.true();
+         expect(visibleSeen).to.be.true;
 
          done();
       });
@@ -209,7 +203,7 @@ describe('utils', function() {
             if (i === 'hidden') hiddenSeen = true;
          }
 
-         expect(hiddenSeen).to.be.false();
+         expect(hiddenSeen).to.be.false;
 
          done();
       });

@@ -2,17 +2,11 @@
 /* globals Uint8Array: true */
 'use strict';
 
-var Code = require('code');
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
-
-var describe = lab.describe;
-var beforeEach = lab.beforeEach;
-var it = lab.it;
-var expect = Code.expect;
+var chai = require('chai');
+var expect = chai.expect;
 
 var AudioPlayer = require('../src/audio-player.js');
-var sinon = require('sinon-es6');
+var sinon = require('sinon');
 
 function setupMockAudioSource(mockAudioContext) {
    var mockAudioSource = {
@@ -66,12 +60,12 @@ describe('AudioPlayer', function () {
    describe('construction', function () {
       
       it('should not be loaded', function (done) {
-		expect(audioPlayer.isLoaded).to.be.false();
+		expect(audioPlayer.isLoaded).to.be.false;
 		done();
       });
 
       it('should not be loading', function (done) {
-		expect(audioPlayer.isLoading).to.be.false();
+		expect(audioPlayer.isLoading).to.be.false;
 		done();
       });
    });
@@ -84,22 +78,22 @@ describe('AudioPlayer', function () {
             setTimeout(done, 0);
          }, mockAudioContext);
 
-         expect(audioPlayer.isLoading).to.be.true();
-         expect(audioPlayer.isLoaded).to.be.false();
+         expect(audioPlayer.isLoading).to.be.true;
+         expect(audioPlayer.isLoaded).to.be.false;
       });
 
       it('should no longer be loading', function (done) {
-		expect(audioPlayer.isLoading).to.be.false();
+		expect(audioPlayer.isLoading).to.be.false;
 		done();
       });
 
       it('should reflect that data is loaded', function (done) {
-		expect(audioPlayer.isLoaded).to.be.true();
+		expect(audioPlayer.isLoaded).to.be.true;
 		done();
       });
 
       it('should pass data to context for decoding', function (done) {
-		expect(mockAudioContext.decodeAudioData.called).to.be.true();
+		expect(mockAudioContext.decodeAudioData.called).to.be.true;
 		done();
       });
 
@@ -157,12 +151,12 @@ describe('AudioPlayer', function () {
          });
 
          it('should return false', function (done) {
-            expect(playReturn).to.be.false();
+            expect(playReturn).to.be.false;
 			done();
          });
 
          it('should not attempt to create an AudioBuffer', function (done) {
-            expect(mockAudioContext.createBufferSource.called).to.be.false();
+            expect(mockAudioContext.createBufferSource.called).to.be.false;
 			done();
          });
       });
@@ -183,12 +177,12 @@ describe('AudioPlayer', function () {
          });
 
          it('should return true', function (done) {
-            expect(playReturn).to.be.true();
+            expect(playReturn).to.be.true;
 			done();
          });
 
          it('should not attempt to create an AudioBuffer', function (done) {
-            expect(mockAudioContext.createBufferSource.called).to.be.false();
+            expect(mockAudioContext.createBufferSource.called).to.be.false;
 			done();
          });
       });
@@ -210,7 +204,7 @@ describe('AudioPlayer', function () {
          });
 
          it('should return false', function (done) {
-            expect(pauseReturn).to.be.false();
+            expect(pauseReturn).to.be.false;
 			done();
          });
       });
@@ -227,7 +221,7 @@ describe('AudioPlayer', function () {
          });
 
          it('should return true', function (done) {
-            expect(pauseReturn).to.be.true();
+            expect(pauseReturn).to.be.true;
 			done();
          });
       });
@@ -245,7 +239,7 @@ describe('AudioPlayer', function () {
          });
          
          it('should stop the audio source', function (done) {
-            expect(mockAudioSource.stop.called).to.be.true();
+            expect(mockAudioSource.stop.called).to.be.true;
 			done();
          });
       });
@@ -266,7 +260,7 @@ describe('AudioPlayer', function () {
          });
 
          it('should indicate we are not playing', function (done) {
-            expect(audioPlayer.isPlaying).to.be.false();
+            expect(audioPlayer.isPlaying).to.be.false;
 			done();
          });
 
@@ -287,7 +281,7 @@ describe('AudioPlayer', function () {
             });
 
             it('should indicate we are playing', function (done) {
-				expect(audioPlayer.isPlaying).to.be.true();
+				expect(audioPlayer.isPlaying).to.be.true;
 				done();
             });
 

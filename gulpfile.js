@@ -7,18 +7,13 @@ var browserify = require('browserify');
 var babelify = require('babelify');
 var through2 = require('through2');
 var rename = require('gulp-rename');
-var lab = require('gulp-lab');
 
-
-// BEGIN CLI options parsing (NOT USED YET)
 var minimist = require('minimist');
 var knownOptions = [
-	{ string: 'file', 'default': '*' }
+	{ string: 'html-output', 'default': false }
 ];
 var options = minimist(process.argv.slice(2), knownOptions);
-// console.dir(options);
-var filter = require('gulp-filter'); // NOT YET USED...
-// END CLI options parsing (NOT USED YET)
+console.dir(options);
 
 gulp.task('clean', function (cb) {
 	del([
@@ -47,18 +42,23 @@ gulp.task('build', ['clean'], function () {
 });
 
 gulp.task('test', function () {
-	return gulp.src('test')
-		.pipe(lab('-T ./lab-es6-transformer.js -l -c'));
+	return gulp.src('test/**/*.spec.js', { read: false })
+		.pipe(require('gulp-spawn-mocha')({
+			istanbul: true,
+			compilers: 'js:babel/register'
+		}));
 });
 
-var sourceWatcher = gulp.watch('./src/**/*.js', ['test']);
-sourceWatcher.on('change', function (event) {
-	console.log('Source file "' + event.path + '" was ' + event.type + ', running tests...');
-});
+gulp.task('watch', function () {
+	var sourceWatcher = gulp.watch('./src/**/*.js', ['test']);
+	sourceWatcher.on('change', function (event) {
+		console.log('Source file "' + event.path + '" was ' + event.type + ', running tests...');
+	});
 
-var testWatcher = gulp.watch('./test/**/*.js', ['test']);
-testWatcher.on('change', function (event) {
-	console.log('Test file "' + event.path + '" was ' + event.type + ', running tests...');
+	var testWatcher = gulp.watch('./test/**/*.js', ['test']);
+	testWatcher.on('change', function (event) {
+		console.log('Test file "' + event.path + '" was ' + event.type + ', running tests...');
+	});
 });
 
 gulp.task('default', ['build']);

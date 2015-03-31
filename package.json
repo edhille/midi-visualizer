@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "lab test"
+    "test": "./node_modules/gulp/bin/gulp.js test"
   },
   "repository": {
     "type": "git",
@@ -36,7 +36,6 @@
     "gulp-filter": "^2.0.2",
     "gulp-lab": "^1.0.5",
     "gulp-rename": "^1.2.0",
-    "hapi": "^8.4.0",
     "lab": "^5.5.1",
     "lodash": "^3.6.0",
     "minimist": "^1.1.1",

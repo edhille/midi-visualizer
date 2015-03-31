@@ -1,15 +1,8 @@
 'use strict';
 
-var Code = require('code');
-var Lab = require('lab');
-var lab = exports.lab = Lab.script();
-
-var describe = lab.describe;
-var beforeEach = lab.beforeEach;
-var afterEach = lab.afterEach;
-var it = lab.it;
-var expect = Code.expect;
-var sinon = require('sinon-es6');
+var chai = require('chai');
+var expect = chai.expect;
+var sinon = require('sinon');
 
 var AudioPlayer = require('../src/audio-player');
 
@@ -53,24 +46,24 @@ describe('midi-visualizer', function () {
 		});
 
 		it('should set the state to playing', function (done) {
-			expect(state.isPlaying).to.be.true();
+			expect(state.isPlaying).to.be.true;
 			done();
 		});
 
 		it('should start the audioPlayer', function (done) {
-			expect(audioPlayerStub.play.called).to.be.true();
+			expect(audioPlayerStub.play.called).to.be.true;
 
 			done();
 		});
 
 		it('should start get the audioPlayer playhead time', function (done) {
-			expect(audioPlayerStub.getPlayheadTime.called).to.be.true();
+			expect(audioPlayerStub.getPlayheadTime.called).to.be.true;
 
 			done();
 		});
 
 		it('should ask renderer to schedule animations', function (done) {
-			expect(rendererStub.scheduleAnimation.called).to.be.true();
+			expect(rendererStub.scheduleAnimation.called).to.be.true;
 			done();
 		});
 	});
