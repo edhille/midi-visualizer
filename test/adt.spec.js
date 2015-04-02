@@ -25,7 +25,7 @@ describe('Abstract Data Type', function () {
 
 		Child.call(this, params);
 	}
-	ADT.inherit(GrandChild, Child);
+	Child.inherit(GrandChild, Child);
 
 	describe('freezing objects', function () {
 		var child;
@@ -190,6 +190,14 @@ describe('Abstract Data Type', function () {
 
 				done();
 			});
+		});
+	});
+
+	describe('inherit helper', function () {
+
+		it('should throw error trying to inherit from non-function', function (done) {
+			expect(function () { ADT.inherit(GrandChild, {}); }).to.throw();
+			done();
 		});
 	});
 });

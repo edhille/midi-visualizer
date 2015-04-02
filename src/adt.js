@@ -2,6 +2,7 @@
 var _ = require('lodash');
 
 function inherit(subClass, superClass) {
+	console.dir(superClass);
 	if (typeof superClass !== 'function' && superClass !== null) {
 		throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass);
 	}
@@ -12,6 +13,8 @@ function inherit(subClass, superClass) {
 	});
 	
 	if (superClass) subClass.__proto__ = superClass;
+
+	subClass.inherit = inherit;
 }
 
 function cloneIt(obj) {
@@ -28,9 +31,9 @@ function ADT() {
 	if (Object.freeze) Object.freeze(this);
 }
 
+ADT.inherit = inherit;
 ADT.prototype = Object.create(null);
 ADT.prototype.constructor = ADT;
-ADT.inherit = inherit;
 ADT.prototype.next = function next(changes) {
 	if (!changes || Object.keys(changes).length === 0) return this;
 

@@ -17,7 +17,8 @@ console.dir(options);
 
 gulp.task('clean', function (cb) {
 	del([
-		'./dist/*'
+		'./dist/*',
+		'./coverage/*'
 	], cb);
 });
 
@@ -41,7 +42,7 @@ gulp.task('build', ['clean'], function () {
         .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('test', function () {
+gulp.task('test', ['clean'], function () {
 	return gulp.src('test/**/*.spec.js', { read: false })
 		.pipe(require('gulp-spawn-mocha')({
 			istanbul: true
