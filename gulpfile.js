@@ -44,8 +44,7 @@ gulp.task('build', ['clean'], function () {
 gulp.task('test', function () {
 	return gulp.src('test/**/*.spec.js', { read: false })
 		.pipe(require('gulp-spawn-mocha')({
-			istanbul: true,
-			compilers: 'js:babel/register'
+			istanbul: true
 		}));
 });
 

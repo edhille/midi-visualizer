@@ -4,30 +4,28 @@
 var chai = require('chai');
 var expect = chai.expect;
 
-import {ADT} from '../src/adt';
+var ADT = require('../src/adt');
 
 describe('Abstract Data Type', function () {
 
 	// Set up some classes for our testing
-	class Child extends ADT {
-		constructor(params) {
-			var self = this;
+	function Child(params) {
+		var self = this;
 
-			Object.keys(params).map(function (prop) {
-				self[prop] = params[prop];
-			});
+		Object.keys(params).map(function (prop) {
+			self[prop] = params[prop];
+		});
 
-			super();
-		}
+		ADT.call(this);
 	}
+	ADT.inherit(Child, ADT);
 
-	class GrandChild extends Child {
-		constructor(params) {
-			params.added = 'value';
+	function GrandChild(params) {
+		params.added = 'value';
 
-			super(params);
-		}
+		Child.call(this, params);
 	}
+	ADT.inherit(GrandChild, Child);
 
 	describe('freezing objects', function () {
 		var child;

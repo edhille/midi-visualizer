@@ -1,18 +1,17 @@
 'use strict';
 
-import {
-	AnimationEvent
-} from './data-types';
+var types = require('./data-types');
+var AnimationEvent = types.AnimationEvent;
 
 function transformMidi(midi) {
    var tempo = 500000; // default of 120bpm
    var tickInMicroSec = tempo / midi.header.timeDivision;
 
-   return midi.tracks.reduce((eventsByTimeOuter, track, trackIndex) => {
+   return midi.tracks.reduce(function reduceOuter(eventsByTimeOuter, track, trackIndex) {
       var elapsedTimeInMicroSec = 0;
       var activeNotes = {};
 
-      return track.events.reduce((eventsByTimeInner, event) => {
+      return track.events.reduce(function reduceInner(eventsByTimeInner, event) {
          var eventTimeInMs = 0;
          var startTime = 0;
          var eventLength = 0;

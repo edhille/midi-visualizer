@@ -6,7 +6,9 @@ var sinon = require('sinon');
 
 var AudioPlayer = require('../src/audio-player');
 
-import {visualizer, MidiVisualizerState} from '../src/midi-visualizer';
+var midiVisualizer  = require('../src/midi-visualizer');
+var visualizer = midiVisualizer.visualizer;
+var MidiVisualizerState = midiVisualizer.types.MidiVisualizerState;
 
 describe('midi-visualizer', function () {
 	var midiVisualizer, audioPlayerStub, rendererStub;

@@ -1,20 +1,24 @@
 'use strict';
 
-import {ADT} from './adt';
+var ADT = require('./adt');
 
-export class MidiVisualizerState extends ADT {
-	constructor(params) {
-		params = params || {};
+function MidiVisualizerState(params) {
+	params = params || {};
 
-		// TODO: should these move to render state?
-		this.root = params.root;
-		this.width = params.width;
-		this.height = params.height;
+	// TODO: should these move to render state?
+	this.root = params.root;
+	this.width = params.width;
+	this.height = params.height;
 
-		this.renderer = params.renderer;
-		this.isPlaying = params.isPlaying;
-		this.audioPlayer = params.audioPlayer;
+	this.renderer = params.renderer;
+	this.isPlaying = params.isPlaying;
+	this.audioPlayer = params.audioPlayer;
 
-		super();
-	}
+	ADT.call(this);
 }
+
+ADT.inherit(MidiVisualizerState, ADT);
+
+module.exports = {
+	MidiVisualizerState: MidiVisualizerState
+};

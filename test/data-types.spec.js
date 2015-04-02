@@ -3,11 +3,9 @@
 var chai = require('chai');
 var expect = chai.expect;
 
-import {ADT} from '../src/adt';
-
-import {
-	MidiVisualizerState
-} from '../src/data-types';
+var ADT = require('../src/adt');
+var types = require('../src/data-types');
+var MidiVisualizerState = types.MidiVisualizerState;
 
 describe('data-types', function () {
 

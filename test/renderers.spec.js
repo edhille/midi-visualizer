@@ -15,7 +15,7 @@ var expect = chai.expect;
 
 var sinon = require('sinon');//-es6');
 
-import renderer from '../src/renderers';
+var renderer = require('../src/renderers');
 
 describe('renderer', function () {
 	var testRenderer;

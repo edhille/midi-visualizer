@@ -2,10 +2,8 @@
 
 // var midiParser = require('func-midi-parser');
 
-import {
-	// partial,
-	monad
-} from 'funtils';
+var utils = require('funtils');
+var monad = utils.monad;
 
 function playVisualizer(state) {
 	state.audioPlayer.play();
@@ -16,6 +14,10 @@ function playVisualizer(state) {
 	});
 }
 
-export * from './data-types';
-export var visualizer = monad();
+var visualizer = monad();
 visualizer.lift('play', playVisualizer);
+
+module.exports = {
+	visualizer: visualizer,
+	types: require('./data-types')
+};
