@@ -2,31 +2,30 @@
 'use strict';
 
 var gulp = require('gulp');
-var del = require('del');
-var browserify = require('browserify');
-var babelify = require('babelify');
-var through2 = require('through2');
-var rename = require('gulp-rename');
 
 var minimist = require('minimist');
 var knownOptions = [
 	{ string: 'html-output', 'default': false }
 ];
 var options = minimist(process.argv.slice(2), knownOptions);
-console.dir(options);
 
-gulp.task('clean', function (cb) {
+function clean(cb) {
+	var del = require('del');
+
 	del([
 		'./dist/*',
 		'./coverage/*'
 	], cb);
-});
+}
 
-gulp.task('build', ['clean'], function () {
+function build() {
+	var browserify = require('browserify');
+	var through2 = require('through2');
+	var rename = require('gulp-rename');
+
     return gulp.src('./src/main.js')
         .pipe(through2.obj(function (file, enc, next) {
             browserify(file.path, { debug: process.env.NODE_ENV === 'development' })
-                .transform(babelify)
                 .bundle(function (err, res) {
                     if (err) { return next(err); }
  
@@ -40,16 +39,20 @@ gulp.task('build', ['clean'], function () {
         })
         .pipe(rename('bundle.js'))
         .pipe(gulp.dest('./dist'));
-});
+}
 
-gulp.task('test', ['clean'], function () {
+function test(cb, doCoverage) {
 	return gulp.src('test/**/*.spec.js', { read: false })
 		.pipe(require('gulp-spawn-mocha')({
-			istanbul: true
+			istanbul: doCoverage
 		}));
-});
+}
 
-gulp.task('watch', function () {
+function coverage(cb) {
+	return test(cb, true);
+}
+
+function watch() {
 	var sourceWatcher = gulp.watch('./src/**/*.js', ['test']);
 	sourceWatcher.on('change', function (event) {
 		console.log('Source file "' + event.path + '" was ' + event.type + ', running tests...');
@@ -59,6 +62,11 @@ gulp.task('watch', function () {
 	testWatcher.on('change', function (event) {
 		console.log('Test file "' + event.path + '" was ' + event.type + ', running tests...');
 	});
-});
+}
 
+gulp.task('clean', clean);
+gulp.task('build', ['clean'], build);
+gulp.task('test', ['clean'], test);
+gulp.task('coverage', ['clean'], coverage);
+gulp.task('watch', watch);
 gulp.task('default', ['build']);
