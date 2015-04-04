@@ -1,12 +1,12 @@
-/* jshint expr: true, es5: true */
-/* globals Uint8Array: true */
+/* jshint expr: true */
+/* globals describe: true, beforeEach: true, it: true */
 'use strict';
 
 var chai = require('chai');
 var expect = chai.expect;
+var sinon = require('sinon');
 
 var AudioPlayer = require('../src/audio-player.js');
-var sinon = require('sinon');
 
 function setupMockAudioSource(mockAudioContext) {
    var mockAudioSource = {
@@ -24,7 +24,6 @@ function setupMockAudioSource(mockAudioContext) {
 }
 
 function setupMockAudioContext(mockAudioContext) {
-
    mockAudioContext.decodeAudioData.callsArgWithAsync(1, {});
 }
 
@@ -39,6 +38,12 @@ function loadPlayer(audioPlayer, callback, mockAudioContext) {
 }
 
 describe('AudioPlayer', function () {
+
+	describe('constructing without an AudioContext', function () {
+
+	});
+
+	describe('construction with an AudioContext', function () {
    var MockContextClass, mockAudioContext, audioPlayer;
 
    beforeEach(function (done) {
@@ -337,4 +342,5 @@ describe('AudioPlayer', function () {
          });
       });
    });
+	});
 });

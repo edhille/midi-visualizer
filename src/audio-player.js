@@ -1,29 +1,26 @@
-/* vim: set expandtab ts=3 sw=3: */
 /* globals window: true */
 'use strict';
 
+var utils = require('funtils');
+var existy = utils.existy;
+
 var SEC_TO_MS = 1000;
 
-function existy(something) {
-   /* jshint eqnull: true */
-   return something != null;
-}
-
 function calcPlayhead(currTime, lastStartTime, startOffset, duration) {
-   return (startOffset + (currTime - lastStartTime)) % duration;
+   return (startOffset + currTime - lastStartTime) % duration;
 }
 
 function AudioPlayer(params) {
    params = params || {};
 
-   var ContextClass = (
+   var ContextClass = 
       params.ContextClass ||
       window.AudioContext || 
       window.webkitAudioContext || 
       window.mozAudioContext || 
       window.oAudioContext || 
       window.msAudioContext
-   );
+   ;
 
    if (ContextClass) {
       this.context = new ContextClass();
@@ -133,7 +130,7 @@ AudioPlayer.prototype.getPlayheadTime = function getPlayheadTime() {
 };
 
 AudioPlayer.prototype.play = function play(startTimeOffset) {
-   var args = [], currTime;
+   var currTime;
 
    if (!this.isLoaded) return false; // nothing to play...
    if (this.isPlaying) return true; // already playing
