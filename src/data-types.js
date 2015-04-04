@@ -5,13 +5,8 @@ var ADT = require('./adt');
 function MidiVisualizerState(params) {
 	params = params || {};
 
-	// TODO: should these move to render state?
-	this.root = params.root;
-	this.width = params.width;
-	this.height = params.height;
-
 	this.renderer = params.renderer;
-	this.isPlaying = params.isPlaying;
+	this.isPlaying = params.isPlaying || false;
 	this.audioPlayer = params.audioPlayer;
 
 	ADT.call(this);
@@ -19,6 +14,21 @@ function MidiVisualizerState(params) {
 
 ADT.inherit(MidiVisualizerState, ADT);
 
+function RendererState(params) {
+	params = params || {};
+
+	this.root = params.root;
+	this.width = params.width || 0;
+	this.height = params.height || 0;
+	this.animEvents = params.animEvents || []; // TODO: should these be needed by renderer?
+	this.renderEvents = params.renderEvents || [];
+	this.currentRunningEvents = params.currentRunningEvents || [];
+	this.scales = params.scales || [];
+}
+
+ADT.inherit(RendererState, ADT);
+
 module.exports = {
-	MidiVisualizerState: MidiVisualizerState
+	MidiVisualizerState: MidiVisualizerState,
+	RendererState: RendererState
 };
