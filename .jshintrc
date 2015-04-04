@@ -7,5 +7,6 @@
 	"notypeof": true,
 	"singleGroups": true,
 	"undef": true,
-	"unused": true
+	"unused": true,
+	"proto": true
 }
