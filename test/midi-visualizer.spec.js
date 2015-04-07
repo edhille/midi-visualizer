@@ -10,48 +10,56 @@ var midiParser = require('func-midi-parser');
 var MidiNoteOnEvent = midiParser.types.MidiNoteOnEvent;
 var MidiNoteOffEvent = midiParser.types.MidiNoteOffEvent;
 var MidiMetaTempoEvent = midiParser.types.MidiMetaTempoEvent;
+var MidiMetaInstrumentNameEvent = midiParser.types.MidiMetaInstrumentNameEvent;
 
 var midiVisualizer = require('../src/midi-visualizer');
 var visualizer = midiVisualizer.visualizer;
 var MidiVisualizerState = midiVisualizer.types.MidiVisualizerState;
 
+function generateMidiData() {
+	return  {
+		header: {
+			// TODO: make this a number to give us nice, round test values
+			timeDivision: 1000
+		},
+		tracks: [{
+			events: [new MidiMetaTempoEvent({
+				delta: 0,
+				dataBytes: [0xFF, 0xF] // TODO: make this a number to give us nice, round test values
+			}), new MidiNoteOnEvent({
+				note: 1,
+				delta: 0
+			}), new MidiNoteOffEvent({
+				note: 1,
+				delta: 1000
+			})]
+		}, {
+			events: [new MidiMetaInstrumentNameEvent({
+				delta: 0,
+				dataBytes: [102, 111, 111]
+			}), new MidiNoteOffEvent({ // though this note will be in the results, it's time gets accounted for
+				note: 6,
+				delta: 10
+			}), new MidiNoteOnEvent({
+				note: 2,
+				delta: 100
+			}), new MidiNoteOffEvent({
+				note: 2,
+				delta: 2000
+			})]
+		}]
+	};
+}
 describe('midi-visualizer', function() {
 
 	describe('#prep', function() {
-		var state, midiData, midiVisualizer;
+		var state, midiData, midiVisualizer, consoleSpy;
 
 		beforeEach(function(done) {
-			midiData = {
-				header: {
-					// TODO: make this a number to give us nice, round test values
-					timeDivision: 1000
-				},
-				tracks: [{
-					events: [new MidiMetaTempoEvent({
-						delta: 0,
-						dataBytes: [0xFF, 0xF], // TODO: make this a number to give us nice, round test values
-						subtype: 'tempo'
-					}), new MidiNoteOnEvent({
-						note: 1,
-						delta: 0
-					}), new MidiNoteOffEvent({
-						note: 1,
-						delta: 1000
-					})]
-				}, {
-					// TODO: add a non-note, non-tempo event to exercise that branch
-					events: [new MidiNoteOnEvent({
-						note: 2,
-						delta: 100
-					}), new MidiNoteOffEvent({
-						note: 2,
-						delta: 2000
-					})]
-				}]
-			};
+			consoleSpy = sinon.stub(console, 'error');
 
 			midiVisualizer = visualizer(new MidiVisualizerState({
-				midi: midiData
+				midi: generateMidiData()
 			}));
 
 			midiVisualizer = midiVisualizer.prep();
@@ -62,18 +70,23 @@ describe('midi-visualizer', function() {
 
 		afterEach(function(done) {
 			state = midiData = midiVisualizer = null;
+			consoleSpy.restore();
+			consoleSpy = null;
 			done();
 		});
 
 		it('should have converted midi data into animEvents by time', function(done) {
 			// TODO: get the math right to line these up nicely...
-			expect(Object.keys(state.animEventsByTimeMs)).to.eql(['0', '6', '65', '136']);
+			expect(Object.keys(state.animEventsByTimeMs)).to.eql(['0', '7', '65', '137']);
 			done();
 		});
 
 		it('should have calculated length of each note');
 
-		it('should log an error for seeing an end note with no begginging, but still parse');
+		it('should log an error for seeing an end note with no begginging, but still parse', function(done) {
+			consoleSpy.calledWithMatch(/no active note/);
+			done();
+		});
 	});
 
 	describe('#play', function() {
