@@ -11,6 +11,7 @@ function inherit(subClass, superClass) {
 		{ constructor: { value: subClass, enumerable: false, writable: true, configurable: true  }
 	});
 	
+	/* istanbul ignore else */
 	if (superClass) subClass.__proto__ = superClass;
 
 	subClass.inherit = inherit;
@@ -27,6 +28,7 @@ function cloneIt(obj) {
 }
 
 function ADT() {
+	/* istanbul ignore else */
 	if (Object.freeze) Object.freeze(this);
 }
 
@@ -34,11 +36,15 @@ ADT.inherit = inherit;
 ADT.prototype = Object.create(null);
 ADT.prototype.constructor = ADT;
 ADT.prototype.next = function next(changes) {
-	if (!changes || Object.keys(changes).length === 0) return this;
+	var clone;
 
-	var clone = _.merge(cloneIt(this), changes);
+	if (!changes || Object.keys(changes).length === 0) {
+		return this;
+	} else {
+		clone = _.merge(cloneIt(this), changes);
 
-	return new this.constructor(clone);
+		return new this.constructor(clone);
+	}
 };
 
 module.exports = ADT;
