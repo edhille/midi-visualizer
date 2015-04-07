@@ -9,6 +9,7 @@ var ADT = require('../src/adt');
 var types = require('../src/data-types');
 var MidiVisualizerState = types.MidiVisualizerState;
 var RendererState = types.RendererState;
+var AnimEvent = types.AnimEvent;
 
 describe('data-types', function() {
 
@@ -43,8 +44,18 @@ describe('data-types', function() {
                 done();
             });
 
-            it('should no be playing', function(done) {
+            it('should not be playing', function(done) {
                 expect(midiVisualizerState.isPlaying).to.be.false;
+                done();
+            });
+
+            it('should have no midi', function(done) {
+                expect(midiVisualizerState.midi).to.be.undefined;
+                done();
+            });
+
+            it('should have no animEvents', function(done) {
+                expect(midiVisualizerState.animEventsByTimeMs).to.have.eql({});
                 done();
             });
         });
@@ -76,6 +87,16 @@ describe('data-types', function() {
                 expect(midiVisualizerState.isPlaying).to.be.false;
                 done();
             });
+
+            it('should have no midi', function(done) {
+                expect(midiVisualizerState.midi).to.be.undefined;
+                done();
+            });
+
+            it('should have no animEvents', function(done) {
+                expect(midiVisualizerState.animEventsByTimeMs).to.have.eql({});
+                done();
+            });
         });
 
         describe('full params instantiation', function() {
@@ -83,7 +104,9 @@ describe('data-types', function() {
                 midiVisualizerState = new MidiVisualizerState({
                     isPlaying: true,
                     renderer: {},
-                    audioPlayer: {}
+                    audioPlayer: {},
+					midi: {},
+                    animEventsByTimeMs: { 0: [] }
                 });
 
                 done();
@@ -107,6 +130,16 @@ describe('data-types', function() {
 
             it('should be playing', function(done) {
                 expect(midiVisualizerState.isPlaying).to.be.true;
+                done();
+            });
+
+            it('should have midi', function(done) {
+                expect(midiVisualizerState.midi).not.to.be.undefined;
+                done();
+            });
+
+            it('should have no animEvents', function(done) {
+                expect(midiVisualizerState.animEventsByTimeMs).to.have.eql({ 0: [] });
                 done();
             });
         });
@@ -145,11 +178,6 @@ describe('data-types', function() {
 
             it('should have a height of zero', function(done) {
                 expect(rendererState.height).to.equal(0);
-                done();
-            });
-
-            it('should have no animEvents', function(done) {
-                expect(rendererState.animEvents).to.have.length(0);
                 done();
             });
 
@@ -197,11 +225,6 @@ describe('data-types', function() {
                 done();
             });
 
-            it('should have no animEvents', function(done) {
-                expect(rendererState.animEvents).to.have.length(0);
-                done();
-            });
-
             it('should have no renderEvents', function(done) {
                 expect(rendererState.renderEvents).to.have.length(0);
                 done();
@@ -224,7 +247,6 @@ describe('data-types', function() {
                     root: {},
                     width: 100,
                     height: 100,
-                    animEvents: ['not empty'],
                     renderEvents: ['not empty'],
                     currentRunningEvents: ['not empty'],
                     scales: ['not empty']
@@ -254,11 +276,6 @@ describe('data-types', function() {
                 done();
             });
 
-            it('should have no animEvents', function(done) {
-                expect(rendererState.animEvents).to.have.length(1);
-                done();
-            });
-
             it('should have no renderEvents', function(done) {
                 expect(rendererState.renderEvents).to.have.length(1);
                 done();
@@ -273,6 +290,116 @@ describe('data-types', function() {
                 expect(rendererState.scales).to.have.length(1);
                 done();
             });
+        });
+    });
+
+    describe('AnimEvent', function() {
+        var animEvent;
+
+        describe('no params instantiation', function() {
+			it('should throw if we do not have any params', function (done) {
+				expect(function () { new AnimEvent(); }).to.throw(TypeError);
+				done();
+			});
+        });
+
+        describe('empty params instantiation', function() {
+			it('should throw if we do not have any params', function (done) {
+				expect(function () { new AnimEvent({}); }).to.throw(TypeError);
+				done();
+			});
+        });
+
+        describe('minimal params instantiation', function() {
+			var params;
+
+            beforeEach(function(done) {
+				params = { event: { note: 127 }};
+                animEvent = new AnimEvent(params);
+
+                done();
+            });
+
+            afterEach(function(done) {
+                params = animEvent = null;
+
+                done();
+            });
+
+            it('should have the event we passed in', function(done) {
+                expect(animEvent.event).to.equal(params.event);
+                done();
+            });
+
+            it('should default the track to 0', function(done) {
+                expect(animEvent.track).to.equal(0);
+                done();
+            });
+
+            it('should default the length to 0', function(done) {
+                expect(animEvent.length).to.equal(0);
+                done();
+            });
+
+            it('should generate an id from track and note', function(done) {
+                expect(animEvent.id).to.equal('0-127');
+                done();
+            });
+
+			describe('and track information instantiation', function() {
+
+				beforeEach(function(done) {
+					params.track = 7;
+					animEvent = new AnimEvent(params);
+
+					done();
+				});
+
+				it('should have the track we set', function(done) {
+					expect(animEvent.track).to.equal(params.track);
+					done();
+				});
+
+				it('should default the length to 0', function(done) {
+					expect(animEvent.length).to.equal(0);
+					done();
+				});
+
+				it('should generate an id from track and note', function(done) {
+					expect(animEvent.id).to.equal('7-127');
+					done();
+				});
+
+				describe('and length information instantiation', function() {
+
+					beforeEach(function(done) {
+						params.length = 100;
+						animEvent = new AnimEvent(params);
+
+						done();
+					});
+
+					it('should have the length we set', function(done) {
+						expect(animEvent.length).to.equal(params.length);
+						done();
+					});
+
+					describe('and custom id instantiation', function() {
+
+						beforeEach(function(done) {
+							params.id = 'CUSTOM';
+							animEvent = new AnimEvent(params);
+
+							done();
+						});
+
+						it('should have id we set', function(done) {
+							expect(animEvent.id).to.equal(params.id);
+							done();
+						});
+					});
+				});
+			});
         });
     });
 });
