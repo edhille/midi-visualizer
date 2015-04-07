@@ -29,14 +29,17 @@
   "homepage": "https://github.com/edhille/midi-visualizer",
   "devDependencies": {
     "browserify": "^9.0.3",
+    "chai": "^2.2.0",
     "code": "^1.4.0",
     "del": "^1.1.1",
     "funtils": "^0.2.0",
     "gulp-filter": "^2.0.2",
     "gulp-rename": "^1.2.0",
+    "gulp-spawn-mocha": "^2.0.1",
     "lodash": "^3.6.0",
     "minimist": "^1.1.1",
     "mocha": "^2.2.1",
+    "sinon": "^1.14.1",
     "through2": "^0.6.3"
   },
   "dependencies": {
