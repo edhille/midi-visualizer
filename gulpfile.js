@@ -3,11 +3,11 @@
 
 var gulp = require('gulp');
 
-var minimist = require('minimist');
-var knownOptions = [
-	{ string: 'html-output', 'default': false }
-];
-var options = minimist(process.argv.slice(2), knownOptions);
+// var minimist = require('minimist');
+// var knownOptions = [
+// 	{ string: 'html-output', 'default': false }
+// ];
+// var options = minimist(process.argv.slice(2), knownOptions);
 
 function clean(cb) {
 	var del = require('del');
