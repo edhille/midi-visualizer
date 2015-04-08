@@ -35,7 +35,6 @@ function transformMidi(midi) {
 				tempo = event.tempo;
 				tickInMicroSec = Math.floor(tempo / midi.header.timeDivision);
 
-				console.log('tempo: ' + tempo + ' timeDivision: ' + midi.header.timeDivision + ' tick: ' + tickInMicroSec);
 				return eventsByTime;
 			}
 
@@ -65,8 +64,6 @@ function transformMidi(midi) {
 						track: trackIndex
 					});
 
-					console.log('delta: ' + event.delta + ', tick: ' + tickInMicroSec + ' elapsed: ' + elapsedTimeInMicroSec);
-
 					eventsByTime[startTimeMs][startNote.index] = newEvent;
 					activeNotes[event.note].pop();
 
@@ -87,8 +84,6 @@ function transformMidi(midi) {
 					length: eventLength,
 					track: trackIndex
 				}));
-
-				console.log('delta: ' + event.delta + ', tick: ' + tickInMicroSec + ' elapsed: ' + elapsedTimeInMicroSec);
 
 				/* istanbul ignore else */
 				if (activeNotes[event.note]) {

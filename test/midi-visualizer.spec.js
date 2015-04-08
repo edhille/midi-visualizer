@@ -25,7 +25,7 @@ function generateMidiData() {
 		tracks: [{
 			events: [new MidiMetaTempoEvent({
 				delta: 0,
-				dataBytes: [0xFF, 0xF] // TODO: make this a number to give us nice, round test values
+				tempo: 10000
 			}), new MidiNoteOnEvent({
 				note: 1,
 				delta: 0
@@ -39,10 +39,10 @@ function generateMidiData() {
 				dataBytes: [102, 111, 111]
 			}), new MidiNoteOffEvent({ // though this note will be in the results, it's time gets accounted for
 				note: 6,
-				delta: 10
+				delta: 2000
 			}), new MidiNoteOnEvent({
 				note: 2,
-				delta: 100
+				delta: 1000
 			}), new MidiNoteOffEvent({
 				note: 2,
 				delta: 2000
@@ -50,6 +50,7 @@ function generateMidiData() {
 		}]
 	};
 }
+
 describe('midi-visualizer', function() {
 
 	describe('#prep', function() {
@@ -76,8 +77,7 @@ describe('midi-visualizer', function() {
 		});
 
 		it('should have converted midi data into animEvents by time', function(done) {
-			// TODO: get the math right to line these up nicely...
-			expect(Object.keys(state.animEventsByTimeMs)).to.eql(['0', '7', '65', '137']);
+			expect(Object.keys(state.animEventsByTimeMs)).to.eql(['0', '10', '30', '50']);
 			done();
 		});
 
