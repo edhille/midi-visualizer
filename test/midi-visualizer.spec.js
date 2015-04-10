@@ -19,7 +19,6 @@ var MidiVisualizerState = midiVisualizer.types.MidiVisualizerState;
 function generateMidiData() {
 	return  {
 		header: {
-			// TODO: make this a number to give us nice, round test values
 			timeDivision: 1000
 		},
 		tracks: [{
@@ -32,6 +31,12 @@ function generateMidiData() {
 			}), new MidiNoteOffEvent({
 				note: 1,
 				delta: 1000
+			}), new MidiNoteOnEvent({
+				note: 3,
+				delta: 0
+			}), new MidiNoteOffEvent({
+				note: 3,
+				delta: 2000
 			})]
 		}, {
 			events: [new MidiMetaInstrumentNameEvent({
@@ -81,7 +86,18 @@ describe('midi-visualizer', function() {
 			done();
 		});
 
-		it('should have calculated length of each note');
+		it('should have two notes for the second two slots', function (done) {
+			expect(state.animEventsByTimeMs[10]).to.have.length(2);
+			expect(state.animEventsByTimeMs[30]).to.have.length(2);
+			done();
+		});
+
+		it('should have calculated length of each note', function (done) {
+			expect(state.animEventsByTimeMs[0][0].length).to.equal(10000);
+			expect(state.animEventsByTimeMs[10][1].length).to.equal(20000);
+			expect(state.animEventsByTimeMs[30][1].length).to.equal(20000);
+			done();
+		});
 
 		it('should log an error for seeing an end note with no begginging, but still parse', function(done) {
 			consoleSpy.calledWithMatch(/no active note/);
