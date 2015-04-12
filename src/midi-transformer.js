@@ -50,7 +50,7 @@ function transformMidi(midi) {
 					startTimeMicroSec: elapsedTimeInMicroSec,
 					index: 0 // assume we are the first note for this time-slice
 				});
-			} else if (event instanceof MidiNoteOffEvent) {
+			} else /* istanbul ignore else */ if (event instanceof MidiNoteOffEvent) {
 				startNote = activeNotes[event.note] ? activeNotes[event.note][0] : null;
 
 				if (startNote) {

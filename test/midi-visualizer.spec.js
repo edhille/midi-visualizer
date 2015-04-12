@@ -2,159 +2,200 @@
 /* globals describe: true, beforeEach: true, afterEach: true, it: true */
 'use strict';
 
+var rewire = require('rewire');
 var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 
-var midiParser = require('func-midi-parser');
-var MidiNoteOnEvent = midiParser.types.MidiNoteOnEvent;
-var MidiNoteOffEvent = midiParser.types.MidiNoteOffEvent;
-var MidiMetaTempoEvent = midiParser.types.MidiMetaTempoEvent;
-var MidiMetaInstrumentNameEvent = midiParser.types.MidiMetaInstrumentNameEvent;
+var midiVisualizer = rewire('../src/midi-visualizer');
 
-var midiVisualizer = require('../src/midi-visualizer');
-var visualizer = midiVisualizer.visualizer;
-var MidiVisualizerState = midiVisualizer.types.MidiVisualizerState;
+function stubAudioLoader(loadDataStub) {
+	var stub = sinon.stub();
 
-function generateMidiData() {
-	return  {
-		header: {
-			timeDivision: 1000
-		},
-		tracks: [{
-			events: [new MidiMetaTempoEvent({
-				delta: 0,
-				tempo: 10000
-			}), new MidiNoteOnEvent({
-				note: 1,
-				delta: 0
-			}), new MidiNoteOffEvent({
-				note: 1,
-				delta: 1000
-			}), new MidiNoteOnEvent({
-				note: 3,
-				delta: 0
-			}), new MidiNoteOffEvent({
-				note: 3,
-				delta: 2000
-			})]
-		}, {
-			events: [new MidiMetaInstrumentNameEvent({
-				delta: 0,
-				dataBytes: [102, 111, 111]
-			}), new MidiNoteOffEvent({ // though this note will be in the results, it's time gets accounted for
-				note: 6,
-				delta: 2000
-			}), new MidiNoteOnEvent({
-				note: 2,
-				delta: 1000
-			}), new MidiNoteOffEvent({
-				note: 2,
-				delta: 2000
-			})]
-		}]
-	};
+	stub.returns({
+		loadData: loadDataStub
+	});
+
+	return stub;
+}
+
+function stubAudioPlayer() {
+	return sinon.stub({
+		play: function() {},
+		getPlayheadTime: function() {}
+	});
+}
+
+function stubLoadData(audioPlayerStub) {
+	var promiseStub = sinon.stub();
+	var stub = sinon.stub();
+
+	promiseStub.callsArgWith(0, audioPlayerStub);
+
+	stub.returns({
+		then: promiseStub
+	});
+
+	return stub;
+}
+
+function stubMidiParser() {
+	return sinon.stub({
+		parse: function() {}
+	});
+}
+
+function stubRenderer(schedulerStub) {
+	var stub = sinon.stub({
+		prep: function() {}
+	});
+
+	stub.prep.returns(schedulerStub);
+
+	return stub;
+}
+
+function stubScheduler() {
+	return sinon.stub({
+		schedule: function() {}
+	});
 }
 
 describe('midi-visualizer', function() {
 
-	describe('#prep', function() {
-		var state, midiData, midiVisualizer, consoleSpy;
+	describe('valid instantaion', function() {
+		var testVisualizer, config, setupError;
+		var audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub, schedulerStub;
 
 		beforeEach(function(done) {
-			consoleSpy = sinon.stub(console, 'error');
+			midiParserStub = stubMidiParser();
+			audioPlayerStub = stubAudioPlayer();
+			schedulerStub = stubScheduler();
 
-			midiVisualizer = visualizer(new MidiVisualizerState({
-				midi: generateMidiData()
-			}));
+			rendererStub = stubRenderer(schedulerStub);
+			loadDataStub = stubLoadData(audioPlayerStub);
 
-			midiVisualizer = midiVisualizer.prep();
-			state = midiVisualizer.value();
+			audioLoaderStub = stubAudioLoader(loadDataStub);
 
-			done();
+			midiVisualizer.__set__('AudioPlayer', audioLoaderStub);
+			midiVisualizer.__set__('midiParser', midiParserStub);
+
+			config = {
+				audio: {
+					data: new Uint8Array(10)
+				},
+				midi: {
+					data: new Uint8Array(10)
+				},
+				renderer: rendererStub
+			};
+
+			midiVisualizer(config, function(err, visualizer) {
+				testVisualizer = visualizer;
+				setupError = err;
+				done();
+			});
 		});
 
 		afterEach(function(done) {
-			state = midiData = midiVisualizer = null;
-			consoleSpy.restore();
-			consoleSpy = null;
+			audioLoaderStub = midiParserStub = config = testVisualizer = setupError = schedulerStub = null;
 			done();
 		});
 
-		it('should have converted midi data into animEvents by time', function(done) {
-			expect(Object.keys(state.animEventsByTimeMs)).to.eql(['0', '10', '30', '50']);
+		it('should not have given an error to the callback', function(done) {
+			expect(setupError).to.be.null;
 			done();
 		});
 
-		it('should have two notes for the second two slots', function (done) {
-			expect(state.animEventsByTimeMs[10]).to.have.length(2);
-			expect(state.animEventsByTimeMs[30]).to.have.length(2);
+		it('should have called midiPlayer.parse', function(done) {
+			expect(midiParserStub.parse.called).to.be.true;
 			done();
 		});
 
-		it('should have calculated length of each note', function (done) {
-			expect(state.animEventsByTimeMs[0][0].length).to.equal(10000);
-			expect(state.animEventsByTimeMs[10][1].length).to.equal(20000);
-			expect(state.animEventsByTimeMs[30][1].length).to.equal(20000);
+		it('should have called audioPlayer.loadData', function(done) {
+			expect(loadDataStub.called).to.be.true;
 			done();
 		});
 
-		it('should log an error for seeing an end note with no begginging, but still parse', function(done) {
-			consoleSpy.calledWithMatch(/no active note/);
+		it('should have called config.renderer.prep', function(done) {
+			expect(config.renderer.prep.called).to.be.true;
 			done();
+		});
+
+		it('should have handed the callback a visualizer', function(done) {
+			expect(testVisualizer).not.to.be.null;
+			done();
+		});
+
+		describe('#play', function() {
+			var state;
+
+			beforeEach(function(done) {
+				testVisualizer = testVisualizer.play();
+				state = testVisualizer.value();
+
+				done();
+			});
+
+			afterEach(function(done) {
+				state = null;
+				done();
+			});
+
+			it('should set the state to playing', function(done) {
+				expect(state.isPlaying).to.be.true;
+				done();
+			});
+
+			it('should start the audioPlayer', function(done) {
+				expect(audioPlayerStub.play.called).to.be.true;
+
+				done();
+			});
+
+			it('should start get the audioPlayer playhead time', function(done) {
+				expect(audioPlayerStub.getPlayheadTime.called).to.be.true;
+
+				done();
+			});
+
+			it('should ask renderer to schedule animations', function(done) {
+				expect(schedulerStub.schedule.called).to.be.true;
+				done();
+			});
 		});
 	});
 
-	describe('#play', function() {
-		var state, midiVisualizer, audioPlayerStub, rendererStub;
+	describe('invalid instantiation', function () {
 
-		beforeEach(function(done) {
-			audioPlayerStub = sinon.stub({
-				play: function() {},
-				getPlayheadTime: function() {}
-			});
+		describe('when no audio data', function () {
 
-			rendererStub = sinon.stub({
-				scheduleAnimation: function() {}
-			});
-
-			midiVisualizer = visualizer(new MidiVisualizerState({
-				audioPlayer: audioPlayerStub,
-				renderer: rendererStub,
-				midi: {}
-			}));
-
-			midiVisualizer = midiVisualizer.play();
-			state = midiVisualizer.value();
-
-			done();
+			it('should pass error to callback');
 		});
 
-		afterEach(function(done) {
-			state = midiVisualizer = audioPlayerStub = rendererStub = null;
-			done();
+		describe('when no midi data', function () {
+
+			it('should pass error to callback');
 		});
 
-		it('should set the state to playing', function(done) {
-			expect(state.isPlaying).to.be.true;
-			done();
+		describe('when error parsing midi', function () {
+
+			it('should pass error to callback');
 		});
 
-		it('should start the audioPlayer', function(done) {
-			expect(audioPlayerStub.play.called).to.be.true;
+		describe('when error in audioPlayer.loadData', function () {
 
-			done();
+			it('should pass error to callback');
 		});
 
-		it('should start get the audioPlayer playhead time', function(done) {
-			expect(audioPlayerStub.getPlayheadTime.called).to.be.true;
-
-			done();
+		describe('when no renderer', function () {
+			
+			it('should pass error to callback');
 		});
 
-		it('should ask renderer to schedule animations', function(done) {
-			expect(rendererStub.scheduleAnimation.called).to.be.true;
-			done();
+		describe('when renderer does not implement #prep', function () {
+			
+			it('should pass error to callback');
 		});
 	});
 });
