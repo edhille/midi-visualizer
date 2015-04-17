@@ -33,8 +33,7 @@ module.exports = function initMidiVisualizer(config, cb) {
 						width: config.width,
 						height: config.height,
 						audioPlayer: audioPlayer,
-						// TODO: I think this syntax is wrong...should it be callback/promise based???
-						renderer: config.renderer.prep(midi)
+						renderer: config.renderer.prep(midi, config)
 					});
 
 					cb(null, midiVisualizer(state));
