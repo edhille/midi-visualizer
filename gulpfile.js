@@ -44,7 +44,9 @@ function build() {
 function test(cb, doCoverage) {
 	return gulp.src('test/**/*.spec.js', { read: false })
 		.pipe(require('gulp-spawn-mocha')({
-			istanbul: doCoverage
+			istanbul: doCoverage,
+			asyncOnly: true,
+			checkLeaks: true
 		}));
 }
 
