@@ -5,8 +5,10 @@ var ADT = require('./adt');
 function MidiVisualizerState(params) {
 	params = params || {};
 
+	// TODO: are these two params needed?
 	this.midi = params.midi;
 	this.animEventsByTimeMs = params.animEventsByTimeMs || {};
+
 	this.renderer = params.renderer;
 	this.isPlaying = params.isPlaying || false;
 	this.audioPlayer = params.audioPlayer;
