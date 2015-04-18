@@ -38,18 +38,43 @@ function AnimEvent(params) {
 
 	if (!params.event) throw new TypeError('no MidiEvent passed in');
 
-    this.event = params.event;
-    this.track = params.track || 0;
-    this.length = params.length || 0;
-    this.id = params.id || this.track + '-' + this.event.note;
+	this.event = params.event;
+	this.track = params.track || 0;
+	this.length = params.length || 0;
+	this.id = params.id || this.track + '-' + this.event.note;
 
 	ADT.call(this);
 }
 
 ADT.inherit(AnimEvent, ADT);
 
+function RenderEvent(params) {
+	params = params || {};
+
+	if (typeof params.id === 'undefined') throw new TypeError('no id passed in');
+	if (typeof params.subtype === 'undefined') throw new TypeError('no subtype passed in');
+	if (typeof params.x === 'undefined') throw new TypeError('no x passed in');
+	if (typeof params.y === 'undefined') throw new TypeError('no y passed in');
+	if (typeof params.length === 'undefined') throw new TypeError('no length passed in');
+
+	this.id = params.id;
+	this.subtype = params.subtype; // should be "on" or "off"
+
+	// All render events have positioning information
+	this.x = params.x;
+	this.y = params.y;
+	this.z = params.z || 0; // Only used in three-dimensional rendering
+
+	this.length = params.length; // how long this event should live
+
+	ADT.call(this);
+}
+
+ADT.inherit(RenderEvent, ADT);
+
 module.exports = {
 	MidiVisualizerState: MidiVisualizerState,
 	RendererState: RendererState,
-	AnimEvent: AnimEvent
+	AnimEvent: AnimEvent,
+	RenderEvent: RenderEvent
 };

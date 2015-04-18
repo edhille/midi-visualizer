@@ -10,6 +10,7 @@ var types = require('../src/data-types');
 var MidiVisualizerState = types.MidiVisualizerState;
 var RendererState = types.RendererState;
 var AnimEvent = types.AnimEvent;
+var RenderEvent = types.RenderEvent;
 
 describe('data-types', function() {
 
@@ -402,4 +403,123 @@ describe('data-types', function() {
 			});
         });
     });
+
+	describe('RenderEvent', function () {
+
+		describe('no params instantiation', function () {
+			
+			it('should throw an error', function (done) {
+				expect(function () { new RenderEvent(); }).to.throw(TypeError);
+				done();
+			});
+		});
+
+		describe('empty params instantiation', function () {
+			
+			it('should throw an error', function (done) {
+				expect(function () { new RenderEvent({}); }).to.throw(TypeError);
+				done();
+			});
+		});
+
+		describe('missing required params', function () {
+			var renderEvent, params;
+
+			beforeEach(function (done) {
+				params = {};
+				done();
+			});
+
+			afterEach(function (done) {
+				params = null;
+				done();
+			});
+
+			describe('only pasing in an id', function () {
+
+				beforeEach(function (done) {
+					params.id = 'TEST-ID';
+					done();
+				});
+
+				it('should throw error', function (done) {
+					expect(function () { new RenderEvent(params); }).to.throw(TypeError);
+					done();
+				});
+
+				describe('and a subtype', function () {
+
+					beforeEach(function (done) {
+						params.subtype = 'TEST-SUBTYPE';
+						done();
+					});
+
+					it('should throw error', function (done) {
+						expect(function () { new RenderEvent(params); }).to.throw(TypeError);
+						done();
+					});
+
+					describe('and an x', function () {
+
+						beforeEach(function (done) {
+							params.x = 'TEST-X';
+							done();
+						});
+
+						it('should throw error', function (done) {
+							expect(function () { new RenderEvent(params); }).to.throw(TypeError);
+							done();
+						});
+
+						describe('and an y', function () {
+
+							beforeEach(function (done) {
+								params.y = 'TEST-Y';
+								done();
+							});
+
+							it('should throw error', function (done) {
+								expect(function () { new RenderEvent(params); }).to.throw(TypeError);
+								done();
+							});
+
+							describe('and an length', function () {
+
+								beforeEach(function (done) {
+									params.length = 'TEST-LENGTH';
+									done();
+								});
+
+								it('should not throw error', function (done) {
+									expect(function () { new RenderEvent(params); }).not.to.throw(TypeError);
+									done();
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+
+		describe('minimal params instantiation', function () {
+			var renderEvent;
+
+			beforeEach(function (done) {
+				renderEvent = new RenderEvent({
+					id: 'TEST-ID',
+					subtype: 'TEST-SUBTYPE',
+					x: 0,
+					y: 0,
+					length: 0
+				});
+
+				done();
+			});
+
+			it('should have defaulted z to zero', function (done) {
+				expect(renderEvent.z).to.equal(0);
+				done();
+			});
+		});
+	});
 });
