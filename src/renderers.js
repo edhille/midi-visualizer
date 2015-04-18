@@ -11,9 +11,15 @@ function scheduleRenders(/*state, playheadTimeMs*/) {
 var d3Renderer = monad();
 d3Renderer.lift('schedule', scheduleRenders);
 
-function transformEvents(/*trackTransformers, animEvents*/) {
-	var renderEvents = [];
-	// TODO: convert to animevents and then renderevents...
+function transformEvents(trackTransformers, animEvents) {
+	var renderEvents = {};
+
+	Object.keys(animEvents).map(function _convertAnimEvents(timeInMs) {
+		renderEvents[timeInMs] = renderEvents[timeInMs] || [];
+		animEvents[timeInMs].map(function _convertEvent(event) {
+			renderEvents[timeInMs] = renderEvents[timeInMs].concat(trackTransformers[event.track](event));
+		});
+	});
 
 	return renderEvents;
 }

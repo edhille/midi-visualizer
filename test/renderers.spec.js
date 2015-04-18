@@ -7,7 +7,16 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 
+var AnimEvent = require('../src/data-types').AnimEvent;
 var renderers = rewire('../src/renderers');
+
+function generateAnimEvents() {
+	return {
+		0: [new AnimEvent({ event: { note: 127 }, track: 0, length: 100 }), new AnimEvent({ event: { note: 100 }, track: 1, length: 200 })],
+		100: [new AnimEvent({ event: { note: 127 }, track: 0, length: 0 })],
+		200: [new AnimEvent({ event: { note: 100 }, track: 1, length: 0 })]
+	};
+}
 
 describe('renderers', function () {
 	var testRenderer;
@@ -19,8 +28,8 @@ describe('renderers', function () {
 			midiStub = sinon.stub();
 			rendererStub = sinon.stub();
 			rendererStub.RenderState = sinon.spy();
-			trackTransformerStub = sinon.stub();
 			transformMidiStub = sinon.stub();
+			transformMidiStub.returns(generateAnimEvents());
 			renderers.__set__('transformMidi', transformMidiStub);
 			testConfig = {
 				root: 'TEST-ROOT',
@@ -28,7 +37,8 @@ describe('renderers', function () {
 				height: 999,
 				renderer: rendererStub,
 				transformers: [
-					trackTransformerStub
+					function (animEvent) { return [{ id: 'test-0-' + animEvent.id }, { id: 'test-1-' + animEvent.id }]; },
+					function (animEvent) { return [{ id: animEvent.id }]; }
 				]
 			};
 			testRenderer = renderers.prep(midiStub, testConfig);
@@ -62,7 +72,11 @@ describe('renderers', function () {
 					root: testConfig.root,
 					width: testConfig.width,
 					height: testConfig.height,
-					renderEvents: []
+					renderEvents: {
+						0: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }, { id: '1-100' }],
+						100: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }],
+						200: [{ id: '1-100' }]
+					}
 				})).to.be.true;
 				done();
 			});
