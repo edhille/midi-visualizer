@@ -8,6 +8,7 @@ var expect = chai.expect;
 var sinon = require('sinon');
 
 var AnimEvent = require('../src/data-types').AnimEvent;
+var RendererState = require('../src/data-types').RendererState;
 var renderers = rewire('../src/renderers');
 
 function generateAnimEvents() {
@@ -79,6 +80,92 @@ describe('renderers', function () {
 					}
 				})).to.be.true;
 				done();
+			});
+		});
+	});
+
+	describe('#play (inital call)', function () {
+		var state, rendererState, timeoutSpy, clearSpy;
+
+		beforeEach(function (done) {
+			timeoutSpy = sinon.stub();
+			timeoutSpy.returns(1);
+			clearSpy = sinon.spy();
+			renderers.__set__({
+				setTimeout: timeoutSpy,
+				clearTimeout: clearSpy
+			});
+			rendererState = new RendererState({
+				root: 'TEST-ROOT',
+				renderEvents: {
+					0: [],
+					100: [],
+					200: []
+				}
+			});
+			testRenderer = renderers.d3(rendererState).play();
+			state = testRenderer.value();
+			done();
+		});
+
+		afterEach(function (done) {
+			state = rendererState = timeoutSpy = clearSpy = null;
+			done();
+		});
+
+		it('should have renderEvents, by time', function (done) {
+			expect(state.renderEvents).to.have.keys(['0', '100', '200']);
+			done();
+		});
+
+		it('should have currentRunningEvents', function (done) {
+			expect(state.currentRunningEvents).to.have.length(0);
+			done();
+		});
+
+		it('should have scales', function (done) {
+			expect(state.scales).to.have.length(0);
+			done();
+		});
+
+		it('should have called setTimeout for each group of events', function (done) {
+			expect(timeoutSpy.callCount).to.equal(3);
+			done();
+		});
+
+		describe('#pause', function () {
+			
+			beforeEach(function (done) {
+				clearSpy.reset();
+				rendererState = testRenderer.pause();
+				state = rendererState.value();
+				done();
+			});
+
+			it('should clear all our timers', function (done) {
+				expect(clearSpy.callCount).to.equal(3);
+				done();
+			});
+
+			describe('#play (after pause)', function () {
+				
+				beforeEach(function (done) {
+					clearSpy.reset();
+					timeoutSpy.reset();
+					rendererState = testRenderer.play();
+					state = rendererState.value();
+					done();
+				});
+
+				it('should not have to clear any timers', function (done) {
+					expect(clearSpy.callCount).to.equal(0);
+					done();
+				});
+
+				it('should have called setTimeout for each group of events', function (done) {
+					expect(timeoutSpy.callCount).to.equal(3);
+					done();
+				});
 			});
 		});
 	});
