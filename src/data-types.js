@@ -40,7 +40,7 @@ function D3RendererState(params) {
 
 	this.document = params.document;
 
-	RendererState.call(this);
+	RendererState.call(this, params);
 }
 
 ADT.inherit(D3RendererState, RendererState);
