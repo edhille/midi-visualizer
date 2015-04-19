@@ -117,7 +117,7 @@ function render(state, renderEvents) {
 
 var d3Renderer = monad();
 
-d3Renderer.lift('play', renderUtils.play);
+d3Renderer.lift('play', partial(renderUtils.play, render));
 d3Renderer.lift('pause', renderUtils.pause);
 d3Renderer.prep = renderUtils.prep;
 d3Renderer.render = render;

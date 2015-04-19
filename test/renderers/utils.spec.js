@@ -88,7 +88,7 @@ describe('renderers', function () {
 
 	describe('#play (inital call)', function () {
 		var play = renderUtils.play;
-		var state, rendererState, timeoutSpy, clearSpy;
+		var state, rendererState, timeoutSpy, clearSpy, renderFnSpy;
 
 		beforeEach(function (done) {
 			timeoutSpy = sinon.stub();
@@ -98,6 +98,7 @@ describe('renderers', function () {
 				setTimeout: timeoutSpy,
 				clearTimeout: clearSpy
 			});
+			renderFnSpy = sinon.spy();
 			rendererState = new RendererState({
 				root: 'TEST-ROOT',
 				renderEvents: {
@@ -106,7 +107,7 @@ describe('renderers', function () {
 					200: []
 				}
 			});
-			state = play(rendererState);
+			state = play(renderFnSpy, rendererState);
 			done();
 		});
 
@@ -154,7 +155,7 @@ describe('renderers', function () {
 				beforeEach(function (done) {
 					clearSpy.reset();
 					timeoutSpy.reset();
-					state = play(state);
+					state = play(renderFnSpy, state);
 					done();
 				});
 

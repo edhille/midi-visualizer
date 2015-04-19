@@ -3,9 +3,9 @@
 var utils = require('funtils');
 var transformMidi = require('../midi-transformer');
 
-function play(state, playheadTimeMs) {
+function play(renderFn, state, playheadTimeMs) {
 	return state.next({
-		renderEvents: setTimers(function () { /* TODO */ }, state, playheadTimeMs)
+		renderEvents: setTimers(renderFn, state, playheadTimeMs)
 	});
 }
 
