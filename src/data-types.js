@@ -33,6 +33,18 @@ function RendererState(params) {
 
 ADT.inherit(RendererState, ADT);
 
+function D3RendererState(params) {
+	params = params || {};
+
+	if (!params.document) throw new TypeError('document required');
+
+	this.document = params.document;
+
+	RendererState.call(this);
+}
+
+ADT.inherit(D3RendererState, RendererState);
+
 function AnimEvent(params) {
 	params = params || {};
 
@@ -75,6 +87,7 @@ ADT.inherit(RenderEvent, ADT);
 module.exports = {
 	MidiVisualizerState: MidiVisualizerState,
 	RendererState: RendererState,
+	D3RendererState: D3RendererState,
 	AnimEvent: AnimEvent,
 	RenderEvent: RenderEvent
 };

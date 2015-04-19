@@ -40,8 +40,7 @@ module.exports = function initMidiVisualizer(config, cb) {
 				} catch (e) {
 					cb(e.stack);
 				}
-			},
-			cb);
+			}, cb);
 	} catch(e) {
 		cb(e.stack);
 	}

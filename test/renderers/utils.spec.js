@@ -7,9 +7,10 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 
-var AnimEvent = require('../src/data-types').AnimEvent;
-var RendererState = require('../src/data-types').RendererState;
-var renderers = rewire('../src/renderers');
+var AnimEvent = require('../../src/data-types').AnimEvent;
+var RendererState = require('../../src/data-types').RendererState;
+
+var renderUtils = rewire('../../src/renderers/utils');
 
 function generateAnimEvents() {
 	return {
@@ -23,6 +24,7 @@ describe('renderers', function () {
 	var testRenderer;
 
 	describe('#prep', function () {
+		var prep = renderUtils.prep;
 		var midiStub, rendererStub, trackTransformerStub, transformMidiStub, testConfig;
 
 		beforeEach(function (done) {
@@ -31,7 +33,7 @@ describe('renderers', function () {
 			rendererStub.RenderState = sinon.spy();
 			transformMidiStub = sinon.stub();
 			transformMidiStub.returns(generateAnimEvents());
-			renderers.__set__('transformMidi', transformMidiStub);
+			renderUtils.__set__('transformMidi', transformMidiStub);
 			testConfig = {
 				root: 'TEST-ROOT',
 				width: 666,
@@ -42,7 +44,7 @@ describe('renderers', function () {
 					function (animEvent) { return [{ id: animEvent.id }]; }
 				]
 			};
-			testRenderer = renderers.prep(midiStub, testConfig);
+			testRenderer = prep(midiStub, testConfig);
 
 			done();
 		});
@@ -85,13 +87,14 @@ describe('renderers', function () {
 	});
 
 	describe('#play (inital call)', function () {
+		var play = renderUtils.play;
 		var state, rendererState, timeoutSpy, clearSpy;
 
 		beforeEach(function (done) {
 			timeoutSpy = sinon.stub();
 			timeoutSpy.returns(1);
 			clearSpy = sinon.spy();
-			renderers.__set__({
+			renderUtils.__set__({
 				setTimeout: timeoutSpy,
 				clearTimeout: clearSpy
 			});
@@ -103,8 +106,7 @@ describe('renderers', function () {
 					200: []
 				}
 			});
-			testRenderer = renderers.d3(rendererState).play();
-			state = testRenderer.value();
+			state = play(rendererState);
 			done();
 		});
 
@@ -134,11 +136,11 @@ describe('renderers', function () {
 		});
 
 		describe('#pause', function () {
+			var pause = renderUtils.pause;
 			
 			beforeEach(function (done) {
 				clearSpy.reset();
-				rendererState = testRenderer.pause();
-				state = rendererState.value();
+				state = pause(state);
 				done();
 			});
 
@@ -152,8 +154,7 @@ describe('renderers', function () {
 				beforeEach(function (done) {
 					clearSpy.reset();
 					timeoutSpy.reset();
-					rendererState = testRenderer.play();
-					state = rendererState.value();
+					state = play(state);
 					done();
 				});
 
