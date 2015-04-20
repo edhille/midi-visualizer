@@ -35,6 +35,7 @@ describe('renderers', function () {
 			transformMidiStub.returns(generateAnimEvents());
 			renderUtils.__set__('transformMidi', transformMidiStub);
 			testConfig = {
+				document: {},
 				root: 'TEST-ROOT',
 				width: 666,
 				height: 999,
