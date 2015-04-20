@@ -131,6 +131,11 @@ describe('AudioPlayer', function() {
 			expect(function () { new AudioPlayer({}); }).to.throw(TypeError);
 			done();
 		});
+
+		it('should throw an error if we try to construct with a window that does not have an audio context', function (done) {
+			expect(function () { new AudioPlayer({ window: {} }); }).to.throw(TypeError);
+			done();
+		});
 	});
 
 	describe('construction with an AudioContext', function() {
@@ -146,7 +151,7 @@ describe('AudioPlayer', function() {
 			MockContextClass.returns(mockAudioContext);
 
 			audioPlayer = new AudioPlayer({
-				ContextClass: MockContextClass
+				window: { AudioContext: MockContextClass }
 			});
 
 			done();

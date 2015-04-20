@@ -63,13 +63,13 @@ function clearTimers(state) {
 	return renderEvents;
 }
 
-function transformEvents(trackTransformers, animEvents) {
+function transformEvents(state, trackTransformers, animEvents) {
 	var renderEvents = {};
 
 	Object.keys(animEvents).map(function _convertAnimEvents(timeInMs) {
 		renderEvents[timeInMs] = renderEvents[timeInMs] || [];
 		animEvents[timeInMs].map(function _convertEvent(event) {
-			renderEvents[timeInMs] = renderEvents[timeInMs].concat(trackTransformers[event.track](event));
+			renderEvents[timeInMs] = renderEvents[timeInMs].concat(trackTransformers[event.track](state, event));
 		});
 	});
 
@@ -77,16 +77,19 @@ function transformEvents(trackTransformers, animEvents) {
 }
 
 function prep(midi, config) {
-	var RenderState = config.renderer.RenderState;
-	var renderState = new RenderState({
+	var RendererState = config.renderer.RendererState;
+	var rendererState = new RendererState({
 		root: config.root,
 		width: config.width,
-		height: config.height,
-		renderEvents: transformEvents(config.transformers, transformMidi(midi))
+		height: config.height
 		// TODO: do we need to set up scales?
 	});
 
-	return config.renderer(renderState);
+	rendererState = rendererState.next({
+		renderEvents: transformEvents(rendererState, config.transformers, transformMidi(midi))
+	});
+
+	return config.renderer(rendererState);
 }
 
 module.exports = {

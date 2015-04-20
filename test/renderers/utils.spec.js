@@ -25,12 +25,17 @@ describe('renderers', function () {
 
 	describe('#prep', function () {
 		var prep = renderUtils.prep;
-		var midiStub, rendererStub, trackTransformerStub, transformMidiStub, testConfig;
+		var midiStub, rendererStub, trackTransformerStub, transformMidiStub, testConfig, nextStub;
 
 		beforeEach(function (done) {
 			midiStub = sinon.stub();
 			rendererStub = sinon.stub();
-			rendererStub.RenderState = sinon.spy();
+			rendererStub.RendererState = sinon.stub();
+			nextStub = sinon.stub();
+			nextStub.returns({});
+			rendererStub.RendererState.returns({
+				next: nextStub
+			});
 			transformMidiStub = sinon.stub();
 			transformMidiStub.returns(generateAnimEvents());
 			renderUtils.__set__('transformMidi', transformMidiStub);
@@ -41,8 +46,8 @@ describe('renderers', function () {
 				height: 999,
 				renderer: rendererStub,
 				transformers: [
-					function (animEvent) { return [{ id: 'test-0-' + animEvent.id }, { id: 'test-1-' + animEvent.id }]; },
-					function (animEvent) { return [{ id: animEvent.id }]; }
+					function (state, animEvent) { return [{ id: 'test-0-' + animEvent.id }, { id: 'test-1-' + animEvent.id }]; },
+					function (state, animEvent) { return [{ id: animEvent.id }]; }
 				]
 			};
 			testRenderer = prep(midiStub, testConfig);
@@ -51,7 +56,7 @@ describe('renderers', function () {
 		});
 
 		afterEach(function (done) {
-			midiStub = rendererStub = trackTransformerStub = transformMidiStub = testConfig = null;
+			midiStub = rendererStub = trackTransformerStub = transformMidiStub = testConfig = nextStub = null;
 			done();
 		});
 
@@ -61,27 +66,37 @@ describe('renderers', function () {
 		});
 
 		describe('config.renderer.RenderState', function () {
+
 			it('should have instantiated our RenderState only once (to create initial state)', function (done) {
-				expect(rendererStub.RenderState.calledOnce).to.be.true;
+				expect(rendererStub.RendererState.calledOnce).to.be.true;
 				done();
 			});
 
 			it('should have used the render state as an object constructor', function (done) {
-				expect(rendererStub.RenderState.calledWithNew()).to.be.true;
+				expect(rendererStub.RendererState.calledWithNew()).to.be.true;
 				done();
 			});
 
-			it('should have passed in the expected state params', function (done) {
-				expect(rendererStub.RenderState.lastCall.calledWithExactly({
+			it('should have passed in the expected state params for the initial state', function (done) {
+				expect(rendererStub.RendererState.lastCall.calledWithExactly({
 					root: testConfig.root,
 					width: testConfig.width,
 					height: testConfig.height,
+				})).to.be.true;
+
+				done();
+			});
+
+			it('should have correctly transformed the render events', function (done) {
+				console.dir(nextStub.lastCall.args);
+				expect(nextStub.lastCall.calledWithExactly({
 					renderEvents: {
 						0: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }, { id: '1-100' }],
 						100: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }],
 						200: [{ id: '1-100' }]
 					}
 				})).to.be.true;
+
 				done();
 			});
 		});

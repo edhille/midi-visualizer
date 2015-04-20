@@ -27,14 +27,9 @@ function stubAudioPlayer() {
 }
 
 function stubLoadData(audioPlayerStub) {
-	var promiseStub = sinon.stub();
 	var stub = sinon.stub();
 
-	promiseStub.callsArgWith(0, audioPlayerStub);
-
-	stub.returns({
-		then: promiseStub
-	});
+	stub.callsArgWith(1, null, audioPlayerStub);
 
 	return stub;
 }
@@ -87,6 +82,7 @@ describe('midi-visualizer', function() {
 				midi: {
 					data: new Uint8Array(10)
 				},
+				window: {},
 				renderer: rendererStub
 			};
 
@@ -201,10 +197,10 @@ describe('midi-visualizer', function() {
 			done();
 		});
 
-		describe('when audio loader throws an error', function () {
+		describe('when audio loader passes error to callback', function () {
 
 			beforeEach(function (done) {
-				audioLoaderStub.throws(new TypeError('no data'));
+				loadDataStub.callsArgWith(1, 'no data');
 
 				midiVisualizer(config, function(err, visualizer) {
 					testVisualizer = visualizer;
