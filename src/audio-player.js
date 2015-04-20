@@ -12,7 +12,7 @@ function calcPlayhead(currTime, lastStartTime, startOffset, duration) {
 function AudioPlayer(params) {
 	params = params || {};
 
-	var ContextClass = params.ContextClass;
+	var ContextClass = AudioPlayer.getAudioContextFromWindow(params.window);
 
 	if (ContextClass) {
 		this.context = new ContextClass();
