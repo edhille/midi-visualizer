@@ -167,35 +167,110 @@ describe('midi-visualizer', function() {
 	});
 
 	describe('invalid instantiation', function () {
+		var testVisualizer, config, setupError;
+		var audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub, schedulerStub;
 
-		describe('when no audio data', function () {
+		beforeEach(function(done) {
+			midiParserStub = stubMidiParser();
+			audioPlayerStub = stubAudioPlayer();
+			schedulerStub = stubScheduler();
 
-			it('should pass error to callback');
+			rendererStub = stubRenderer(schedulerStub);
+			loadDataStub = stubLoadData(audioPlayerStub);
+
+			audioLoaderStub = stubAudioLoader(loadDataStub);
+
+			midiVisualizer.__set__('AudioPlayer', audioLoaderStub);
+			midiVisualizer.__set__('midiParser', midiParserStub);
+
+			config = {
+				audio: {
+					data: new Uint8Array(10)
+				},
+				midi: {
+					data: new Uint8Array(10)
+				},
+				renderer: rendererStub
+			};
+
+			done();
 		});
 
-		describe('when no midi data', function () {
-
-			it('should pass error to callback');
+		afterEach(function(done) {
+			audioLoaderStub = midiParserStub = config = testVisualizer = setupError = schedulerStub = null;
+			done();
 		});
 
-		describe('when error parsing midi', function () {
+		describe('when audio loader throws an error', function () {
 
-			it('should pass error to callback');
+			beforeEach(function (done) {
+				audioLoaderStub.throws(new TypeError('no data'));
+
+				midiVisualizer(config, function(err, visualizer) {
+					testVisualizer = visualizer;
+					setupError = err;
+					done();
+				});
+			});
+
+			it('should pass error to callback', function (done) {
+				expect(setupError).not.to.be.null;
+				done();
+			});
 		});
 
-		describe('when error in audioPlayer.loadData', function () {
+		describe('when midi parser throws an error', function () {
 
-			it('should pass error to callback');
+			beforeEach(function (done) {
+				midiParserStub.parse.throws(new TypeError('no data'));
+
+				midiVisualizer(config, function(err, visualizer) {
+					testVisualizer = visualizer;
+					setupError = err;
+					done();
+				});
+			});
+
+			it('should pass error to callback', function (done) {
+				expect(setupError).not.to.be.null;
+				done();
+			});
 		});
 
 		describe('when no renderer', function () {
-			
-			it('should pass error to callback');
+
+			beforeEach(function (done) {
+				delete config.renderer;
+
+				midiVisualizer(config, function(err, visualizer) {
+					testVisualizer = visualizer;
+					setupError = err;
+					done();
+				});
+			});
+
+			it('should pass error to callback', function (done) {
+				expect(setupError).not.to.be.null;
+				done();
+			});
 		});
 
 		describe('when renderer does not implement #prep', function () {
-			
-			it('should pass error to callback');
+
+			beforeEach(function (done) {
+				delete rendererStub.prep;
+
+				midiVisualizer(config, function(err, visualizer) {
+					testVisualizer = visualizer;
+					setupError = err;
+					done();
+				});
+			});
+
+			it('should pass error to callback', function (done) {
+				expect(setupError).not.to.be.null;
+				done();
+			});
 		});
 	});
 });
