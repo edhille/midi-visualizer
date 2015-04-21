@@ -5,7 +5,7 @@ var monad = funtils.monad;
 var partial = funtils.partial;
 var getIndex = funtils.getIndex;
 var renderUtils = require('./utils');
-var D3RenderState = require('../data-types').D3RenderState;
+var RendererState = require('../data-types').RendererState;
 
 function getId(d) { return d.id; }
 function getColor(d) { return d.color; }
@@ -102,7 +102,7 @@ function render(state, renderEvents) {
 
 	shapes.exit().transition().duration(15).attr('r', 0).remove();
 
-	return new D3RenderState({
+	return new RendererState({
 		document: state.document,
 		root: state.root,
 		width: state.width,
@@ -121,5 +121,6 @@ d3Renderer.lift('play', partial(renderUtils.play, render));
 d3Renderer.lift('pause', renderUtils.pause);
 d3Renderer.prep = renderUtils.prep;
 d3Renderer.render = render;
+d3Renderer.RendererState = RendererState;
 
 module.exports = d3Renderer;

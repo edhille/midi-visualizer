@@ -9,7 +9,6 @@ var ADT = require('../src/adt');
 var types = require('../src/data-types');
 var MidiVisualizerState = types.MidiVisualizerState;
 var RendererState = types.RendererState;
-var D3RendererState = types.D3RendererState;
 var AnimEvent = types.AnimEvent;
 var RenderEvent = types.RenderEvent;
 
@@ -150,9 +149,64 @@ describe('data-types', function() {
     describe('RendererState', function() {
         var rendererState;
 
-        describe('no params instantiation', function() {
+		describe('no params instantiation', function() {
+
+			it('should throw a TypeError', function (done) {
+				expect(function () { new RendererState(); }).to.throw(TypeError);
+				done();
+			});
+		});
+
+		describe('empty params instantiation', function() {
+
+			it('should throw a TypeError', function (done) {
+				expect(function () { new RendererState({}); }).to.throw(TypeError);
+				done();
+			});
+		});
+
+		describe('missing document param instantiation', function() {
+
+			it('should throw a TypeError', function (done) {
+				expect(function () {
+					new RendererState({
+						root: {}, 
+						width: 100,
+						height: 100,
+						renderEvents: [],
+						currentRunningEvents: [],
+						scales: []
+					});
+				}).to.throw(TypeError);
+
+				done();
+			});
+		});
+
+		describe('missing document param instantiation', function() {
+
+			it('should throw a TypeError', function (done) {
+				expect(function () {
+					new RendererState({
+						document: {}, 
+						width: 100,
+						height: 100,
+						renderEvents: [],
+						currentRunningEvents: [],
+						scales: []
+					});
+				}).to.throw(TypeError);
+
+				done();
+			});
+		});
+
+        describe('defaulted params instantiation', function() {
             beforeEach(function(done) {
-                rendererState = new RendererState();
+				rendererState = new RendererState({
+					document: {},
+					root: {}
+				});
 
                 done();
             });
@@ -160,60 +214,6 @@ describe('data-types', function() {
             afterEach(function(done) {
                 rendererState = null;
 
-                done();
-            });
-
-            it('should be an Abstract Data Type', function(done) {
-                expect(rendererState).to.be.instanceof(ADT);
-                done();
-            });
-
-            it('should have no root', function(done) {
-                expect(rendererState.root).to.be.undefined;
-                done();
-            });
-
-            it('should have a width of zero', function(done) {
-                expect(rendererState.width).to.equal(0);
-                done();
-            });
-
-            it('should have a height of zero', function(done) {
-                expect(rendererState.height).to.equal(0);
-                done();
-            });
-
-            it('should have no renderEvents', function(done) {
-                expect(rendererState.renderEvents).to.have.length(0);
-                done();
-            });
-
-            it('should have no currentRunningEvents', function(done) {
-                expect(rendererState.currentRunningEvents).to.have.length(0);
-                done();
-            });
-
-            it('should have no scales', function(done) {
-                expect(rendererState.scales).to.have.length(0);
-                done();
-            });
-        });
-
-        describe('empty params instantiation', function() {
-            beforeEach(function(done) {
-                rendererState = new RendererState({});
-
-                done();
-            });
-
-            afterEach(function(done) {
-                rendererState = null;
-
-                done();
-            });
-
-            it('should have no root', function(done) {
-                expect(rendererState.root).to.be.undefined;
                 done();
             });
 
@@ -246,95 +246,6 @@ describe('data-types', function() {
         describe('full params instantiation', function() {
             beforeEach(function(done) {
                 rendererState = new RendererState({
-                    root: {},
-                    width: 100,
-                    height: 100,
-                    renderEvents: ['not empty'],
-                    currentRunningEvents: ['not empty'],
-                    scales: ['not empty']
-                });
-
-                done();
-            });
-
-            afterEach(function(done) {
-                rendererState = null;
-
-                done();
-            });
-
-            it('should have a root', function(done) {
-                expect(rendererState.root).not.to.be.undefined;
-                done();
-            });
-
-            it('should have a width', function(done) {
-                expect(rendererState.width).to.equal(100);
-                done();
-            });
-
-            it('should have a height', function(done) {
-                expect(rendererState.height).to.equal(100);
-                done();
-            });
-
-            it('should have renderEvents', function(done) {
-                expect(rendererState.renderEvents).to.have.length(1);
-                done();
-            });
-
-            it('should have currentRunningEvents', function(done) {
-                expect(rendererState.currentRunningEvents).to.have.length(1);
-                done();
-            });
-
-            it('should have scales', function(done) {
-                expect(rendererState.scales).to.have.length(1);
-                done();
-            });
-        });
-    });
-
-    describe('D3RendererState', function() {
-        var rendererState;
-
-		describe('no params instantiation', function() {
-
-			it('should throw a TypeError', function (done) {
-				expect(function () { new D3RendererState(); }).to.throw(TypeError);
-				done();
-			});
-		});
-
-		describe('empty params instantiation', function() {
-
-			it('should throw a TypeError', function (done) {
-				expect(function () { new D3RendererState({}); }).to.throw(TypeError);
-				done();
-			});
-		});
-
-		describe('missing document param instantiation', function() {
-
-			it('should throw a TypeError', function (done) {
-				expect(function () {
-					new D3RendererState({
-						root: {}, 
-						width: 100,
-						height: 100,
-						renderEvents: [],
-						currentRunningEvents: [],
-						scales: []
-					});
-				}).to.throw(TypeError);
-
-				done();
-			});
-		});
-
-        describe('full params instantiation', function() {
-            beforeEach(function(done) {
-                rendererState = new D3RendererState({
 					document: {},
                     root: {},
                     width: 100,
@@ -363,12 +274,12 @@ describe('data-types', function() {
                 done();
             });
 
-            it('should have a width of zero', function(done) {
+            it('should have a width', function(done) {
                 expect(rendererState.width).to.equal(100);
                 done();
             });
 
-            it('should have a height of zero', function(done) {
+            it('should have a height', function(done) {
                 expect(rendererState.height).to.equal(100);
                 done();
             });
