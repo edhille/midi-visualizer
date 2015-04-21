@@ -49,5 +49,3 @@ module.exports = function initMidiVisualizer(config, cb) {
 		cb(e.stack);
 	}
 };
-
-module.exports.types = require('./data-types');
