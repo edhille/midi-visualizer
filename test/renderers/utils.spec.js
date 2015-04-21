@@ -25,20 +25,28 @@ describe('renderers', function () {
 
 	describe('#prep', function () {
 		var prep = renderUtils.prep;
-		var midiStub, rendererStub, trackTransformerStub, transformMidiStub, testConfig, nextStub;
+		var midiStub, rendererStub, transformMidiStub, testConfig, nextStub, scalesGeneratorStub;
 
 		beforeEach(function (done) {
 			midiStub = sinon.stub();
+
 			rendererStub = sinon.stub();
 			rendererStub.RendererState = sinon.stub();
+
 			nextStub = sinon.stub();
 			nextStub.returns({});
+
 			rendererStub.RendererState.returns({
 				next: nextStub
 			});
+
 			transformMidiStub = sinon.stub();
 			transformMidiStub.returns(generateAnimEvents());
+
+			scalesGeneratorStub = sinon.stub();
+
 			renderUtils.__set__('transformMidi', transformMidiStub);
+
 			testConfig = {
 				document: {},
 				root: 'TEST-ROOT',
@@ -48,15 +56,17 @@ describe('renderers', function () {
 				transformers: [
 					function (state, animEvent) { return [{ id: 'test-0-' + animEvent.id }, { id: 'test-1-' + animEvent.id }]; },
 					function (state, animEvent) { return [{ id: animEvent.id }]; }
-				]
+				],
+				scalesGenerator: scalesGeneratorStub
 			};
+
 			testRenderer = prep(midiStub, testConfig);
 
 			done();
 		});
 
 		afterEach(function (done) {
-			midiStub = rendererStub = trackTransformerStub = transformMidiStub = testConfig = nextStub = null;
+			midiStub = rendererStub = transformMidiStub = testConfig = nextStub = scalesGeneratorStub = null;
 			done();
 		});
 
@@ -79,6 +89,7 @@ describe('renderers', function () {
 
 			it('should have passed in the expected state params for the initial state', function (done) {
 				expect(rendererStub.RendererState.lastCall.calledWithExactly({
+					document: testConfig.document,
 					root: testConfig.root,
 					width: testConfig.width,
 					height: testConfig.height,
@@ -88,14 +99,19 @@ describe('renderers', function () {
 			});
 
 			it('should have correctly transformed the render events', function (done) {
-				console.dir(nextStub.lastCall.args);
-				expect(nextStub.lastCall.calledWithExactly({
+				expect(nextStub.lastCall.calledWithMatch({
 					renderEvents: {
 						0: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }, { id: '1-100' }],
 						100: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }],
 						200: [{ id: '1-100' }]
 					}
 				})).to.be.true;
+
+				done();
+			});
+
+			it('should have called our scaleGenerator', function (done) {
+				expect(scalesGeneratorStub.callCount).to.be.equal(1);
 
 				done();
 			});
@@ -116,6 +132,7 @@ describe('renderers', function () {
 			});
 			renderFnSpy = sinon.spy();
 			rendererState = new RendererState({
+				document: {},
 				root: 'TEST-ROOT',
 				renderEvents: {
 					0: [],

@@ -77,16 +77,21 @@ function transformEvents(state, trackTransformers, animEvents) {
 }
 
 function prep(midi, config) {
+	var animEvents = transformMidi(midi);
 	var RendererState = config.renderer.RendererState;
 	var rendererState = new RendererState({
+		document: config.document,
 		root: config.root,
 		width: config.width,
 		height: config.height
-		// TODO: do we need to set up scales?
 	});
 
 	rendererState = rendererState.next({
-		renderEvents: transformEvents(rendererState, config.transformers, transformMidi(midi))
+		scales: config.scalesGenerator(rendererState)
+	});
+
+	rendererState = rendererState.next({
+		renderEvents: transformEvents(rendererState, config.transformers, animEvents)
 	});
 
 	return config.renderer(rendererState);
