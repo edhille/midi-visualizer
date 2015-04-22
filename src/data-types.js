@@ -37,6 +37,18 @@ function RendererState(params) {
 
 ADT.inherit(RendererState, ADT);
 
+function D3RendererState(params) {
+	params = params || {};
+	
+	if(!params.svg) throw new TypeError('svg is required');
+
+	this.svg = params.svg;
+
+	RendererState.call(this, params);
+}
+
+ADT.inherit(D3RendererState, RendererState);
+
 function AnimEvent(params) {
 	params = params || {};
 
@@ -71,14 +83,34 @@ function RenderEvent(params) {
 
 	this.length = params.length; // how long this event should live
 
+	this.color = params.color || '#FFFFFF';
+
 	ADT.call(this);
 }
 
 ADT.inherit(RenderEvent, ADT);
 
+function D3RenderEvent(params) {
+	params = params || {};
+
+	if (typeof params.path !== 'undefined' && typeof params.radius !== 'undefined') throw new TypeError('cannot have path and radius');
+	if (typeof params.path === 'undefined' && typeof params.radius === 'undefined') throw new TypeError('no path or radius passed in');
+	if (typeof params.scale === 'undefined' && typeof params.path !== 'undefined') throw new TypeError('scale required if path passed in');
+
+	this.path = params.path;
+	this.radius = params.radius;
+	this.scale = params.scale;
+
+	RenderEvent.call(this, params);
+}
+
+ADT.inherit(D3RenderEvent, RenderEvent);
+
 module.exports = {
 	MidiVisualizerState: MidiVisualizerState,
 	RendererState: RendererState,
+	D3RendererState: D3RendererState,
 	AnimEvent: AnimEvent,
-	RenderEvent: RenderEvent
+	RenderEvent: RenderEvent,
+	D3RenderEvent: D3RenderEvent
 };

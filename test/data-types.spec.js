@@ -9,8 +9,10 @@ var ADT = require('../src/adt');
 var types = require('../src/data-types');
 var MidiVisualizerState = types.MidiVisualizerState;
 var RendererState = types.RendererState;
+var D3RendererState = types.D3RendererState;
 var AnimEvent = types.AnimEvent;
 var RenderEvent = types.RenderEvent;
+var D3RenderEvent = types.D3RenderEvent;
 
 describe('data-types', function() {
 
@@ -301,6 +303,41 @@ describe('data-types', function() {
         });
     });
 
+	describe('D3RendererState', function () {
+		var rendererState;
+		
+		beforeEach(function (done) {
+			rendererState = new D3RendererState({
+				window: {},
+				document: {},
+				root: {},
+				svg: 'TEST-SVG'
+			});
+
+			done();
+		});
+
+		it('should be a RendererState', function (done) {
+			expect(rendererState).to.be.instanceof(RendererState);
+			done();
+		});
+
+		it('should have an svg property', function (done) {
+			expect(rendererState.svg).to.equal('TEST-SVG');
+			done();
+		});
+
+		it('should throw an error if no params', function (done) {
+			expect(function () { new D3RendererState(); }).to.throw(TypeError);
+			done();
+		});
+
+		it('should throw an error if empty params', function (done) {
+			expect(function () { new D3RendererState({}); }).to.throw(TypeError);
+			done();
+		});
+	});
+
     describe('AnimEvent', function() {
         var animEvent;
 
@@ -525,6 +562,102 @@ describe('data-types', function() {
 
 			it('should have defaulted z to zero', function (done) {
 				expect(renderEvent.z).to.equal(0);
+				done();
+			});
+
+			it('should have defaulted color to white', function (done) {
+				expect(renderEvent.color).to.equal('#FFFFFF');
+				done();
+			});
+		});
+	});
+
+	describe('D3RenderEvent', function () {
+
+		it('should throw an error with no params', function (done) {
+			expect(function () { new D3RenderEvent(); }).to.throw(TypeError);
+			done();
+		});
+
+		it('should throw an error with empty params', function (done) {
+			expect(function () { new D3RenderEvent({}); }).to.throw(TypeError);
+			done();
+		});
+
+		describe('with a path, no radius and no scale', function () {
+			var params;
+
+			beforeEach(function (done) {
+				params = {
+					path: 'TEST-PATH'
+				};
+				done();
+			});
+
+			it('should throw an error', function (done) {
+				expect(function () { new D3RenderEvent(params); }).to.throw(TypeError);
+				done();
+			});
+		});
+
+		describe('with a radius (but not a path) and no scale', function () {
+			var params;
+			
+			beforeEach(function (done) {
+				params = {
+					id: 'TEST-ID',
+					subtype: 'TEST-SUBTYPE',
+					x: 0,
+					y: 0,
+					length: 0,
+					radius: 3.14
+				};
+
+				done();
+			});
+
+			it('should not throw an error', function (done) {
+				expect(function () { new D3RenderEvent(params); }).not.to.throw(TypeError);
+				done();
+			});
+		});
+
+		describe('with a path and radius', function () {
+			var params;
+			
+			beforeEach(function (done) {
+				params = {
+					path: 'TEST-PATH',
+					radius: 3.14
+				};
+				done();
+			});
+
+			it('should throw an error', function (done) {
+				expect(function () { new D3RenderEvent(params); }).to.throw(TypeError);
+				done();
+			});
+		});
+				
+		describe('with a path and a scale', function () {
+			var params;
+			
+			beforeEach(function (done) {
+				params = {
+					id: 'TEST-ID',
+					subtype: 'TEST-SUBTYPE',
+					x: 0,
+					y: 0,
+					length: 0,
+					path: 'TEST-PATH',
+					scale: 'TEST-LENGTH'
+				};
+
+				done();
+			});
+
+			it('should not throw error', function (done) {
+				expect(function () { new D3RenderEvent(params); }).not.to.throw(TypeError);
 				done();
 			});
 		});
