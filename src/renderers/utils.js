@@ -77,18 +77,8 @@ function transformEvents(state, trackTransformers, animEvents) {
 }
 
 function prep(midi, config) {
+	var rendererState = config.renderer.init(midi, config);
 	var animEvents = transformMidi(midi);
-	var RendererState = config.renderer.RendererState;
-	var rendererState = new RendererState({
-		document: config.document,
-		root: config.root,
-		width: config.width,
-		height: config.height
-	});
-
-	rendererState = rendererState.next({
-		scales: config.scalesGenerator(rendererState)
-	});
 
 	rendererState = rendererState.next({
 		renderEvents: transformEvents(rendererState, config.transformers, animEvents)

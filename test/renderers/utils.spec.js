@@ -25,25 +25,19 @@ describe('renderers', function () {
 
 	describe('#prep', function () {
 		var prep = renderUtils.prep;
-		var midiStub, rendererStub, transformMidiStub, testConfig, nextStub, scalesGeneratorStub;
+		var midiStub, rendererStub, transformMidiStub, testConfig, nextStub;
 
 		beforeEach(function (done) {
 			midiStub = sinon.stub();
 
 			rendererStub = sinon.stub();
-			rendererStub.RendererState = sinon.stub();
+			rendererStub.init = sinon.stub();
+			rendererStub.init.returns(new RendererState({ window: {}, document: {}, root: {} }));
 
-			nextStub = sinon.stub();
-			nextStub.returns({});
-
-			rendererStub.RendererState.returns({
-				next: nextStub
-			});
+			nextStub = sinon.spy(RendererState.prototype, 'next');
 
 			transformMidiStub = sinon.stub();
 			transformMidiStub.returns(generateAnimEvents());
-
-			scalesGeneratorStub = sinon.stub();
 
 			renderUtils.__set__('transformMidi', transformMidiStub);
 
@@ -56,8 +50,7 @@ describe('renderers', function () {
 				transformers: [
 					function (state, animEvent) { return [{ id: 'test-0-' + animEvent.id }, { id: 'test-1-' + animEvent.id }]; },
 					function (state, animEvent) { return [{ id: animEvent.id }]; }
-				],
-				scalesGenerator: scalesGeneratorStub
+				]
 			};
 
 			testRenderer = prep(midiStub, testConfig);
@@ -66,7 +59,8 @@ describe('renderers', function () {
 		});
 
 		afterEach(function (done) {
-			midiStub = rendererStub = transformMidiStub = testConfig = nextStub = scalesGeneratorStub = null;
+			nextStub.restore();
+			midiStub = rendererStub = transformMidiStub = testConfig = nextStub = null;
 			done();
 		});
 
@@ -75,46 +69,25 @@ describe('renderers', function () {
 			done();
 		});
 
-		describe('config.renderer.RenderState', function () {
+		it('should have correctly transformed the render events', function (done) {
+			expect(nextStub.lastCall.calledWithMatch({
+				renderEvents: {
+					0: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }, { id: '1-100' }],
+					100: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }],
+					200: [{ id: '1-100' }]
+				}
+			})).to.be.true;
 
-			it('should have instantiated our RenderState only once (to create initial state)', function (done) {
-				expect(rendererStub.RendererState.calledOnce).to.be.true;
-				done();
-			});
+			done();
+		});
 
-			it('should have used the render state as an object constructor', function (done) {
-				expect(rendererStub.RendererState.calledWithNew()).to.be.true;
-				done();
-			});
+		it('should have called our init with midi data, width, and height', function (done) {
+			expect(rendererStub.init.lastCall.calledWithExactly(
+				midiStub,
+				testConfig
+			)).to.be.true;
 
-			it('should have passed in the expected state params for the initial state', function (done) {
-				expect(rendererStub.RendererState.lastCall.calledWithExactly({
-					document: testConfig.document,
-					root: testConfig.root,
-					width: testConfig.width,
-					height: testConfig.height,
-				})).to.be.true;
-
-				done();
-			});
-
-			it('should have correctly transformed the render events', function (done) {
-				expect(nextStub.lastCall.calledWithMatch({
-					renderEvents: {
-						0: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }, { id: '1-100' }],
-						100: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }],
-						200: [{ id: '1-100' }]
-					}
-				})).to.be.true;
-
-				done();
-			});
-
-			it('should have called our scaleGenerator', function (done) {
-				expect(scalesGeneratorStub.callCount).to.be.equal(1);
-
-				done();
-			});
+			done();
 		});
 	});
 

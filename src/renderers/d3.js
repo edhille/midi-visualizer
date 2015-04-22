@@ -1,11 +1,12 @@
 'use strict';
 
+var d3 = require('d3');
 var funtils = require('funtils');
 var monad = funtils.monad;
 var partial = funtils.partial;
 var getIndex = funtils.getIndex;
 var renderUtils = require('./utils');
-var RendererState = require('../data-types').RendererState;
+var D3RendererState = require('../data-types').D3RendererState;
 
 function getId(d) { return d.id; }
 function getColor(d) { return d.color; }
@@ -102,16 +103,69 @@ function render(state, renderEvents) {
 
 	shapes.exit().transition().duration(15).attr('r', 0).remove();
 
-	return new RendererState({
-		document: state.document,
-		root: state.root,
-		width: state.width,
-		height: state.height,
-		svg: svg,
-		scales: state.scales,
-		animEvents: state.animEvents,
-		renderEvents: state.renderEvents,
+	return state.next({
 		currentRunningEvents: currentRunningEvents 
+	});
+}
+
+function maxNote(currMaxNote, event) {
+	return currMaxNote > event.note ? currMaxNote : event.note;
+}
+
+function isNoteToggleEvent(event) {
+	return event.type === 'note';
+}
+
+function isNoteOnEvent(event) {
+	return isNoteToggleEvent(event) && event.subtype === 'on';
+}
+
+function prepDOM(midi, config) {
+	// TODO: Handle resize...
+	var w = config.window;
+	var d = config.document;
+	var e = d.documentElement;
+	var x = config.width || w.innerWidth || e.clientWidth;
+	var y = config.height || w.innerHeight|| e.clientHeight;
+
+	if (!x) throw new TypeError('unable to calculate width');
+	if (!y) throw new TypeError('unable to calculate height');
+
+	var svg = d3.select('body').append('svg');
+	svg.attr('id', 'stage');
+
+	var scales = [];
+
+	midi.tracks.forEach(function (track, index) {
+		// if (!track.hasNotes) return;
+
+		var scale = scales[index] = {
+			x: d3.scale.linear(),
+			y: d3.scale.linear(),
+			note: d3.scale.linear()
+		};
+
+		scale.y.range([25, y]);
+		scale.y.domain([0, track.events.filter(isNoteOnEvent).reduce(maxNote, 0)]);
+
+		scale.x.range([25, x]);
+		scale.x.domain([0, track.events.filter(isNoteOnEvent).reduce(maxNote, 0)]);
+
+		scale.note.range([50, 100]);
+		scale.note.domain(scale.x.domain());
+
+		scale.hue = d3.scale.linear().range([0,360]).domain([0,8]);
+		scale.velocity = d3.scale.linear().range([30,60]).domain([0, 256]);
+	});
+
+	return new D3RendererState({
+		window: w,
+		document: d,
+		root: config.root,
+		width: x,
+		height: y,
+		scales: config.scalesTuner ? config.scalesTuner(scales, x, y) : scales,
+		svg: svg
 	});
 }
 
@@ -120,7 +174,7 @@ var d3Renderer = monad();
 d3Renderer.lift('play', partial(renderUtils.play, render));
 d3Renderer.lift('pause', renderUtils.pause);
 d3Renderer.prep = renderUtils.prep;
+d3Renderer.init = prepDOM;
 d3Renderer.render = render;
-d3Renderer.RendererState = RendererState;
 
 module.exports = d3Renderer;
