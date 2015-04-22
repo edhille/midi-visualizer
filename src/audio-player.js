@@ -110,7 +110,7 @@ AudioPlayer.prototype.loadData = function loadData(audioData, callback) { /* jsh
 		self.isLoading = false;
 		self.isLoaded = true;
 
-		callback(null);
+		callback(null, self);
 	}
 };
 
