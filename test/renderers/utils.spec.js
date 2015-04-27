@@ -32,7 +32,7 @@ describe('renderers', function () {
 
 			rendererStub = sinon.stub();
 			rendererStub.init = sinon.stub();
-			rendererStub.init.returns(new RendererState({ window: {}, document: {}, root: {} }));
+			rendererStub.init.returns(new RendererState({ window: { document: {} }, root: {} }));
 
 			nextStub = sinon.spy(RendererState.prototype, 'next');
 
@@ -105,7 +105,7 @@ describe('renderers', function () {
 			});
 			renderFnSpy = sinon.spy();
 			rendererState = new RendererState({
-				document: {},
+				window: { document: {} },
 				root: 'TEST-ROOT',
 				renderEvents: {
 					0: [],
@@ -124,11 +124,6 @@ describe('renderers', function () {
 
 		it('should have renderEvents, by time', function (done) {
 			expect(state.renderEvents).to.have.keys(['0', '100', '200']);
-			done();
-		});
-
-		it('should have currentRunningEvents', function (done) {
-			expect(state.currentRunningEvents).to.have.length(0);
 			done();
 		});
 
