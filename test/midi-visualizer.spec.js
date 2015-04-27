@@ -52,7 +52,7 @@ function stubRenderer(schedulerStub) {
 
 function stubScheduler() {
 	return sinon.stub({
-		schedule: function() {}
+		play: function() {}
 	});
 }
 
@@ -155,8 +155,8 @@ describe('midi-visualizer', function() {
 				done();
 			});
 
-			it('should ask renderer to schedule animations', function(done) {
-				expect(schedulerStub.schedule.called).to.be.true;
+			it('should ask renderer to play animations', function(done) {
+				expect(schedulerStub.play.called).to.be.true;
 				done();
 			});
 		});

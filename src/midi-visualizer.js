@@ -11,7 +11,8 @@ function playVisualizer(state) {
 
 	return state.next({
 		isPlaying: true,
-		renderer: state.renderer.schedule(state.audioPlayer.getPlayheadTime())
+		// TODO: get trial implementation to implement schedule...
+		renderer: state.renderer.play(state.audioPlayer.getPlayheadTime())
 	});
 }
 
