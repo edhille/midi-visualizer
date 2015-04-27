@@ -167,7 +167,7 @@ describe('data-types', function() {
 			});
 		});
 
-		describe('missing document param instantiation', function() {
+		describe('missing window param instantiation', function() {
 
 			it('should throw a TypeError', function (done) {
 				expect(function () {
@@ -176,7 +176,6 @@ describe('data-types', function() {
 						width: 100,
 						height: 100,
 						renderEvents: [],
-						currentRunningEvents: [],
 						scales: []
 					});
 				}).to.throw(TypeError);
@@ -185,16 +184,15 @@ describe('data-types', function() {
 			});
 		});
 
-		describe('missing document param instantiation', function() {
+		describe('window param is missing document property instantiation', function() {
 
 			it('should throw a TypeError', function (done) {
 				expect(function () {
 					new RendererState({
-						document: {}, 
+						window: {}, 
 						width: 100,
 						height: 100,
 						renderEvents: [],
-						currentRunningEvents: [],
 						scales: []
 					});
 				}).to.throw(TypeError);
@@ -206,7 +204,7 @@ describe('data-types', function() {
         describe('defaulted params instantiation', function() {
             beforeEach(function(done) {
 				rendererState = new RendererState({
-					document: {},
+					window: { document: {} },
 					root: {}
 				});
 
@@ -234,11 +232,6 @@ describe('data-types', function() {
                 done();
             });
 
-            it('should have no currentRunningEvents', function(done) {
-                expect(rendererState.currentRunningEvents).to.have.length(0);
-                done();
-            });
-
             it('should have no scales', function(done) {
                 expect(rendererState.scales).to.have.length(0);
                 done();
@@ -248,12 +241,11 @@ describe('data-types', function() {
         describe('full params instantiation', function() {
             beforeEach(function(done) {
                 rendererState = new RendererState({
-					document: {},
+					window: { document: {} },
                     root: {},
                     width: 100,
                     height: 100,
                     renderEvents: ['not empty'],
-                    currentRunningEvents: ['not empty'],
                     scales: ['not empty']
                 });
 
@@ -291,11 +283,6 @@ describe('data-types', function() {
                 done();
             });
 
-            it('should have currentRunningEvents', function(done) {
-                expect(rendererState.currentRunningEvents).to.have.length(1);
-                done();
-            });
-
             it('should have scales', function(done) {
                 expect(rendererState.scales).to.have.length(1);
                 done();
@@ -308,8 +295,7 @@ describe('data-types', function() {
 		
 		beforeEach(function (done) {
 			rendererState = new D3RendererState({
-				window: {},
-				document: {},
+				window: { document: {} },
 				root: {},
 				svg: 'TEST-SVG'
 			});
