@@ -17,7 +17,7 @@ function inherit(subClass, superClass) {
 	subClass.inherit = inherit;
 }
 
-function cloneIt(obj) {
+function makeCloneable(obj) {
 	var clone = {};
 
 	Object.keys(obj).map(function openUpProp(prop) {
@@ -41,7 +41,9 @@ ADT.prototype.next = function next(changes) {
 	if (!changes || Object.keys(changes).length === 0) {
 		return this;
 	} else {
-		clone = _.merge(cloneIt(this), changes);
+		clone = _.merge(makeCloneable(this), changes, function (a, b) {
+			return b;
+		});
 
 		return new this.constructor(clone);
 	}

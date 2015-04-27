@@ -1,4 +1,5 @@
-/* globals Uint8Array: true */
+/* jshint expr: true */
+/* globals describe: true, beforeEach: true, afterEach: true, it: true */
 'use strict';
 
 var chai = require('chai');
@@ -156,7 +157,7 @@ describe('Abstract Data Type', function () {
 			});
 		});
 
-		describe('with changes', function () {
+		describe('with simple property changes', function () {
 			var origInstance;
 			var clonedInstance;
 
@@ -181,6 +182,42 @@ describe('Abstract Data Type', function () {
 
 			it('should have changed value in cloned instance', function (done) {
 				expect(clonedInstance.original).to.equal('changed');
+
+				done();
+			});
+
+			it('should have property that was not modified', function (done) {
+				expect(clonedInstance.another).to.equal('thing');
+
+				done();
+			});
+		});
+
+		describe('with array property changes', function () {
+			var origInstance;
+			var clonedInstance;
+
+			beforeEach(function (done) {
+				origInstance = new Child({ original: ['value'], another: 'thing' });
+				clonedInstance = origInstance.next({ original: ['changed'] });
+
+				done();
+			});
+
+			afterEach(function (done) {
+				origInstance = clonedInstance = null;
+
+				done();
+			});
+
+			it('should not have original instance equaling cloned instance', function (done) {
+				expect(origInstance).not.to.equal(clonedInstance);
+
+				done();
+			});
+
+			it('should have changed value in cloned instance', function (done) {
+				expect(clonedInstance.original).not.to.have.same.members(origInstance.original);
 
 				done();
 			});
