@@ -4,7 +4,6 @@ var d3 = require('d3');
 var funtils = require('funtils');
 var monad = funtils.monad;
 var partial = funtils.partial;
-var getIndex = funtils.getIndex;
 var renderUtils = require('./utils');
 var D3RendererState = require('../data-types').D3RendererState;
 
@@ -56,7 +55,9 @@ function transform(datum) {
       case 'path':
          var scale = getScale(datum);
          var box = this.getBBox();
-         var newTransform = 'matrix(' + scale + ', 0, 0, ' + scale + ', ' + x - box.width*scale/2 + ', ' + y - box.height*scale/2 + ')'; 
+		 // jshint singleGroups: false
+		 // (the grouping is actually needed here...)
+         var newTransform = 'matrix(' + scale + ', 0, 0, ' + scale + ', ' + (x - box.width*scale/2) + ', ' + (y - box.height*scale/2) + ')'; 
 
          this.setAttribute('transform', newTransform);
          break;
@@ -66,50 +67,60 @@ function transform(datum) {
    }
 }
 
-function render(state, renderEvents) {
-	// TODO: a lot of this is common with renderThreeJs...
-	var svg = state.svg;
-	var currentRunningEvents = state.currentRunningEvents;
-	var l = renderEvents.length;
-	var i = 0;
-	var index = -1;
-	var datum = {};
-	var shapes = {};
-	var enter = {};
+function render(state, currentRunningEvents, renderEvents) {
 
-	for (i = 0; i < l; ++i) {
-		datum = renderEvents[i];
-		index = getIndex(currentRunningEvents, datum);
+	renderEvents.forEach(function (datum) {
+		var id = datum.id;
+		var matchIndices = currentRunningEvents.reduce(function (matchIndices, event, index) { return event.id === id ? matchIndices.concat([index]) : matchIndices; }, []);
 
 		if (datum.subtype === 'on') {
-			if (index === -1) currentRunningEvents.push(datum);
-		} else if (index > -1) {
-			// NOTE: this is still returning an array...
-			currentRunningEvents.splice(index, 1);
+			/* istanbul ignore else */
+			if (matchIndices.length === 0) currentRunningEvents.push(datum);
+		} else if (datum.subtype === 'off') {
+			/* istanbul ignore else */
+			currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
+				return -1 === matchIndices.indexOf(index);
+			});
+		} else /* istanbuld ignore else */ if (matchIndices.length > 0) {
+			console.error('neither on nor off....');
+			currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
+				return -1 === matchIndices.indexOf(index);
+			});
 		}
-	}
-
-	if (currentRunningEvents.length > 20) throw new Error(currentRunningEvents);
-
-	shapes = svg.selectAll('.shape').data(currentRunningEvents, getId);
-
-	// enter 
-	enter = shapes.enter().append(partial(getShape, state.document)); 
-	enter.attr('fill', getColor);
-	enter.attr('id', getId);
-	enter.each(sizeElem);
-	enter.each(transform);
-	// enter.transition('.drum').duration(shrinkDuration).attr('r', 0);
-
-	shapes.exit().transition().duration(15).attr('r', 0).remove();
-
-	return state.next({
-		currentRunningEvents: currentRunningEvents 
 	});
+
+	// TODO: remove when done debugging
+	/* istanbul ignore if */
+	if (currentRunningEvents.length > 20) console.error('More than 20 concurrent running events (' + currentRunningEvents.length + ') is something wrong?');
+
+	var timestamp = state.window.performance.now();
+	state.window.requestAnimationFrame(function (now) {
+		var delta = now - timestamp;
+		var shapes = state.svg.selectAll('.shape').data(currentRunningEvents, getId);
+
+		if (delta < 15) {
+			var enter = shapes.enter().append(partial(getShape, state.document)); 
+			enter.attr('fill', getColor);
+			enter.attr('id', getId);
+			enter.each(sizeElem);
+			enter.each(transform);
+			// enter.transition('.drum').duration(shrinkDuration).attr('r', 0);
+
+			shapes.exit().transition().duration(15).attr('r', 0).remove();
+		} else {
+			shapes.remove();
+		}
+	});
+
+	return currentRunningEvents;
 }
 
 function maxNote(currMaxNote, event) {
 	return currMaxNote > event.note ? currMaxNote : event.note;
+}
+
+function minNote(currMinNote, event) {
+	return currMinNote < event.note ? currMinNote : event.note;
 }
 
 function isNoteToggleEvent(event) {
@@ -123,7 +134,7 @@ function isNoteOnEvent(event) {
 function prepDOM(midi, config) {
 	// TODO: Handle resize...
 	var w = config.window;
-	var d = config.document;
+	var d = w.document;
 	var e = d.documentElement;
 	var x = config.width || w.innerWidth || e.clientWidth;
 	var y = config.height || w.innerHeight|| e.clientHeight;
@@ -137,7 +148,7 @@ function prepDOM(midi, config) {
 	var scales = [];
 
 	midi.tracks.forEach(function (track, index) {
-		// if (!track.hasNotes) return;
+		if (track.events.length === 0) return;
 
 		var scale = scales[index] = {
 			x: d3.scale.linear(),
@@ -145,11 +156,15 @@ function prepDOM(midi, config) {
 			note: d3.scale.linear()
 		};
 
+		var onNotes = track.events.filter(isNoteOnEvent);
+		var highestNote = onNotes.reduce(maxNote, 0);
+		var lowestNote = onNotes.reduce(minNote, highestNote);
+
 		scale.y.range([25, y]);
-		scale.y.domain([0, track.events.filter(isNoteOnEvent).reduce(maxNote, 0)]);
+		scale.y.domain([lowestNote, highestNote]);
 
 		scale.x.range([25, x]);
-		scale.x.domain([0, track.events.filter(isNoteOnEvent).reduce(maxNote, 0)]);
+		scale.x.domain([lowestNote, highestNote]);
 
 		scale.note.range([50, 100]);
 		scale.note.domain(scale.x.domain());
@@ -160,7 +175,6 @@ function prepDOM(midi, config) {
 
 	return new D3RendererState({
 		window: w,
-		document: d,
 		root: config.root,
 		width: x,
 		height: y,
