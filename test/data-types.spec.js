@@ -189,6 +189,7 @@ describe('data-types', function() {
 			it('should throw a TypeError', function (done) {
 				expect(function () {
 					new RendererState({
+						root: {},
 						window: {}, 
 						width: 100,
 						height: 100,

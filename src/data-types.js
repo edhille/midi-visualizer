@@ -21,9 +21,8 @@ ADT.inherit(MidiVisualizerState, ADT);
 function RendererState(params) {
 	params = params || {};
 
-	if (!params.window) throw new TypeError('window required');
 	if (!params.root) throw new TypeError('root required');
-
+	if (!params.window) throw new TypeError('window required');
 	if (!params.window.document) throw new TypeError('window must have document property');
 
 	this.window = params.window;
