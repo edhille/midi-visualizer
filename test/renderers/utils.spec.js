@@ -89,6 +89,23 @@ describe('renderers', function () {
 
 			done();
 		});
+
+		describe('when transform function missing for a track', function () {
+
+			it('should log to console.error', function (done) {
+				var consoleStub = {
+					error: sinon.spy()
+				};
+				renderUtils.__with__({
+					console: consoleStub
+				})(function () {
+					testConfig.transformers.pop();
+					testRenderer = prep(midiStub, testConfig);
+					expect(consoleStub.error.calledWithMatch(/no transform/i)).to.be.true;
+					done();
+				});
+			});
+		});
 	});
 
 	describe('#play (inital call)', function () {
@@ -98,6 +115,7 @@ describe('renderers', function () {
 		beforeEach(function (done) {
 			timeoutSpy = sinon.stub();
 			timeoutSpy.returns(1);
+			timeoutSpy.callsArgWith(0, 'TEST-STATE', 'TEST-EVENTS');
 			clearSpy = sinon.spy();
 			renderUtils.__set__({
 				setTimeout: timeoutSpy,
@@ -134,6 +152,11 @@ describe('renderers', function () {
 
 		it('should have called setTimeout for each group of events', function (done) {
 			expect(timeoutSpy.callCount).to.equal(3);
+			done();
+		});
+
+		it('should have called renderFn with ???', function (done) {
+			expect(renderFnSpy.calledWith('TEST-STATE', [], 'TEST-EVENTS')).to.be.true;
 			done();
 		});
 
