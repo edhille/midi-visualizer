@@ -77,15 +77,11 @@ function render(state, currentRunningEvents, renderEvents) {
 			/* istanbul ignore else */
 			if (matchIndices.length === 0) currentRunningEvents.push(datum);
 		} else if (datum.subtype === 'off') {
-			/* istanbul ignore else */
 			currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
 				return -1 === matchIndices.indexOf(index);
 			});
-		} else /* istanbuld ignore else */ if (matchIndices.length > 0) {
-			console.error('neither on nor off....');
-			currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
-				return -1 === matchIndices.indexOf(index);
-			});
+		} else {
+			console.error('unknown render event subtype "' + datum.subtype + '"');
 		}
 	});
 

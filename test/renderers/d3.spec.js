@@ -124,7 +124,7 @@ describe('renderers.d3', function () {
 			});
 		});
 
-		describe.only('when turning off only one event', function () {
+		describe('when turning off only one event', function () {
 			
 			beforeEach(function (done) {
 				nowStub.returns(0);
@@ -158,10 +158,62 @@ describe('renderers.d3', function () {
 			});
 
 			it('should have removed one event from currentRunningEvents (passing only one to svg.data)', function (done) {
-				console.log('callCount', mockData.callCount);
 				expect(mockData.lastCall.args[0]).to.have.length(1);
 				done();
 			});
+		});
+
+		describe('when an event that has an unknow subptye is passed in', function () {
+			var consoleStub;
+
+			beforeEach(function (done) {
+				consoleStub = {
+					error: sinon.spy()
+				};
+				nowStub.returns(0);
+				rafStub.callsArgWith(0, 14);
+				var renderEvents = [
+					new D3RenderEvent({
+						id: 'TEST-ONE',
+						subtype: 'BAD',
+						length: 1,
+						x: 0,
+						y: 0,
+						radius: 1,
+						color: 'blue'
+					})
+				];
+				d3Renderer.__with__({
+					console: consoleStub
+				})(function () {
+					mockState = renderFn(mockState, [], renderEvents);
+					done();
+				});
+			});
+
+			it('should log to console.error', function (done) {
+				expect(consoleStub.error.calledWithMatch(/unknown render event subtype/)).to.be.true;
+				done();
+			});
+		});
+	});
+
+	describe('#init', function () {
+
+		describe('when unable to calculate width', function () {
+
+		});
+
+		describe('when unable to calculate height', function () {
+			
+		});
+
+		describe('when no configured scalesTuner', function () {
+
+		});
+
+		describe('when there is a configure scalesTunner', function () {
+			
 		});
 	});
 });
