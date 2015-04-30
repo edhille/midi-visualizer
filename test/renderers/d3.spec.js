@@ -135,9 +135,12 @@ function createMockD3() {
 describe('renderers.d3', function () {
 
 	describe('#render', function () {
-		var renderFn, mockState, nowStub, rafStub, mockData, mockSvg, removeStub, eachStub;
+		var renderFn, mockState, nowStub, rafStub, mockData, mockSvg, removeStub, eachStub, mockCircle, mockShape, mockDatum;
 
 		beforeEach(function (done) {
+			mockCircle =  { tagName: 'circle', setAttribute: sinon.spy() };
+			mockShape = { tagName: 'shape', setAttribute: sinon.spy() };
+			mockDatum = { id: 'TEST-ID', x: 100, y: 200 };
 			var svgMocks = createMockSvg();
 			mockSvg = svgMocks.svgMock;
 			mockData = svgMocks.dataMock;
@@ -145,8 +148,8 @@ describe('renderers.d3', function () {
 			rafStub = sinon.stub();
 			removeStub = svgMocks.removeMock;
 			eachStub = svgMocks.eachMock;
-			eachStub.onFirstCall().callsArgOnWith(0, { tagName: 'circle', setAttribute: sinon.spy() }, { id: 'TEST-ID', x: 100, y: 200 });
-			eachStub.onSecondCall().callsArgOnWith(0, { tagName: 'circle', setAttribute: sinon.spy() }, { id: 'TEST-ID', x: 100, y: 200 });
+			eachStub.onFirstCall().callsArgOnWith(0, mockCircle, mockDatum);
+			eachStub.onSecondCall().callsArgOnWith(0, mockCircle, mockDatum);
 			renderFn = d3Renderer.render;
 			mockState = new D3RendererState({
 				window: {
@@ -168,7 +171,8 @@ describe('renderers.d3', function () {
 			nowStub.reset();
 			removeStub.reset();
 			eachStub.reset();
-			renderFn = mockState = nowStub = rafStub = mockSvg = mockData = removeStub = eachStub = null;
+			renderFn = mockState = nowStub = rafStub = mockSvg = mockData = removeStub = eachStub = mockCircle = mockShape = mockDatum = null;
+
 			done();
 		});
 
