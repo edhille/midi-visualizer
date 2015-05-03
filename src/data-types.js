@@ -50,6 +50,25 @@ function D3RendererState(params) {
 
 ADT.inherit(D3RendererState, RendererState);
 
+function ThreeJsRendererState(params) {
+	params = params || {};
+
+	if(!params.instruments) throw new TypeError('instruments is required');
+	if(!params.camera) throw new TypeError('camera is required');
+	if(!params.scene) throw new TypeError('scene is required');
+	if(!params.scene) throw new TypeError('scene is required');
+	if(!params.renderer) throw new TypeError('renderer is required');
+
+	this.instruments = params.instruments;
+	this.camera = params.camera;
+	this.scene = params.scene;
+	this.renderer = params.renderer;
+
+	RendererState.call(this, params);
+}
+
+ADT.inherit(ThreeJsRendererState, RendererState);
+
 function AnimEvent(params) {
 	params = params || {};
 
@@ -111,6 +130,7 @@ module.exports = {
 	MidiVisualizerState: MidiVisualizerState,
 	RendererState: RendererState,
 	D3RendererState: D3RendererState,
+	ThreeJsRendererState: ThreeJsRendererState,
 	AnimEvent: AnimEvent,
 	RenderEvent: RenderEvent,
 	D3RenderEvent: D3RenderEvent
