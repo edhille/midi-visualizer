@@ -10,6 +10,7 @@ var types = require('../src/data-types');
 var MidiVisualizerState = types.MidiVisualizerState;
 var RendererState = types.RendererState;
 var D3RendererState = types.D3RendererState;
+var ThreeJsRendererState = types.ThreeJsRendererState;
 var AnimEvent = types.AnimEvent;
 var RenderEvent = types.RenderEvent;
 var D3RenderEvent = types.D3RenderEvent;
@@ -321,6 +322,58 @@ describe('data-types', function() {
 
 		it('should throw an error if empty params', function (done) {
 			expect(function () { new D3RendererState({}); }).to.throw(TypeError);
+			done();
+		});
+	});
+
+	describe('ThreeJsRendererState', function () {
+		var rendererState;
+		
+		beforeEach(function (done) {
+			rendererState = new ThreeJsRendererState({
+				window: { document: {} },
+				root: {},
+				instruments: 'TEST-INSTRUMENTS',
+				camera: 'TEST-CAMERA',
+				scene: 'TEST-SCENE',
+				renderer: 'TEST-RENDERER'
+			});
+
+			done();
+		});
+
+		it('should be a RendererState', function (done) {
+			expect(rendererState).to.be.instanceof(RendererState);
+			done();
+		});
+
+		it('should have an instruments property', function (done) {
+			expect(rendererState.instruments).to.equal('TEST-INSTRUMENTS');
+			done();
+		});
+
+		it('should have a camera property', function (done) {
+			expect(rendererState.camera).to.equal('TEST-CAMERA');
+			done();
+		});
+
+		it('should have a scene property', function (done) {
+			expect(rendererState.scene).to.equal('TEST-SCENE');
+			done();
+		});
+
+		it('should have a renderer property', function (done) {
+			expect(rendererState.renderer).to.equal('TEST-RENDERER');
+			done();
+		});
+
+		it('should throw an error if no params', function (done) {
+			expect(function () { new ThreeJsRendererState(); }).to.throw(TypeError);
+			done();
+		});
+
+		it('should throw an error if empty params', function (done) {
+			expect(function () { new ThreeJsRendererState({}); }).to.throw(TypeError);
 			done();
 		});
 	});
