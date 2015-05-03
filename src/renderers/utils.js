@@ -1,5 +1,6 @@
 'use strict';
 
+var d3 = require('d3');
 var utils = require('funtils');
 var transformMidi = require('../midi-transformer');
 
@@ -94,11 +95,31 @@ function prep(midi, config) {
 	return config.renderer(rendererState);
 }
 
+function maxNote(currMaxNote, event) {
+	return currMaxNote > event.note ? currMaxNote : event.note;
+}
+
+function minNote(currMinNote, event) {
+	return currMinNote < event.note ? currMinNote : event.note;
+}
+
+function isNoteToggleEvent(event) {
+	return event.type === 'note';
+}
+
+function isNoteOnEvent(event) {
+	return isNoteToggleEvent(event) && event.subtype === 'on';
+}
+
 module.exports = {
 	prep: prep,
 	play: play,
 	pause: pause,
 	setTimers: setTimers,
 	clearTimers: clearTimers,
-	transformEvents: transformEvents
+	transformEvents: transformEvents,
+	maxNote: maxNote,
+	minNote: minNote,
+	isNoteOnEvent: isNoteOnEvent,
+	scale: d3.scale
 };

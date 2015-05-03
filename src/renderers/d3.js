@@ -5,6 +5,9 @@ var funtils = require('funtils');
 var monad = funtils.monad;
 var partial = funtils.partial;
 var renderUtils = require('./utils');
+var maxNote = renderUtils.maxNote;
+var minNote = renderUtils.minNote;
+var isNoteOnEvent = renderUtils.isNoteOnEvent;
 var D3RendererState = require('../data-types').D3RendererState;
 
 function getId(d) { return d.id; }
@@ -95,6 +98,7 @@ function render(state, currentRunningEvents, renderEvents) {
 		var shapes = state.svg.selectAll('.shape').data(currentRunningEvents, getId);
 
 		if (delta < 15) {
+			// TODO: can we remove based on "off" subtype? (would make currentRunningEvens generalizable for THREEJS)
 			var enter = shapes.enter().append(partial(getShape, state.document)); 
 			enter.attr('fill', getColor);
 			enter.attr('id', getId);
@@ -109,22 +113,6 @@ function render(state, currentRunningEvents, renderEvents) {
 	});
 
 	return currentRunningEvents;
-}
-
-function maxNote(currMaxNote, event) {
-	return currMaxNote > event.note ? currMaxNote : event.note;
-}
-
-function minNote(currMinNote, event) {
-	return currMinNote < event.note ? currMinNote : event.note;
-}
-
-function isNoteToggleEvent(event) {
-	return event.type === 'note';
-}
-
-function isNoteOnEvent(event) {
-	return isNoteToggleEvent(event) && event.subtype === 'on';
 }
 
 function prepDOM(midi, config) {
