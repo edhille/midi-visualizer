@@ -70,7 +70,7 @@ describe('midi-transformater', function() {
 
 	afterEach(function(done) {
 		animEventsByTimeMs = null;
-		consoleSpy.restore();
+		if (consoleSpy) consoleSpy.restore();
 		consoleSpy = null;
 		done();
 	});
