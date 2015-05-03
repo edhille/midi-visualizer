@@ -14,6 +14,7 @@ var ThreeJsRendererState = types.ThreeJsRendererState;
 var AnimEvent = types.AnimEvent;
 var RenderEvent = types.RenderEvent;
 var D3RenderEvent = types.D3RenderEvent;
+var ThreeJsRenderEvent = types.ThreeJsRenderEvent;
 
 describe('data-types', function() {
 
@@ -698,6 +699,54 @@ describe('data-types', function() {
 
 			it('should not throw error', function (done) {
 				expect(function () { new D3RenderEvent(params); }).not.to.throw(TypeError);
+				done();
+			});
+		});
+	});
+
+	describe('ThreeJsRenderEvent', function () {
+
+		it('should throw an error with no params', function (done) {
+			expect(function () { new ThreeJsRenderEvent(); }).to.throw(TypeError);
+			done();
+		});
+
+		it('should throw an error with empty params', function (done) {
+			expect(function () { new ThreeJsRenderEvent({}); }).to.throw(TypeError);
+			done();
+		});
+
+		describe('with params', function () {
+			var params;
+
+			beforeEach(function (done) {
+				params = {
+					mesh: 'TEST-MESH',
+					id: 'TEST-ID',
+					type: 'note',
+					subtype: 'on',
+					x: 0,
+					y: 0,
+					z: 0,
+					length: 0
+				};
+				done();
+			});
+
+			it('should not throw an error when all expected params passed in', function (done) {
+				expect(function () { new ThreeJsRenderEvent(params); }).not.to.throw(TypeError);
+				done();
+			});
+
+			it('should throw an error mesh is left out', function (done) {
+				delete params.mesh;
+				expect(function () { new ThreeJsRenderEvent(params); }).to.throw(TypeError);
+				done();
+			});
+
+			it('should throw an error z is left out', function (done) {
+				delete params.z;
+				expect(function () { new ThreeJsRenderEvent(params); }).to.throw(TypeError);
 				done();
 			});
 		});

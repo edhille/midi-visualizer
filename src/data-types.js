@@ -126,6 +126,20 @@ function D3RenderEvent(params) {
 
 ADT.inherit(D3RenderEvent, RenderEvent);
 
+function ThreeJsRenderEvent(params) {
+	params = params || {};
+
+	if (typeof params.mesh === 'undefined') throw new TypeError('no mesh passed in');
+	if (typeof params.z === 'undefined') throw new TypeError('no z passed in');
+
+	this.z = params.z;
+	this.mesh = params.mesh;
+
+	RenderEvent.call(this, params);
+}
+
+ADT.inherit(ThreeJsRenderEvent, RenderEvent);
+
 module.exports = {
 	MidiVisualizerState: MidiVisualizerState,
 	RendererState: RendererState,
@@ -133,5 +147,6 @@ module.exports = {
 	ThreeJsRendererState: ThreeJsRendererState,
 	AnimEvent: AnimEvent,
 	RenderEvent: RenderEvent,
-	D3RenderEvent: D3RenderEvent
+	D3RenderEvent: D3RenderEvent,
+	ThreeJsRenderEvent: ThreeJsRenderEvent
 };
