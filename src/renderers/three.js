@@ -24,6 +24,7 @@ function render(state, currentRunningEvents, renderEvents) {
 			/* istanbul ignore else */
 			if (matchIndices.length === 0) currentRunningEvents.push(datum);
 		} else if (datum.subtype === 'off') {
+			// TODO: This is the only THREE-specific code...
 			removeEvents = removeEvents.concat(currentRunningEvents.filter(function (elem, index) { return matchIndices.indexOf(index) > -1; }));
 			currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
 				return -1 === matchIndices.indexOf(index);
@@ -41,59 +42,45 @@ function render(state, currentRunningEvents, renderEvents) {
 	state.window.requestAnimationFrame(function (now) {
 		var delta = now - timestamp;
 
-		var instruments = state.instruments;
+		/* end threejs-specific code... */
+		if (delta < 15) {
+			var instruments = state.instruments;
 
-		instruments.drums.rotation.x += 0.1;
-		instruments.drums.rotation.y += 0.1;
+			instruments.drums.rotation.x += 0.1;
+			instruments.drums.rotation.y += 0.1;
 
-		var i, l;
-		for (i = 0, l = renderEvents.length; i < l; ++i) {
-			var event = renderEvents[i];
-			if (event.type === 'note') {
-				if (event.subtype === 'on') {
-					switch (event.name) {
-						case 'drums':
-							instruments.drums.scale.x = event.r;
-							instruments.drums.scale.y = event.r;
-							instruments.drums.scale.z = event.r;  
-							state.scene.add(instruments.drums);
-							break;
-						case 'bass':
-							instruments.bass.scale.x = event.r;
-							instruments.bass.scale.y = event.r;
-							instruments.bass.scale.z = event.r;  
-							state.scene.add(instruments.bass);
-							break;
-						default:
-							break;
+			var i, l;
+			for (i = 0, l = renderEvents.length; i < l; ++i) {
+				var event = renderEvents[i];
+				if (event.type === 'note') {
+					if (event.subtype === 'on') {
+						switch (event.name) {
+							case 'drums':
+								instruments.drums.scale.x = event.r;
+								instruments.drums.scale.y = event.r;
+								instruments.drums.scale.z = event.r;  
+								state.scene.add(instruments.drums);
+								break;
+							case 'bass':
+								instruments.bass.scale.x = event.r;
+								instruments.bass.scale.y = event.r;
+								instruments.bass.scale.z = event.r;  
+								state.scene.add(instruments.bass);
+								break;
+							default:
+								break;
+						}
+					} else if (event.subtype === 'off') {
+						state.scene.remove(instruments[event.name]);
 					}
-				} else if (event.subtype === 'off') {
-					state.scene.remove(instruments[event.name]);
 				}
 			}
-		}
-
-
-
-
-
-
-		/* start threejs-specific code... */
-		var shapes = state.svg.selectAll('.shape').data(currentRunningEvents, getId);
-
-		if (delta < 15) {
-			var enter = shapes.enter().append(partial(getShape, state.document)); 
-			enter.attr('fill', getColor);
-			enter.attr('id', getId);
-			enter.each(sizeElem);
-			enter.each(transform);
-			// enter.transition('.drum').duration(shrinkDuration).attr('r', 0);
-
-			shapes.exit().transition().duration(15).attr('r', 0).remove();
 		} else {
-			shapes.remove();
+
 		}
 
+
+		state.scene.remove(instruments[event.name]);
 		/* end threejs-specific code... */
 	});
 
