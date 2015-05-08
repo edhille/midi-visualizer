@@ -16,13 +16,18 @@ var ThreeJsRendererState = require('../data-types').ThreeJsRendererState;
 function render(state, currentRunningEvents, renderEvents) {
 
 	var removeEvents = [];
+	var addEvents = [];
+
 	renderEvents.forEach(function (datum) {
 		var id = datum.id;
 		var matchIndices = currentRunningEvents.reduce(function (matchIndices, event, index) { return event.id === id ? matchIndices.concat([index]) : matchIndices; }, []);
 
 		if (datum.subtype === 'on') {
 			/* istanbul ignore else */
-			if (matchIndices.length === 0) currentRunningEvents.push(datum);
+			if (matchIndices.length === 0) {
+				addEvents.push(datum);
+				currentRunningEvents.push(datum);
+			}
 		} else if (datum.subtype === 'off') {
 			// TODO: This is the only THREE-specific code...
 			removeEvents = removeEvents.concat(currentRunningEvents.filter(function (elem, index) { return matchIndices.indexOf(index) > -1; }));
@@ -42,45 +47,32 @@ function render(state, currentRunningEvents, renderEvents) {
 	state.window.requestAnimationFrame(function (now) {
 		var delta = now - timestamp;
 
-		/* end threejs-specific code... */
+		/* begin threejs-specific code... */
+		removeEvents.reduce(function (tracks, event) { tracks[event.track] = true; return tracks; }, [])
+			.map(function (hasShape, trackIndex) { return hasShape ? state.shapesByTrack[trackIndex] : null; })
+			.filter(function (shape) { return shape !== null; })
+			.forEach(function (shape) { state.scene.remove(shape); });
+
 		if (delta < 15) {
-			var instruments = state.instruments;
+			currentRunningEvents.forEach(function (event) {
+				var shape = state.shapesByTrack[event.track];
 
-			instruments.drums.rotation.x += 0.1;
-			instruments.drums.rotation.y += 0.1;
+				if (shape) {
+					shape.scale.x = shape.scale.y = shape.scale.z = event.r;
 
-			var i, l;
-			for (i = 0, l = renderEvents.length; i < l; ++i) {
-				var event = renderEvents[i];
-				if (event.type === 'note') {
-					if (event.subtype === 'on') {
-						switch (event.name) {
-							case 'drums':
-								instruments.drums.scale.x = event.r;
-								instruments.drums.scale.y = event.r;
-								instruments.drums.scale.z = event.r;  
-								state.scene.add(instruments.drums);
-								break;
-							case 'bass':
-								instruments.bass.scale.x = event.r;
-								instruments.bass.scale.y = event.r;
-								instruments.bass.scale.z = event.r;  
-								state.scene.add(instruments.bass);
-								break;
-							default:
-								break;
-						}
-					} else if (event.subtype === 'off') {
-						state.scene.remove(instruments[event.name]);
+					if (event.rotation) {
+						shape.rotation.x += event.rotation;
+						shape.rotation.y += event.rotation;
 					}
+
+					if (addEvents.indexOf(event) > -1) state.scene.add(shape);
+				} else {
+					console.error('no shape for track "' + event.track + '"');
 				}
-			}
+			});
 		} else {
-
+			console.error('skipping render due to "' + delta + '" delay');
 		}
-
-
-		state.scene.remove(instruments[event.name]);
 		/* end threejs-specific code... */
 	});
 
@@ -120,7 +112,7 @@ function prepDOM(midi, config) {
 		trackScale.x.domain([lowestNote, highestNote]);
 
 		trackScale.note.range([50, 100]);
-		trackScale.note.domain(scale.x.domain());
+		trackScale.note.domain(trackScale.x.domain());
 
 		trackScale.hue = scale.linear().range([0,360]).domain([0,8]);
 		trackScale.velocity = scale.linear().range([30,60]).domain([0, 256]);
@@ -134,16 +126,13 @@ function prepDOM(midi, config) {
    
 	config.root.appendChild(renderer.domElement);
 
-	// TODO: define instruments...
-	var instruments = {};
-
 	return new ThreeJsRendererState({
 		window: w,
 		root: config.root,
 		width: x,
 		height: y,
 		scales: config.scalesTuner ? config.scalesTuner(songScales, x, y) : songScales,
-		instruments: instruments,
+		shapesByTrack: config.shapesSetup(),
 		camera: camera,
 		scene: scene,
 		renderer: renderer
