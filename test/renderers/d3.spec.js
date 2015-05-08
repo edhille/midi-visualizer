@@ -184,6 +184,7 @@ describe('renderers.d3', function () {
 				var renderEvents = [
 					new D3RenderEvent({
 						id: 'TEST-ONE',
+						track: 1,
 						subtype: 'on',
 						length: 1,
 						x: 0,
@@ -193,6 +194,7 @@ describe('renderers.d3', function () {
 					}),
 					new D3RenderEvent({
 						id: 'TEST-TWO',
+						track: 2,
 						subtype: 'on',
 						length: 1,
 						x: 1,
@@ -219,6 +221,7 @@ describe('renderers.d3', function () {
 				var offEvent = new D3RenderEvent({
 					id: 'TEST-ONE',
 					subtype: 'on',
+					track: 1,
 					length: 1,
 					x: 0,
 					y: 0,
@@ -229,6 +232,7 @@ describe('renderers.d3', function () {
 					offEvent,
 					new D3RenderEvent({
 						id: 'TEST-TWO',
+						track: 2,
 						subtype: 'on',
 						length: 1,
 						x: 1,
@@ -250,7 +254,7 @@ describe('renderers.d3', function () {
 			});
 		});
 
-		describe('when an event that has an unknow subptye is passed in', function () {
+		describe('when an event that has an unknown subptye is passed in', function () {
 			var consoleStub;
 
 			beforeEach(function (done) {
@@ -262,6 +266,7 @@ describe('renderers.d3', function () {
 				var renderEvents = [
 					new D3RenderEvent({
 						id: 'TEST-ONE',
+						track: 1,
 						subtype: 'BAD',
 						length: 1,
 						x: 0,
@@ -292,6 +297,7 @@ describe('renderers.d3', function () {
 				var renderEvents = [
 					new D3RenderEvent({
 						id: 'TEST-ONE',
+						track: 1,
 						subtype: 'on',
 						length: 1,
 						x: 0,
@@ -301,6 +307,7 @@ describe('renderers.d3', function () {
 					}),
 					new D3RenderEvent({
 						id: 'TEST-TWO',
+						track: 2,
 						subtype: 'on',
 						length: 1,
 						x: 1,
