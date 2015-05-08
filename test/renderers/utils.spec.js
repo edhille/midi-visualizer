@@ -20,7 +20,7 @@ function generateAnimEvents() {
 	};
 }
 
-describe('renderers', function () {
+describe('renderer.utils', function () {
 	var testRenderer;
 
 	describe('#prep', function () {
@@ -194,5 +194,119 @@ describe('renderers', function () {
 				});
 			});
 		});
+	});
+
+	describe('#setTimers', function () {
+		var setTimers, state, renderSpy;
+
+		beforeEach(function (done) {
+			setTimers = renderUtils.setTimers;
+			renderSpy = sinon.spy();
+			done();
+		});
+
+		afterEach(function (done) {
+			setTimers = state = renderSpy = null;
+
+			done();
+		});
+
+		it('should do nothing if state has no renderEvents');
+
+		it('should call setTimeout');
+
+		describe('when given a startOffset', function () {
+
+			it('should not call setTimeout if events are before the startOffset');
+		});
+
+		describe('#clearTimers', function () {
+			var clearTimers;
+
+			beforeEach(function (done) {
+				clearTimers = renderUtils.clearTimers;
+				done();
+			});
+
+			afterEach(function (done) {
+				clearTimers = null;
+
+				done();
+			});
+
+			it('should do nothing if there are not renderEvents');
+			
+			it('should call clearTimeoutif there are renderEvents');
+		});
+	});
+
+	describe('#transformEvents', function () {
+		var transformEvents, state, animEvents, transformerFns;
+
+		beforeEach(function (done) {
+			transformEvents = renderUtils.transformEvents;
+			done();
+		});
+
+		afterEach(function (done) {
+			transformEvents = state = animEvents = transformerFns = null;
+			done();
+		});
+
+		it('should return no renderEvents if passed no animEvents');
+
+		it('should log error to console if no transformer function');
+	});
+
+	describe('#maxNote', function () {
+		var maxNote;
+
+		beforeEach(function (done) {
+			maxNote = renderUtils.maxNote;
+			done();
+		});
+
+		it('should return current note if it is highest');
+
+		it('should return new note if it is highest');
+	});
+
+	describe('#minNote', function () {
+		var minNote;
+
+		beforeEach(function (done) {
+			minNote = renderUtils.minNote;
+			done();
+		});
+
+		it('should return current note if it is lowest');
+
+		it('should new current note if it is lowest');
+	});
+
+	describe('#isNoteEvent', function () {
+		var isNoteEvent;
+
+		beforeEach(function (done) {
+			isNoteEvent = renderUtils.isNoteEvent;
+			done();
+		});
+
+		it('should return true if note is an "on" note');
+
+		it('should return false if note is an "off" event');
+
+		it('should return false if event is not a note event');
+	});
+
+	describe('#scale', function () {
+		var scale;
+
+		beforeEach(function (done) {
+			scale = renderUtils.scale;
+			done();
+		});
+
+		it('should do what?');
 	});
 });
