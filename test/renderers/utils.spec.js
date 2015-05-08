@@ -8,6 +8,7 @@ var expect = chai.expect;
 var sinon = require('sinon');
 
 var AnimEvent = require('../../src/data-types').AnimEvent;
+var RenderEvent = require('../../src/data-types').RenderEvent;
 var RendererState = require('../../src/data-types').RendererState;
 
 var renderUtils = rewire('../../src/renderers/utils');
@@ -197,27 +198,86 @@ describe('renderer.utils', function () {
 	});
 
 	describe('#setTimers', function () {
-		var setTimers, state, renderSpy;
+		var setTimers, mockState, renderSpy, setTimeoutSpy;
 
 		beforeEach(function (done) {
 			setTimers = renderUtils.setTimers;
 			renderSpy = sinon.spy();
-			done();
+			setTimeoutSpy = sinon.spy();
+
+			mockState = new RendererState({
+				root: {},
+				window: {
+					document: {}
+				},
+				renderEvents: {
+					1234: [
+						new RenderEvent({
+							id: 'TEST-ID',
+							track: 1,
+							subtype: 'on',
+							x: 0,
+							y: 0,
+							length: 1
+						})
+					]
+				}
+			});
+
+			renderUtils.__with__({
+				setTimeout: setTimeoutSpy
+			})(function () {
+				mockState = setTimers(renderSpy, mockState);
+				done();
+			});
 		});
 
 		afterEach(function (done) {
-			setTimers = state = renderSpy = null;
+			setTimers = mockState = renderSpy = setTimeoutSpy = null;
 
 			done();
 		});
 
-		it('should do nothing if state has no renderEvents');
+		it('should call setTimeout', function (done) {
+			expect(setTimeoutSpy.called).to.be.true;
+			done();
+		});
 
-		it('should call setTimeout');
+		describe('when no renderEvents', function () {
+			beforeEach(function (done) {
+				setTimeoutSpy.reset();
+				mockState = mockState.next({ renderEvents: [] });
+				renderUtils.__with__({
+					setTimeout: setTimeoutSpy
+				})(function () {
+					mockState = setTimers(renderSpy, mockState);
+					done();
+				});
+				done();
+			});
+
+			it('should not call setTimeout', function (done) {
+				expect(setTimeoutSpy.callCount).to.equal(0);
+				done();
+			});
+		});
 
 		describe('when given a startOffset', function () {
+			beforeEach(function (done) {
+				setTimeoutSpy.reset();
+				renderUtils.__with__({
+					setTimeout: setTimeoutSpy
+				})(function () {
+					mockState = setTimers(renderSpy, mockState, 10000);
+					done();
+				});
+				done();
+			});
 
-			it('should not call setTimeout if events are before the startOffset');
+			it('should not call setTimeout', function (done) {
+				expect(setTimeoutSpy.callCount).to.equal(0);
+				done();
+			});
 		});
 
 		describe('#clearTimers', function () {
