@@ -53,13 +53,12 @@ ADT.inherit(D3RendererState, RendererState);
 function ThreeJsRendererState(params) {
 	params = params || {};
 
-	if(!params.instruments) throw new TypeError('instruments is required');
+	if(!params.shapesByTrack) throw new TypeError('shapesByTrack is required');
 	if(!params.camera) throw new TypeError('camera is required');
-	if(!params.scene) throw new TypeError('scene is required');
 	if(!params.scene) throw new TypeError('scene is required');
 	if(!params.renderer) throw new TypeError('renderer is required');
 
-	this.instruments = params.instruments;
+	this.shapesByTrack = params.shapesByTrack;
 	this.camera = params.camera;
 	this.scene = params.scene;
 	this.renderer = params.renderer;
@@ -88,12 +87,14 @@ function RenderEvent(params) {
 	params = params || {};
 
 	if (typeof params.id === 'undefined') throw new TypeError('no id passed in');
+	if (typeof params.track === 'undefined') throw new TypeError('no track passed in');
 	if (typeof params.subtype === 'undefined') throw new TypeError('no subtype passed in');
 	if (typeof params.x === 'undefined') throw new TypeError('no x passed in');
 	if (typeof params.y === 'undefined') throw new TypeError('no y passed in');
 	if (typeof params.length === 'undefined') throw new TypeError('no length passed in');
 
 	this.id = params.id;
+	this.track = params.track;
 	this.subtype = params.subtype; // should be "on" or "off"
 
 	// All render events have positioning information
@@ -129,11 +130,10 @@ ADT.inherit(D3RenderEvent, RenderEvent);
 function ThreeJsRenderEvent(params) {
 	params = params || {};
 
-	if (typeof params.mesh === 'undefined') throw new TypeError('no mesh passed in');
 	if (typeof params.z === 'undefined') throw new TypeError('no z passed in');
 
 	this.z = params.z;
-	this.mesh = params.mesh;
+	this.rotation = params.rotation || 0;
 
 	RenderEvent.call(this, params);
 }

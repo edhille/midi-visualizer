@@ -328,17 +328,18 @@ describe('data-types', function() {
 	});
 
 	describe('ThreeJsRendererState', function () {
-		var rendererState;
+		var rendererState, params;
 		
 		beforeEach(function (done) {
-			rendererState = new ThreeJsRendererState({
+			params = {
 				window: { document: {} },
 				root: {},
-				instruments: 'TEST-INSTRUMENTS',
+				shapesByTrack: 'TEST-INSTRUMENTS',
 				camera: 'TEST-CAMERA',
 				scene: 'TEST-SCENE',
 				renderer: 'TEST-RENDERER'
-			});
+			};
+			rendererState = new ThreeJsRendererState(params);
 
 			done();
 		});
@@ -348,8 +349,8 @@ describe('data-types', function() {
 			done();
 		});
 
-		it('should have an instruments property', function (done) {
-			expect(rendererState.instruments).to.equal('TEST-INSTRUMENTS');
+		it('should have an shapesByTrack property', function (done) {
+			expect(rendererState.shapesByTrack).to.equal('TEST-INSTRUMENTS');
 			done();
 		});
 
@@ -375,6 +376,30 @@ describe('data-types', function() {
 
 		it('should throw an error if empty params', function (done) {
 			expect(function () { new ThreeJsRendererState({}); }).to.throw(TypeError);
+			done();
+		});
+
+		it('should throw an error if no shapesByTrack', function (done) {
+			delete params.shapesByTrack;
+			expect(function () { new ThreeJsRendererState(params); }).to.throw(TypeError);
+			done();
+		});
+
+		it('should throw an error if no camera', function (done) {
+			delete params.camera;
+			expect(function () { new ThreeJsRendererState(params); }).to.throw(TypeError);
+			done();
+		});
+
+		it('should throw an error if no scene', function (done) {
+			delete params.scene;
+			expect(function () { new ThreeJsRendererState(params); }).to.throw(TypeError);
+			done();
+		});
+
+		it('should throw an error if no renderer', function (done) {
+			delete params.renderer;
+			expect(function () { new ThreeJsRendererState(params); }).to.throw(TypeError);
 			done();
 		});
 	});
@@ -519,6 +544,7 @@ describe('data-types', function() {
 				params = null;
 				done();
 			});
+			
 
 			describe('only pasing in an id', function () {
 
@@ -532,10 +558,10 @@ describe('data-types', function() {
 					done();
 				});
 
-				describe('and a subtype', function () {
+				describe('and a track', function () {
 
 					beforeEach(function (done) {
-						params.subtype = 'TEST-SUBTYPE';
+						params.track = 1;
 						done();
 					});
 
@@ -544,10 +570,10 @@ describe('data-types', function() {
 						done();
 					});
 
-					describe('and an x', function () {
+					describe('and a subtype', function () {
 
 						beforeEach(function (done) {
-							params.x = 'TEST-X';
+							params.subtype = 'TEST-SUBTYPE';
 							done();
 						});
 
@@ -556,10 +582,10 @@ describe('data-types', function() {
 							done();
 						});
 
-						describe('and an y', function () {
+						describe('and an x', function () {
 
 							beforeEach(function (done) {
-								params.y = 'TEST-Y';
+								params.x = 'TEST-X';
 								done();
 							});
 
@@ -568,16 +594,29 @@ describe('data-types', function() {
 								done();
 							});
 
-							describe('and an length', function () {
+							describe('and an y', function () {
 
 								beforeEach(function (done) {
-									params.length = 'TEST-LENGTH';
+									params.y = 'TEST-Y';
 									done();
 								});
 
-								it('should not throw error', function (done) {
-									expect(function () { new RenderEvent(params); }).not.to.throw(TypeError);
+								it('should throw error', function (done) {
+									expect(function () { new RenderEvent(params); }).to.throw(TypeError);
 									done();
+								});
+
+								describe('and an length', function () {
+
+									beforeEach(function (done) {
+										params.length = 'TEST-LENGTH';
+										done();
+									});
+
+									it('should not throw error', function (done) {
+										expect(function () { new RenderEvent(params); }).not.to.throw(TypeError);
+										done();
+									});
 								});
 							});
 						});
@@ -592,6 +631,7 @@ describe('data-types', function() {
 			beforeEach(function (done) {
 				renderEvent = new RenderEvent({
 					id: 'TEST-ID',
+					track: 1,
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
@@ -647,6 +687,7 @@ describe('data-types', function() {
 			beforeEach(function (done) {
 				params = {
 					id: 'TEST-ID',
+					track: 1,
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
@@ -686,6 +727,7 @@ describe('data-types', function() {
 			beforeEach(function (done) {
 				params = {
 					id: 'TEST-ID',
+					track: 1,
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
@@ -721,13 +763,14 @@ describe('data-types', function() {
 
 			beforeEach(function (done) {
 				params = {
-					mesh: 'TEST-MESH',
 					id: 'TEST-ID',
+					track: 1,
 					type: 'note',
 					subtype: 'on',
 					x: 0,
 					y: 0,
 					z: 0,
+					rotation: 10,
 					length: 0
 				};
 				done();
@@ -738,9 +781,9 @@ describe('data-types', function() {
 				done();
 			});
 
-			it('should throw an error mesh is left out', function (done) {
-				delete params.mesh;
-				expect(function () { new ThreeJsRenderEvent(params); }).to.throw(TypeError);
+			it('should default rotation to zero when it is left out', function (done) {
+				delete params.rotation;
+				expect((new ThreeJsRenderEvent(params)).rotation).to.equal(0);
 				done();
 			});
 
