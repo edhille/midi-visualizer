@@ -110,7 +110,11 @@ describe('renderers.threejs', function () {
 					requestAnimationFrame: rafStub
 				},
 				root: createMockDoc(),
-				shapesByTrack: [{}, { scale: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0 } }, { scale: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0 } }],
+				shapesByTrack: [
+					{ scale: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0 } },
+					{ scale: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0 } },
+					{ scale: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0 } }
+				],
 				camera: {},
 				scene: sceneStub,
 				renderer: {}
@@ -139,7 +143,8 @@ describe('renderers.threejs', function () {
 						y: 0,
 						z: 0,
 						radius: 1,
-						color: 'blue'
+						color: 'blue',
+						rotation: 1
 					}),
 					new ThreeJsRenderEvent({
 						id: 'TEST-TWO',
@@ -246,35 +251,97 @@ describe('renderers.threejs', function () {
 		});
 
 		describe('when the time delta is 15ms', function () {
+			var consoleSpy;
 
 			beforeEach(function (done) {
 				nowStub.returns(0);
 				rafStub.callsArgWith(0, 15);
+				consoleSpy = {
+					error: sinon.spy()
+				};
 				var renderEvents = [
 					new ThreeJsRenderEvent({
 						id: 'TEST-ONE',
-						subtype: 'on',
+						track: 1,
+						subtype: 'off',
 						length: 1,
 						x: 0,
 						y: 0,
+						z: 0,
 						radius: 1,
 						color: 'blue'
 					}),
 					new ThreeJsRenderEvent({
-						id: 'TEST-TWO',
-						subtype: 'on',
+						id: 'TEST-NO-SHAPE',
+						track: 10,
+						subtype: 'off',
 						length: 1,
 						x: 1,
 						y: 1,
+						z: 1,
 						radius: 1,
 						color: 'red'
 					})
 				];
-				mockState = renderFn(mockState, [], renderEvents);
+				var runningEvents = [
+					renderEvents[0].next({ subtype: 'on' }),
+					renderEvents[1].next({ subtype: 'on' })
+				];
+
+				threeJsRenderer.__with__({
+					console: consoleSpy
+				})(function () {
+					mockState = renderFn(mockState, runningEvents, renderEvents);
+					done();
+				});
+			});
+
+			it('should have removed shapes', function (done) {
+				expect(sceneStub.remove.callCount).to.equal(1);
 				done();
 			});
 
-			it('should have removed shapes');
+			it('should have logged an error about skipping render', function (done) {
+				expect(consoleSpy.error.calledWithMatch(/skipping/)).to.be.true;
+				done();
+			});
+		});
+
+		describe('when there is no shape for an event', function() {
+			var consoleSpy;
+
+			beforeEach(function (done) {
+				nowStub.returns(0);
+				rafStub.callsArgWith(0, 14);
+				consoleSpy = {
+					error: sinon.spy()
+				};
+				var renderEvents = [
+					new ThreeJsRenderEvent({
+						id: 'TEST-TWO',
+						track: 3,
+						subtype: 'on',
+						length: 1,
+						x: 1,
+						y: 1,
+						z: 1,
+						radius: 1,
+						color: 'red'
+					})
+				];
+
+				threeJsRenderer.__with__({
+					console: consoleSpy
+				})(function () {
+					mockState = renderFn(mockState, [], renderEvents);
+					done();
+				});
+			});
+
+			it('should have logged an error about a missing shape', function (done) {
+				expect(consoleSpy.error.calledWithMatch(/shape/)).to.be.true;
+				done();
+			});
 		});
 	});
 
@@ -440,6 +507,26 @@ describe('renderers.threejs', function () {
 				expect(function () {
 					initFn(mockMidi, mockConfig);
 				}).to.throw(TypeError);
+				done();
+			});
+		});
+
+		describe('when passed a custom scale-tuning function in config', function () {
+
+			beforeEach(function (done) {
+				mockConfig.scalesTuner = sinon.spy();
+				threeJsRenderer.__with__({
+					THREE: mockThreeJs,
+					scale: mockScale
+				})(function () {
+					state = initFn(mockMidi, mockConfig);
+					done();
+				});
+				done();
+			});
+
+			it('should have called the provided function', function (done) {
+				expect(mockConfig.scalesTuner.called).to.be.true;
 				done();
 			});
 		});

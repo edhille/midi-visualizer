@@ -49,7 +49,7 @@ function render(state, currentRunningEvents, renderEvents) {
 
 		/* begin threejs-specific code... */
 		removeEvents.reduce(function (tracks, event) { tracks[event.track] = true; return tracks; }, [])
-			.map(function (hasShape, trackIndex) { return hasShape ? state.shapesByTrack[trackIndex] : null; })
+			.map(function (x, trackIndex) { return state.shapesByTrack[trackIndex] || null; })
 			.filter(function (shape) { return shape !== null; })
 			.forEach(function (shape) { state.scene.remove(shape); });
 
