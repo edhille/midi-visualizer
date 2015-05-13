@@ -70,6 +70,8 @@ function render(state, currentRunningEvents, renderEvents) {
 					console.error('no shape for track "' + event.track + '"');
 				}
 			});
+
+			state.renderer.render(state.scene, state.camera);
 		} else {
 			console.error('skipping render due to "' + delta + '" delay');
 		}
