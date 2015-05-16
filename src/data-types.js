@@ -53,10 +53,10 @@ ADT.inherit(D3RendererState, RendererState);
 function ThreeJsRendererState(params) {
 	params = params || {};
 
-	if(!params.shapesByTrack) throw new TypeError('shapesByTrack is required');
-	if(!params.camera) throw new TypeError('camera is required');
-	if(!params.scene) throw new TypeError('scene is required');
-	if(!params.renderer) throw new TypeError('renderer is required');
+	if (!params.shapesByTrack) throw new TypeError('shapesByTrack is required');
+	if (!params.camera) throw new TypeError('camera is required');
+	if (!params.scene) throw new TypeError('scene is required');
+	if (!params.renderer) throw new TypeError('renderer is required');
 
 	this.shapesByTrack = params.shapesByTrack;
 	this.camera = params.camera;
@@ -131,6 +131,8 @@ function ThreeJsRenderEvent(params) {
 	params = params || {};
 
 	if (typeof params.z === 'undefined') throw new TypeError('no z passed in');
+
+	this.scale = params.scale || 1;
 
 	this.z = params.z;
 	this.rotation = params.rotation || 0;
