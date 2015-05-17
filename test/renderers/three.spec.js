@@ -117,7 +117,9 @@ describe('renderers.threejs', function () {
 				],
 				camera: {},
 				scene: sceneStub,
-				renderer: {}
+				renderer: {
+					render: sinon.spy()
+				}
 			});
 
 			done();
