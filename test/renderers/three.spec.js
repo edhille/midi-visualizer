@@ -43,16 +43,37 @@ function createMockMidi() {
 }
 
 function createThreeJsMock() {
-	var sceneStub = sinon.spy();
-	var cameraStub = sinon.spy();
+	var sceneStub = sinon.stub();
+	var cameraStub = sinon.stub();
 	var rendererStub = sinon.stub();
+	// TODO: remove when done debugging actual implementation
+	var axisStub = sinon.stub();
+	var spotLightStub = sinon.stub();
 
 	rendererStub.returns({
 		setSize: sinon.spy(),
 		domElement: {}
 	});
 
+	cameraStub.returns({
+		lookAt: sinon.spy(),
+		position: { x: 0, y: 0, z: 0 }
+	});
+
+	sceneStub.returns({
+		add: sinon.spy()
+	});
+
+	// TODO: remove when done debugging actual implementation
+	spotLightStub.returns({
+		position: sinon.stub({ set: function() {} }),
+		castShadow: false,
+		target: null
+	});
+
 	return {
+		AxisHelper: axisStub, // TODO: remove when done debugging actual implementation
+		SpotLight: spotLightStub, // TODO: remove when done debugging actual implementation
 		Scene: sceneStub,
 		PerspectiveCamera: cameraStub,
 		WebGLRenderer: rendererStub
@@ -83,7 +104,7 @@ function createMockDoc() {
 function createShapesMock() {
 	var shapesStub = sinon.stub();
 
-	shapesStub.returns('TEST-SHAPES');
+	shapesStub.returns([]);
 
 	return shapesStub;
 }
@@ -111,9 +132,9 @@ describe('renderers.threejs', function () {
 				},
 				root: createMockDoc(),
 				shapesByTrack: [
-					{ scale: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0 } },
-					{ scale: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0 } },
-					{ scale: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0 } }
+					{ scale: { set: sinon.spy() }, rotation: { x: 0, y: 0 } },
+					{ scale: { set: sinon.spy() }, rotation: { x: 0, y: 0 } },
+					{ scale: { set: sinon.spy() }, rotation: { x: 0, y: 0 } }
 				],
 				camera: {},
 				scene: sceneStub,
@@ -144,7 +165,7 @@ describe('renderers.threejs', function () {
 						x: 0,
 						y: 0,
 						z: 0,
-						radius: 1,
+						scale: 1,
 						color: 'blue',
 						rotation: 1
 					}),
@@ -156,7 +177,7 @@ describe('renderers.threejs', function () {
 						x: 1,
 						y: 1,
 						z: 1,
-						radius: 1,
+						scale: 1,
 						color: 'red'
 					})
 				];

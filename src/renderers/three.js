@@ -47,7 +47,8 @@ function render(state, currentRunningEvents, renderEvents) {
 	state.window.requestAnimationFrame(function (now) {
 		var delta = now - timestamp;
 
-		/* begin threejs-specific code... */
+		/* TODO: begin threejs-specific code... */
+		// NOTE: this should have a default implementation, but then be customizable...
 		removeEvents.reduce(function (tracks, event) { tracks[event.track] = true; return tracks; }, [])
 			.map(function (x, trackIndex) { return state.shapesByTrack[trackIndex] || null; })
 			.filter(function (shape) { return shape !== null; })
@@ -146,6 +147,7 @@ function prepDOM(midi, config) {
 	camera.position.y = 40;
 	camera.position.z = 30;
 	camera.lookAt(scene.position);
+	// END custom setup...
 
 	renderer.setSize(x, y);
    
