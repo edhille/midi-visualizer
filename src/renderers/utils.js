@@ -3,6 +3,7 @@
 var d3 = require('d3');
 var utils = require('funtils');
 var transformMidi = require('../midi-transformer');
+var MAX_RAF_DELTA = 15;
 
 function play(renderFn, state, playheadTimeMs) {
 	return setTimers(renderFn, state, playheadTimeMs);
@@ -111,15 +112,63 @@ function isNoteOnEvent(event) {
 	return isNoteToggleEvent(event) && event.subtype === 'on';
 }
 
+function render(cleanupFn, rafFn, state, currentRunningEvents, renderEvents) {
+	var eventsToRemove = [];
+	var eventsToAdd = [];
+
+	renderEvents.forEach(function (datum) {
+		var id = datum.id;
+		var matchIndices = currentRunningEvents.reduce(function (matchIndices, event, index) {
+			return event.id === id ? matchIndices.concat([index]) : matchIndices;
+		}, []);
+
+		if (datum.subtype === 'on') {
+			/* istanbul ignore else */
+			if (matchIndices.length === 0) {
+				eventsToAdd.push(datum);
+				currentRunningEvents.push(datum);
+			}
+		} else if (datum.subtype === 'off') {
+			eventsToRemove = eventsToRemove.concat(currentRunningEvents.filter(function (elem, index) {
+				return matchIndices.indexOf(index) > -1;
+			}));
+
+			currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
+				return -1 === matchIndices.indexOf(index);
+			});
+		} else {
+			console.error('unknown render event subtype "' + datum.subtype + '"');
+		}
+	});
+
+	var timestamp = state.window.performance.now();
+
+	state.window.requestAnimationFrame(function (now) {
+		var delta = now - timestamp;
+
+		cleanupFn(state, eventsToRemove);
+
+		if (delta < MAX_RAF_DELTA) {
+			rafFn(state, eventsToAdd, currentRunningEvents);
+		} else {
+			console.error('skipping render due to ' + delta + ' delay');
+		}
+	});
+
+	return currentRunningEvents;
+}
+
 module.exports = {
 	prep: prep,
 	play: play,
 	pause: pause,
+	render: render,
 	setTimers: setTimers,
 	clearTimers: clearTimers,
 	transformEvents: transformEvents,
 	maxNote: maxNote,
 	minNote: minNote,
 	isNoteOnEvent: isNoteOnEvent,
-	scale: d3.scale
+	scale: d3.scale,
+	MAX_RAF_DELTA: MAX_RAF_DELTA
 };

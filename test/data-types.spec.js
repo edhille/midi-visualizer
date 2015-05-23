@@ -339,6 +339,7 @@ describe('data-types', function() {
 				scene: 'TEST-SCENE',
 				renderer: 'TEST-RENDERER'
 			};
+
 			rendererState = new ThreeJsRendererState(params);
 
 			done();

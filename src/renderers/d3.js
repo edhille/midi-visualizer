@@ -70,51 +70,6 @@ function transform(datum) {
    }
 }
 
-function render(state, currentRunningEvents, renderEvents) {
-
-	renderEvents.forEach(function (datum) {
-		var id = datum.id;
-		var matchIndices = currentRunningEvents.reduce(function (matchIndices, event, index) { return event.id === id ? matchIndices.concat([index]) : matchIndices; }, []);
-
-		if (datum.subtype === 'on') {
-			/* istanbul ignore else */
-			if (matchIndices.length === 0) currentRunningEvents.push(datum);
-		} else if (datum.subtype === 'off') {
-			currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
-				return -1 === matchIndices.indexOf(index);
-			});
-		} else {
-			console.error('unknown render event subtype "' + datum.subtype + '"');
-		}
-	});
-
-	// TODO: remove when done debugging
-	/* istanbul ignore if */
-	if (currentRunningEvents.length > 20) console.error('More than 20 concurrent running events (' + currentRunningEvents.length + ') is something wrong?');
-
-	var timestamp = state.window.performance.now();
-	state.window.requestAnimationFrame(function (now) {
-		var delta = now - timestamp;
-		var shapes = state.svg.selectAll('.shape').data(currentRunningEvents, getId);
-
-		if (delta < 15) {
-			// TODO: can we remove based on "off" subtype? (would make currentRunningEvens generalizable for THREEJS)
-			var enter = shapes.enter().append(partial(getShape, state.document)); 
-			enter.attr('fill', getColor);
-			enter.attr('id', getId);
-			enter.each(sizeElem);
-			enter.each(transform);
-			// enter.transition('.drum').duration(shrinkDuration).attr('r', 0);
-
-			shapes.exit().transition().duration(15).attr('r', 0).remove();
-		} else {
-			shapes.remove();
-		}
-	});
-
-	return currentRunningEvents;
-}
-
 function prepDOM(midi, config) {
 	// TODO: Handle resize...
 	var w = config.window;
@@ -166,6 +121,22 @@ function prepDOM(midi, config) {
 		svg: svg
 	});
 }
+
+function rafFn(state, eventsToAdd, currentRunningEvents) {
+	var shapes = state.svg.selectAll('.shape').data(currentRunningEvents, getId);
+
+	// TODO: can we remove based on "off" subtype? (would make currentRunningEvens generalizable for THREEJS)
+	var enter = shapes.enter().append(partial(getShape, state.document)); 
+	enter.attr('fill', getColor);
+	enter.attr('id', getId);
+	enter.each(sizeElem);
+	enter.each(transform);
+	// enter.transition('.drum').duration(shrinkDuration).attr('r', 0);
+
+	shapes.exit().transition().duration(15).attr('r', 0).remove();
+}
+
+var render = partial(renderUtils.render, funtils.identity, rafFn);
 
 var d3Renderer = monad();
 

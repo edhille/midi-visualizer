@@ -49,6 +49,7 @@ function createThreeJsMock() {
 	// TODO: remove when done debugging actual implementation
 	var axisStub = sinon.stub();
 	var spotLightStub = sinon.stub();
+	var ambientLightStub = sinon.stub();
 
 	rendererStub.returns({
 		setSize: sinon.spy(),
@@ -74,6 +75,7 @@ function createThreeJsMock() {
 	return {
 		AxisHelper: axisStub, // TODO: remove when done debugging actual implementation
 		SpotLight: spotLightStub, // TODO: remove when done debugging actual implementation
+		AmbientLight: ambientLightStub, // TODO: remove when done debugging actual implementation
 		Scene: sceneStub,
 		PerspectiveCamera: cameraStub,
 		WebGLRenderer: rendererStub
@@ -112,14 +114,20 @@ function createShapesMock() {
 describe('renderers.threejs', function () {
 
 	describe('#render', function () {
-		var renderFn, mockState, nowStub, rafStub, sceneStub;
+		var renderFn, cleanupSpy, rafSpy, mockState, nowStub, rafStub, sceneStub, renderMock;
 
 		beforeEach(function (done) {
+			cleanupSpy = sinon.spy();
+			rafSpy = sinon.spy();
 			rafStub = sinon.stub();
 			nowStub = sinon.stub();
+			renderMock = sinon.stub({
+				render: function () {}
+			});
 			sceneStub = sinon.stub({
 				add: function () {},
-				remove: function () {}
+				remove: function () {},
+				getObjectByName: function () {}
 			});
 			renderFn = threeJsRenderer.render;
 			mockState = new ThreeJsRendererState({
@@ -147,7 +155,7 @@ describe('renderers.threejs', function () {
 		});
 
 		afterEach(function (done) {
-			renderFn = mockState = nowStub = rafStub = sceneStub = null;
+			renderFn = mockState = nowStub = rafStub = sceneStub = renderMock = null;
 			done();
 		});
 
@@ -181,9 +189,13 @@ describe('renderers.threejs', function () {
 						color: 'red'
 					})
 				];
-				mockState = renderFn(mockState, [], renderEvents);
+				threeJsRenderer.__with__({
+					renderUtils: renderMock
+				})(function () {
+					mockState = renderFn(mockState, [], renderEvents);
 
-				done();
+					done();
+				});
 			});
 
 			it('should have added two shapes to the scene', function (done) {
@@ -195,6 +207,7 @@ describe('renderers.threejs', function () {
 		describe('when turning off only one event', function () {
 			
 			beforeEach(function (done) {
+				sceneStub.getObjectByName.returns({});
 				nowStub.returns(0);
 				rafStub.callsArgWith(0, 14);
 				var offEvent = new ThreeJsRenderEvent({
@@ -225,144 +238,16 @@ describe('renderers.threejs', function () {
 				var renderEvents = [
 					offEvent.next({ subtype: 'off' })
 				];
-				mockState = renderFn(mockState, runningEvents, renderEvents);
-				done();
-			});
-
-			it('should have removed one shape from the scene', function (done) {
-				expect(sceneStub.remove.callCount).to.equal(1);
-				done();
-			});
-		});
-
-		describe('when an event that has an unknown subptye is passed in', function () {
-			var consoleStub;
-
-			beforeEach(function (done) {
-				nowStub.returns(0);
-				consoleStub = {
-					error: sinon.spy()
-				};
-				nowStub.returns(0);
-				rafStub.callsArgWith(0, 14);
-				var renderEvents = [
-					new ThreeJsRenderEvent({
-						id: 'TEST-ONE',
-						track: 1,
-						subtype: 'BAD',
-						length: 1,
-						x: 0,
-						y: 0,
-						z: 0,
-						radius: 1,
-						color: 'blue',
-						mesh: {}
-					})
-				];
 				threeJsRenderer.__with__({
-					console: consoleStub
-				})(function () {
-					mockState = renderFn(mockState, [], renderEvents);
-					done();
-				});
-			});
-
-			it('should log to console.error', function (done) {
-				expect(consoleStub.error.calledWithMatch(/unknown render event subtype/)).to.be.true;
-				done();
-			});
-		});
-
-		describe('when the time delta is 15ms', function () {
-			var consoleSpy;
-
-			beforeEach(function (done) {
-				nowStub.returns(0);
-				rafStub.callsArgWith(0, 15);
-				consoleSpy = {
-					error: sinon.spy()
-				};
-				var renderEvents = [
-					new ThreeJsRenderEvent({
-						id: 'TEST-ONE',
-						track: 1,
-						subtype: 'off',
-						length: 1,
-						x: 0,
-						y: 0,
-						z: 0,
-						radius: 1,
-						color: 'blue'
-					}),
-					new ThreeJsRenderEvent({
-						id: 'TEST-NO-SHAPE',
-						track: 10,
-						subtype: 'off',
-						length: 1,
-						x: 1,
-						y: 1,
-						z: 1,
-						radius: 1,
-						color: 'red'
-					})
-				];
-				var runningEvents = [
-					renderEvents[0].next({ subtype: 'on' }),
-					renderEvents[1].next({ subtype: 'on' })
-				];
-
-				threeJsRenderer.__with__({
-					console: consoleSpy
+					renderUtils: renderMock
 				})(function () {
 					mockState = renderFn(mockState, runningEvents, renderEvents);
 					done();
 				});
 			});
 
-			it('should have removed shapes', function (done) {
+			it('should have removed one shape from the scene', function (done) {
 				expect(sceneStub.remove.callCount).to.equal(1);
-				done();
-			});
-
-			it('should have logged an error about skipping render', function (done) {
-				expect(consoleSpy.error.calledWithMatch(/skipping/)).to.be.true;
-				done();
-			});
-		});
-
-		describe('when there is no shape for an event', function() {
-			var consoleSpy;
-
-			beforeEach(function (done) {
-				nowStub.returns(0);
-				rafStub.callsArgWith(0, 14);
-				consoleSpy = {
-					error: sinon.spy()
-				};
-				var renderEvents = [
-					new ThreeJsRenderEvent({
-						id: 'TEST-TWO',
-						track: 3,
-						subtype: 'on',
-						length: 1,
-						x: 1,
-						y: 1,
-						z: 1,
-						radius: 1,
-						color: 'red'
-					})
-				];
-
-				threeJsRenderer.__with__({
-					console: consoleSpy
-				})(function () {
-					mockState = renderFn(mockState, [], renderEvents);
-					done();
-				});
-			});
-
-			it('should have logged an error about a missing shape', function (done) {
-				expect(consoleSpy.error.calledWithMatch(/shape/)).to.be.true;
 				done();
 			});
 		});

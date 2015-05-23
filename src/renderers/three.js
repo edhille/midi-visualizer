@@ -11,84 +11,6 @@ var isNoteOnEvent = renderUtils.isNoteOnEvent;
 var scale = renderUtils.scale;
 var ThreeJsRendererState = require('../data-types').ThreeJsRendererState;
 
-
-// TODO: move this into render-utils and have the raf callback passed in and bound to state it needs
-function render(state, currentRunningEvents, renderEvents) {
-
-	var removeEvents = [];
-	var addEvents = [];
-
-	renderEvents.forEach(function (datum) {
-		var id = datum.id;
-		var matchIndices = currentRunningEvents.reduce(function (matchIndices, event, index) { return event.id === id ? matchIndices.concat([index]) : matchIndices; }, []);
-
-		if (datum.subtype === 'on') {
-			/* istanbul ignore else */
-			if (matchIndices.length === 0) {
-				addEvents.push(datum);
-				currentRunningEvents.push(datum);
-			}
-		} else if (datum.subtype === 'off') {
-			// TODO: This is the only THREE-specific code...
-			removeEvents = removeEvents.concat(currentRunningEvents.filter(function (elem, index) { return matchIndices.indexOf(index) > -1; }));
-			currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
-				return -1 === matchIndices.indexOf(index);
-			});
-		} else {
-			console.error('unknown render event subtype "' + datum.subtype + '"');
-		}
-	});
-
-	// TODO: remove when done debugging
-	/* istanbul ignore if */
-	if (currentRunningEvents.length > 20) console.error('More than 20 concurrent running events (' + currentRunningEvents.length + ') is something wrong?');
-
-	var timestamp = state.window.performance.now();
-	state.window.requestAnimationFrame(function (now) {
-		var delta = now - timestamp;
-
-		/* TODO: begin threejs-specific code... */
-		// NOTE: this should have a default implementation, but then be customizable...
-		removeEvents.reduce(function (tracks, event) { tracks[event.track] = true; return tracks; }, [])
-			.map(function (x, trackIndex) { return state.shapesByTrack[trackIndex] || null; })
-			.filter(function (shape) { return shape !== null; })
-			.forEach(function (shape) { state.scene.remove(shape); });
-
-		if (delta < 15) {
-			currentRunningEvents.forEach(function (event) {
-				var shape = state.shapesByTrack[event.track];
-
-				if (shape) {
-					if (event.scale) {
-						var scaleX = Math.abs(Math.sin(event.scale / 4));
-						// var scaleY = Math.abs(Math.cos(event.radius / 5));
-						// var scaleZ = Math.abs(Math.sin(event.radius / 7));
-						shape.scale.set(scaleX, scaleX, scaleX);
-					}
-
-					if (event.rotation) {
-						shape.rotation.x += event.rotation;
-						shape.rotation.y += event.rotation;
-					}
-
-					if (addEvents.indexOf(event) > -1) {
-						state.scene.add(shape);
-					}
-				} else {
-					console.error('no shape for track "' + event.track + '"');
-				}
-			});
-
-			state.renderer.render(state.scene, state.camera);
-		} else {
-			console.error('skipping render due to "' + delta + '" delay');
-		}
-		/* end threejs-specific code... */
-	});
-
-	return currentRunningEvents;
-}
-
 function prepDOM(midi, config) {
 	// TODO: Handle resize...
 	var w = config.window;
@@ -130,7 +52,7 @@ function prepDOM(midi, config) {
 
 	// TODO: this should be set up by the implementation...
 	var scene = new THREE.Scene();
-	var camera = new THREE.PerspectiveCamera(45, x / y, 0.1, 1000);
+	var camera = new THREE.PerspectiveCamera(45, x / y, 0.1, x > y ? x*2 : y*2);
 	var renderer = new THREE.WebGLRenderer();
 
 	var axes = new THREE.AxisHelper(20);
@@ -138,14 +60,17 @@ function prepDOM(midi, config) {
 
 	var pointColor = '#ffffff';
 	var spotLight = new THREE.SpotLight(pointColor);
-	spotLight.position.set(-40, 60, -10);
+	spotLight.position.set(20, 10, -20);
 	spotLight.castShadow = true;
 	spotLight.target = axes;
 	scene.add(spotLight);
 
-	camera.position.x = -70;
-	camera.position.y = 40;
-	camera.position.z = 30;
+	var ambientLight = new THREE.AmbientLight(pointColor);
+	scene.add(ambientLight);
+
+	camera.position.x = x + 50;
+	camera.position.y = y + 50;
+	camera.position.z = x + y;
 	camera.lookAt(scene.position);
 	// END custom setup...
 
@@ -165,6 +90,49 @@ function prepDOM(midi, config) {
 		renderer: renderer
 	});
 }
+
+function cleanupFn(state, eventsToRemove) {
+	eventsToRemove.map(function (event) {
+		var obj = state.scene.getObjectByName(event.id);
+
+		if (obj) {
+			state.scene.remove(obj);
+		} else {
+			console.log('NO OBJ', event.id);
+		}
+	});
+}
+
+function rafFn(state, eventsToAdd) {
+	eventsToAdd.forEach(function (event) {
+		var geo = event.scale ? new THREE.BoxGeometry(event.scale, event.scale, event.scale) : new THREE.SphereGeometry(event.radius);
+		var mesh = new THREE.MeshLambertMaterial({
+			color: 0xFF0000,
+			transparent: true,
+			opacity: 0.5
+		});
+		var shape = new THREE.Mesh(geo, mesh);
+		shape.name = event.id;
+		shape.position.x = event.x;
+		shape.position.y = event.y;
+
+		state.scene.add(shape);
+
+	// 	if (event.rotation) {
+	// 		shape.rotation.x += event.rotation;
+	// 		shape.rotation.y += event.rotation;
+	// 		shape.rotation.z += event.rotation;
+	// 	}
+	//
+	// 	if (addEvents.indexOf(event) > -1) {
+	// 		state.scene.add(shape);
+	// 	}
+	});
+
+	state.renderer.render(state.scene, state.camera);
+}
+
+var render = partial(renderUtils.render, cleanupFn, rafFn);
 
 var threeJsRenderer = monad();
 

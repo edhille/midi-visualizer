@@ -369,4 +369,186 @@ describe('renderer.utils', function () {
 
 		it('should do what?');
 	});
+
+	describe('#render', function () {
+		var cleanupSpy, rafSpy, rafStub, nowStub, mockState, renderFn;
+
+		beforeEach(function (done) {
+			renderFn = renderUtils.render;
+			cleanupSpy = sinon.spy();
+			rafSpy = sinon.spy();
+			rafStub = sinon.stub();
+			nowStub = sinon.stub();
+			mockState = new RendererState({
+				window: {
+					document: {},
+					performance: {
+						now: nowStub
+					},
+					requestAnimationFrame: rafStub
+				},
+				root: {}
+			});
+			done();
+		});
+
+		afterEach(function (done) {
+			rafStub.reset();
+			nowStub.reset();
+			mockState = nowStub = rafStub = null;
+
+			done();
+		});
+
+		describe('when there are no previous events and only "on" events to render', function () {
+
+			beforeEach(function (done) {
+				nowStub.returns(0);
+				rafStub.callsArgWith(0, 14);
+				var renderEvents = [
+					new RenderEvent({
+						id: 'TEST-ONE',
+						track: 1,
+						subtype: 'on',
+						length: 1,
+						x: 0,
+						y: 0,
+						radius: 1,
+						color: 'blue'
+					}),
+					new RenderEvent({
+						id: 'TEST-TWO',
+						track: 2,
+						subtype: 'on',
+						length: 1,
+						x: 1,
+						y: 1,
+						radius: 1,
+						color: 'red'
+					})
+				];
+				mockState = renderFn(cleanupSpy, rafSpy, mockState, [], renderEvents);
+				done();
+			});
+
+			it('should have called cleanup with no events to remove', function (done) {
+				expect(cleanupSpy.firstCall.args[1]).to.have.length(0);
+				done();
+			});
+
+			it('should have called raf with two events to add', function (done) {
+				expect(rafSpy.firstCall.args[1]).to.have.length(2);
+				done();
+			});
+		});
+
+		describe('when turning off only one event', function () {
+			
+			beforeEach(function (done) {
+				nowStub.returns(0);
+				rafStub.callsArgWith(0, 14);
+				var offEvent = new RenderEvent({
+					id: 'TEST-ONE',
+					subtype: 'on',
+					track: 1,
+					length: 1,
+					x: 0,
+					y: 0,
+					radius: 1,
+					color: 'blue'
+				});
+				var runningEvents = [
+					offEvent,
+					new RenderEvent({
+						id: 'TEST-TWO',
+						track: 2,
+						subtype: 'on',
+						length: 1,
+						x: 1,
+						y: 1,
+						radius: 1,
+						color: 'red'
+					})
+				];
+				var renderEvents = [
+					offEvent.next({ subtype: 'off' })
+				];
+				mockState = renderFn(cleanupSpy, rafSpy, mockState, runningEvents, renderEvents);
+				done();
+			});
+
+			it('should have called cleanup with one event to remove', function (done) {
+				expect(cleanupSpy.firstCall.args[1]).to.have.length(1);
+				done();
+			});
+		});
+
+		describe('when an event that has an unknown subtype is passed in', function () {
+			var consoleStub;
+
+			beforeEach(function (done) {
+				consoleStub = {
+					error: sinon.spy()
+				};
+				nowStub.returns(0);
+				rafStub.callsArgWith(0, 14);
+				var renderEvents = [
+					new RenderEvent({
+						id: 'TEST-ONE',
+						track: 1,
+						subtype: 'BAD',
+						length: 1,
+						x: 0,
+						y: 0,
+						radius: 1,
+						color: 'blue'
+					})
+				];
+				renderUtils.__with__({
+					console: consoleStub
+				})(function () {
+					mockState = renderFn(cleanupSpy, rafSpy, mockState, [], renderEvents);
+					done();
+				});
+			});
+
+			it('should log to console.error', function (done) {
+				expect(consoleStub.error.calledWithMatch(/unknown render event subtype/)).to.be.true;
+				done();
+			});
+		});
+
+		describe('when the time delta is 15ms', function () {
+			var consoleStub;
+
+			beforeEach(function (done) {
+				consoleStub = {
+					error: sinon.spy()
+				};
+				nowStub.returns(0);
+				rafStub.callsArgWith(0, 15);
+				renderUtils.__with__({
+					console: consoleStub
+				})(function () {
+					mockState = renderFn(cleanupSpy, rafSpy, mockState, [], []);
+					done();
+				});
+			});
+
+			it('should have called cleanup', function (done) {
+				expect(cleanupSpy.called).to.be.true;
+				done();
+			});
+
+			it('should not have called raf', function (done) {
+				expect(rafSpy.called).to.be.false;
+				done();
+			});
+
+			it('should log to console.error', function (done) {
+				expect(consoleStub.error.calledWithMatch(/skipping render due to \d+ delay/)).to.be.true;
+				done();
+			});
+		});
+	});
 });
