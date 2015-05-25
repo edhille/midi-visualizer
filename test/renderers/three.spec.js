@@ -254,7 +254,7 @@ describe('renderers.threejs', function () {
 	});
 
 	describe('#init', function () {
-		var mockMidi, mockConfig, mockThreeJs, mockScale, mockDomain, mockRange, initFn, state, testWidth, testHeight;
+		var mockMidi, mockConfig, mockThreeJs, mockScale, mockDomain, mockRange, initFn, state, testWidth, testHeight, domPrepSpy;
 
 		beforeEach(function (done) {
 			initFn = threeJsRenderer.init;
@@ -264,6 +264,7 @@ describe('renderers.threejs', function () {
 			mockDomain = sinon.stub();
 			mockRange = sinon.stub();
 			mockScale = createScaleMock(mockDomain, mockRange);
+			domPrepSpy = sinon.spy();
 
 			testWidth = 999;
 			testHeight = 666;
@@ -278,6 +279,7 @@ describe('renderers.threejs', function () {
 				width: 999,
 				height: 666,
 				shapesSetup: createShapesMock(),
+				domPrep: domPrepSpy
 			};
 			threeJsRenderer.__with__({
 				THREE: mockThreeJs,
@@ -290,7 +292,7 @@ describe('renderers.threejs', function () {
 		});
 
 		afterEach(function (done) {
-			mockMidi = mockConfig = mockThreeJs = mockDomain = mockRange = initFn = state = testWidth = testHeight;
+			mockMidi = mockConfig = mockThreeJs = mockDomain = mockRange = initFn = state = testWidth = testHeight = domPrepSpy = null;
 			done();
 		});
 
@@ -370,6 +372,11 @@ describe('renderers.threejs', function () {
 
 		it('should have set shapesByTrack on the state', function (done) {
 			expect(state.shapesByTrack).not.to.be.undefined;
+			done();
+		});
+
+		it('should have called our domPrep', function (done) {
+			expect(domPrepSpy.called).to.be.true;
 			done();
 		});
 

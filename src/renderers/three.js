@@ -50,35 +50,13 @@ function prepDOM(midi, config) {
 		trackScale.velocity = scale.linear().range([30,60]).domain([0, 256]);
 	});
 
-	// TODO: this should be set up by the implementation...
 	var scene = new THREE.Scene();
 	var camera = new THREE.PerspectiveCamera(45, x / y, 0.1, x > y ? x*2 : y*2);
 	var renderer = new THREE.WebGLRenderer();
 
-	var axes = new THREE.AxisHelper(20);
-    scene.add(axes);
-
-	var pointColor = '#ffffff';
-	var spotLight = new THREE.SpotLight(pointColor);
-	spotLight.position.set(20, 10, -20);
-	spotLight.castShadow = true;
-	spotLight.target = axes;
-	scene.add(spotLight);
-
-	var ambientLight = new THREE.AmbientLight(pointColor);
-	scene.add(ambientLight);
-
-	camera.position.x = x + 50;
-	camera.position.y = y + 50;
-	camera.position.z = x + y;
-	camera.lookAt(scene.position);
-	// END custom setup...
-
 	renderer.setSize(x, y);
-   
-	config.root.appendChild(renderer.domElement);
 
-	return new ThreeJsRendererState({
+	var state = new ThreeJsRendererState({
 		window: w,
 		root: config.root,
 		width: x,
@@ -89,6 +67,11 @@ function prepDOM(midi, config) {
 		scene: scene,
 		renderer: renderer
 	});
+   
+	config.domPrep(state, THREE);
+	config.root.appendChild(renderer.domElement);
+
+	return state;
 }
 
 function cleanupFn(state, eventsToRemove) {
