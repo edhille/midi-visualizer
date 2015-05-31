@@ -1,4 +1,7 @@
+/* global Promise: true */
 'use strict';
+
+require('es6-promise').polyfill();
 
 var AudioPlayer = require('./audio-player');
 var midiParser = require('func-midi-parser');
@@ -11,7 +14,6 @@ function playVisualizer(state) {
 
 	return state.next({
 		isPlaying: true,
-		// TODO: get trial implementation to implement schedule...
 		renderer: state.renderer.play(state.audioPlayer.getPlayheadTime())
 	});
 }
@@ -19,34 +21,36 @@ function playVisualizer(state) {
 var midiVisualizer = monad();
 midiVisualizer.lift('play', playVisualizer);
 
-module.exports = function initMidiVisualizer(config, cb) {
-	try {
-		var audioData = config.audio.data;
-		var midiData = config.midi.data;
-		var audioPlayer = new AudioPlayer({ window: config.window });
-		var midi = midiParser.parse(new Uint8Array(midiData));
+module.exports = function initMidiVisualizer(config) {
+	return new Promise(function _initPromise(resolve, reject) {
+		try {
+			var audioData = config.audio.data;
+			var midiData = config.midi.data;
+			var audioPlayer = new AudioPlayer({ window: config.window });
+			var midi = midiParser.parse(new Uint8Array(midiData));
 
-		audioPlayer.loadData(audioData, function _setStage(err, audioPlayer) {
-			if (err) {
-				cb(err);
-				return;
-			}
+			audioPlayer.loadData(audioData, function _setStage(err, audioPlayer) {
+				if (err) {
+					return reject(err);
+				}
 
-			try {
-				var state = new MidiVisualizerState({
-					root: config.root,
-					width: config.width,
-					height: config.height,
-					audioPlayer: audioPlayer,
-					renderer: config.renderer.prep(midi, config)
-				});
+				try {
+					var state = new MidiVisualizerState({
+						root: config.root,
+						width: config.width,
+						height: config.height,
+						audioPlayer: audioPlayer,
+						renderer: config.renderer.prep(midi, config),
+						raf: config.raf
+					});
 
-				cb(null, midiVisualizer(state));
-			} catch (e) {
-				cb(e.stack);
-			}
-		});
-	} catch(e) {
-		cb(e.stack);
-	}
+					return resolve(midiVisualizer(state));
+				} catch (e) {
+					return reject(e.stack);
+				}
+			});
+		} catch(e) {
+			return reject(e.stack);
+		}
+	});
 };
