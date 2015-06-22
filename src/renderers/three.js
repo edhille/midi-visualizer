@@ -3,16 +3,16 @@
 var THREE = require('three');
 var funtils = require('funtils');
 var monad = funtils.monad;
-var partial = funtils.partial;
 var renderUtils = require('./utils');
+var scale = renderUtils.scale;
 var maxNote = renderUtils.maxNote;
 var minNote = renderUtils.minNote;
 var isNoteOnEvent = renderUtils.isNoteOnEvent;
-var scale = renderUtils.scale;
+var transformMidi = require('../midi-transformer');
 var ThreeJsRendererState = require('../data-types').ThreeJsRendererState;
 
+// Midi -> Config -> ThreeJsRendererState
 function prepDOM(midi, config) {
-	// TODO: Handle resize...
 	var w = config.window;
 	var d = w.document;
 	var e = d.documentElement;
@@ -22,12 +22,16 @@ function prepDOM(midi, config) {
 	if (!x) throw new TypeError('unable to calculate width');
 	if (!y) throw new TypeError('unable to calculate height');
 
-	var songScales = [];
+	var scene = new THREE.Scene();
+	var camera = new THREE.PerspectiveCamera(45, x / y, 0.1, x > y ? x*2 : y*2);
+	var renderer = new THREE.WebGLRenderer();
 
-	midi.tracks.forEach(function (track, index) {
+	renderer.setSize(x, y);
+
+	var songScales = midi.tracks.reduce(function (scales, track, index) {
 		if (track.events.length === 0) return;
 
-		var trackScale = songScales[index] = {
+		var trackScale = scales[index] = {
 			x: scale.linear(),
 			y: scale.linear(),
 			note: scale.linear()
@@ -48,32 +52,33 @@ function prepDOM(midi, config) {
 
 		trackScale.hue = scale.linear().range([0,360]).domain([0,8]);
 		trackScale.velocity = scale.linear().range([30,60]).domain([0, 256]);
-	});
 
-	var scene = new THREE.Scene();
-	var camera = new THREE.PerspectiveCamera(45, x / y, 0.1, x > y ? x*2 : y*2);
-	var renderer = new THREE.WebGLRenderer();
-
-	renderer.setSize(x, y);
+		return scales;
+	}, []);
 
 	var state = new ThreeJsRendererState({
 		window: w,
 		root: config.root,
 		width: x,
 		height: y,
-		scales: config.scalesTuner ? config.scalesTuner(songScales, x, y) : songScales,
-		shapesByTrack: config.shapesSetup(THREE),
+		scales: songScales,
 		camera: camera,
 		scene: scene,
-		renderer: renderer
+		renderer: renderer,
+		THREE: THREE
 	});
    
-	config.domPrep(state, THREE);
+	// config.domPrep(state, THREE);
 	config.root.appendChild(renderer.domElement);
 
 	return state;
 }
 
+function resize(/* state, dimension */) {
+	// TODO: handle resize...
+}
+
+// ThreeJsRendererState -> [RenderEvent] -> undefined
 function cleanupFn(state, eventsToRemove) {
 	eventsToRemove.map(function (event) {
 		var obj = state.scene.getObjectByName(event.id);
@@ -86,43 +91,47 @@ function cleanupFn(state, eventsToRemove) {
 	});
 }
 
-function rafFn(state, eventsToAdd) {
-	eventsToAdd.forEach(function (event) {
-		var geo = event.scale ? new THREE.BoxGeometry(event.scale, event.scale, event.scale) : new THREE.SphereGeometry(event.radius);
-		var mesh = new THREE.MeshLambertMaterial({
-			color: 0xFF0000,
-			transparent: true,
-			opacity: 0.5
+// Config -> (Midi -> Config -> Renderer)
+function generate(renderConfig) {
+	var renderer = monad();
+
+	// ThreeJsRendererState -> [RenderEvent] -> undefined
+	function rafFn(state, eventsToAdd) {
+		eventsToAdd.forEach(function (event) {
+			// TODO: do we want to pass state or just the things it needs?
+			return renderConfig.frameRenderer(event, state.scene, state.camera, THREE);
 		});
-		var shape = new THREE.Mesh(geo, mesh);
-		shape.name = event.id;
-		shape.position.x = event.x;
-		shape.position.y = event.y;
 
-		state.scene.add(shape);
+		state.renderer.render(state.scene, state.camera);
+	}
 
-	// 	if (event.rotation) {
-	// 		shape.rotation.x += event.rotation;
-	// 		shape.rotation.y += event.rotation;
-	// 		shape.rotation.z += event.rotation;
-	// 	}
-	//
-	// 	if (addEvents.indexOf(event) > -1) {
-	// 		state.scene.add(shape);
-	// 	}
+	// TODO: this is too crazy...we want to have play get the current RendererState and a playheadTime,
+	//       it should then invoke the renderUtils.play() function such that it can set timers to run
+	//       renderUtils.render with the appropriate RendererState, a callback to clean-up dead events,
+	//       a callback for the RAF to render newEvents and to return the currentRunning events ((runningEvents - deadEvents) + newEvents)
+	renderer.lift('play', function _play(state, playheadTimeMs) {
+		return renderUtils.play(state, playheadTimeMs, function _render(state, currentRunningEvents, newEvents) {
+			// But...we want our configured rafFn to be called (either from this rafFn, or ???)
+			return renderUtils.render(state, cleanupFn, rafFn, currentRunningEvents, newEvents);
+		});
 	});
+	renderer.lift('pause', renderUtils.pause);
 
-	state.renderer.render(state.scene, state.camera);
+	return function setupRenderer(midi, config) {
+		var rendererState = renderConfig.prepDOM(midi, config);
+		var animEvents = transformMidi(midi);
+
+		rendererState = rendererState.next({
+			renderEvents: renderConfig.mapEvents(rendererState, animEvents)
+		});
+
+		return renderer(rendererState);
+	};
 }
 
-var render = partial(renderUtils.render, cleanupFn, rafFn);
-
-var threeJsRenderer = monad();
-
-threeJsRenderer.lift('play', partial(renderUtils.play, render));
-threeJsRenderer.lift('pause', renderUtils.pause);
-threeJsRenderer.prep = renderUtils.prep;
-threeJsRenderer.init = prepDOM;
-threeJsRenderer.render = render;
-
-module.exports = threeJsRenderer;
+module.exports = {
+	prepDOM: prepDOM,
+	resize: resize,
+	generate: generate,
+	THREE: THREE
+};

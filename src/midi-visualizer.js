@@ -1,4 +1,5 @@
 /* global Promise: true */
+
 'use strict';
 
 require('es6-promise').polyfill();
@@ -9,6 +10,7 @@ var utils = require('funtils');
 var monad = utils.monad;
 var MidiVisualizerState = require('./data-types').MidiVisualizerState;
 
+// VisualizerState -> VisualizerState
 function playVisualizer(state) {
 	state.audioPlayer.play();
 
@@ -21,18 +23,17 @@ function playVisualizer(state) {
 var midiVisualizer = monad();
 midiVisualizer.lift('play', playVisualizer);
 
+// Config -> Promise(Visualizer, Error)
 module.exports = function initMidiVisualizer(config) {
 	return new Promise(function _initPromise(resolve, reject) {
 		try {
-			var audioData = config.audio.data;
 			var midiData = config.midi.data;
-			var audioPlayer = new AudioPlayer({ window: config.window });
 			var midi = midiParser.parse(new Uint8Array(midiData));
+			var audioData = config.audio.data;
+			var audioPlayer = new AudioPlayer({ window: config.window });
 
 			audioPlayer.loadData(audioData, function _setStage(err, audioPlayer) {
-				if (err) {
-					return reject(err);
-				}
+				if (err) return reject(err);
 
 				try {
 					var state = new MidiVisualizerState({
@@ -40,8 +41,7 @@ module.exports = function initMidiVisualizer(config) {
 						width: config.width,
 						height: config.height,
 						audioPlayer: audioPlayer,
-						renderer: config.renderer.prep(midi, config),
-						raf: config.raf
+						renderer: config.renderer(midi, config)
 					});
 
 					return resolve(midiVisualizer(state));

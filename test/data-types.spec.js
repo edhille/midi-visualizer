@@ -4,6 +4,7 @@
 
 var chai = require('chai');
 var expect = chai.expect;
+var sinon = require('sinon');
 
 var ADT = require('../src/adt');
 var types = require('../src/data-types');
@@ -22,84 +23,23 @@ describe('data-types', function() {
         var midiVisualizerState;
 
         describe('no params instantiation', function() {
-            beforeEach(function(done) {
-                midiVisualizerState = new MidiVisualizerState();
 
-                done();
-            });
+            it('should throw an error regarding a missing "audioPlayer"', function(done) {
+				expect(function () {
+					midiVisualizerState = new MidiVisualizerState();
+				}).to.throw(/audioPlayer/);
 
-            afterEach(function(done) {
-                midiVisualizerState = null;
-
-                done();
-            });
-
-            it('should be an Abstract Data Type', function(done) {
-                expect(midiVisualizerState).to.be.instanceof(ADT);
-                done();
-            });
-
-            it('should have no audioPlayer', function(done) {
-                expect(midiVisualizerState.audioPlayer).to.be.undefined;
-                done();
-            });
-
-            it('should have no renderer', function(done) {
-                expect(midiVisualizerState.renderer).to.be.undefined;
-                done();
-            });
-
-            it('should not be playing', function(done) {
-                expect(midiVisualizerState.isPlaying).to.be.false;
-                done();
-            });
-
-            it('should have no midi', function(done) {
-                expect(midiVisualizerState.midi).to.be.undefined;
-                done();
-            });
-
-            it('should have no animEvents', function(done) {
-                expect(midiVisualizerState.animEventsByTimeMs).to.have.eql({});
                 done();
             });
         });
 
         describe('empty params instantiation', function() {
-            beforeEach(function(done) {
-                midiVisualizerState = new MidiVisualizerState({});
 
-                done();
-            });
+            it('should throw an error regarding a missing "audioPlayer"', function(done) {
+				expect(function () {
+					midiVisualizerState = new MidiVisualizerState();
+				}).to.throw(/audioPlayer/);
 
-            afterEach(function(done) {
-                midiVisualizerState = null;
-
-                done();
-            });
-
-            it('should have no audioPlayer', function(done) {
-                expect(midiVisualizerState.audioPlayer).to.be.undefined;
-                done();
-            });
-
-            it('should have no renderer', function(done) {
-                expect(midiVisualizerState.renderer).to.be.undefined;
-                done();
-            });
-
-            it('should not be playing', function(done) {
-                expect(midiVisualizerState.isPlaying).to.be.false;
-                done();
-            });
-
-            it('should have no midi', function(done) {
-                expect(midiVisualizerState.midi).to.be.undefined;
-                done();
-            });
-
-            it('should have no animEvents', function(done) {
-                expect(midiVisualizerState.animEventsByTimeMs).to.have.eql({});
                 done();
             });
         });
@@ -120,6 +60,11 @@ describe('data-types', function() {
             afterEach(function(done) {
                 midiVisualizerState = null;
 
+                done();
+            });
+
+            it('should be an Abstract Data Type', function(done) {
+                expect(midiVisualizerState).to.be.instanceof(ADT);
                 done();
             });
 
@@ -334,7 +279,6 @@ describe('data-types', function() {
 			params = {
 				window: { document: {} },
 				root: {},
-				shapesByTrack: 'TEST-INSTRUMENTS',
 				camera: 'TEST-CAMERA',
 				scene: 'TEST-SCENE',
 				renderer: 'TEST-RENDERER'
@@ -347,11 +291,6 @@ describe('data-types', function() {
 
 		it('should be a RendererState', function (done) {
 			expect(rendererState).to.be.instanceof(RendererState);
-			done();
-		});
-
-		it('should have an shapesByTrack property', function (done) {
-			expect(rendererState.shapesByTrack).to.equal('TEST-INSTRUMENTS');
 			done();
 		});
 
@@ -377,12 +316,6 @@ describe('data-types', function() {
 
 		it('should throw an error if empty params', function (done) {
 			expect(function () { new ThreeJsRendererState({}); }).to.throw(TypeError);
-			done();
-		});
-
-		it('should throw an error if no shapesByTrack', function (done) {
-			delete params.shapesByTrack;
-			expect(function () { new ThreeJsRendererState(params); }).to.throw(TypeError);
 			done();
 		});
 

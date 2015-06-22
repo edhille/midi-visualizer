@@ -58,11 +58,12 @@ function stubScheduler() {
 
 describe('midi-visualizer', function() {
 
-	describe('valid instantaion', function() {
+	describe('with valid instantaion', function() {
 		var testVisualizer, config, setupError;
 		var audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub, schedulerStub;
 
 		beforeEach(function(done) {
+			setupError = null;
 			midiParserStub = stubMidiParser();
 			audioPlayerStub = stubAudioPlayer();
 			schedulerStub = stubScheduler();
@@ -83,12 +84,15 @@ describe('midi-visualizer', function() {
 					data: new Uint8Array(10)
 				},
 				window: {},
-				renderer: rendererStub
+				renderer: function () { return schedulerStub; },
+				raf: sinon.spy()
 			};
 
-			midiVisualizer(config, function(err, visualizer) {
+			midiVisualizer(config).then(function(visualizer) {
 				testVisualizer = visualizer;
-				setupError = err;
+			}).catch(function (err) {
+				setupError = err;	
+			}).then(function () {
 				done();
 			});
 		});
@@ -113,7 +117,7 @@ describe('midi-visualizer', function() {
 			done();
 		});
 
-		it('should have called config.renderer.prep', function(done) {
+		it.skip('should have called config.renderer.prep', function(done) {
 			expect(config.renderer.prep.called).to.be.true;
 			done();
 		});
@@ -162,7 +166,7 @@ describe('midi-visualizer', function() {
 		});
 	});
 
-	describe('invalid instantiation', function () {
+	describe('with invalid instantiation', function () {
 		var testVisualizer, config, setupError;
 		var audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub, schedulerStub;
 
@@ -202,9 +206,11 @@ describe('midi-visualizer', function() {
 			beforeEach(function (done) {
 				loadDataStub.callsArgWith(1, 'no data');
 
-				midiVisualizer(config, function(err, visualizer) {
+				midiVisualizer(config).then(function(visualizer) {
 					testVisualizer = visualizer;
+				}).catch(function (err) {
 					setupError = err;
+				}).then(function () {
 					done();
 				});
 			});
@@ -220,9 +226,11 @@ describe('midi-visualizer', function() {
 			beforeEach(function (done) {
 				midiParserStub.parse.throws(new TypeError('no data'));
 
-				midiVisualizer(config, function(err, visualizer) {
+				midiVisualizer(config).then(function (visualizer) {
 					testVisualizer = visualizer;
+				}).catch(function (err) {
 					setupError = err;
+				}).then(function () {
 					done();
 				});
 			});
@@ -238,9 +246,11 @@ describe('midi-visualizer', function() {
 			beforeEach(function (done) {
 				delete config.renderer;
 
-				midiVisualizer(config, function(err, visualizer) {
+				midiVisualizer(config).then(function(visualizer) {
 					testVisualizer = visualizer;
+				}).catch(function (err) {
 					setupError = err;
+				}).then(function () {
 					done();
 				});
 			});
@@ -256,9 +266,11 @@ describe('midi-visualizer', function() {
 			beforeEach(function (done) {
 				delete rendererStub.prep;
 
-				midiVisualizer(config, function(err, visualizer) {
+				midiVisualizer(config).then(function(visualizer) {
 					testVisualizer = visualizer;
+				}).catch(function (err) {
 					setupError = err;
+				}).then(function () {
 					done();
 				});
 			});

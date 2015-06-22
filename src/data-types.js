@@ -5,6 +5,9 @@ var ADT = require('./adt');
 function MidiVisualizerState(params) {
 	params = params || {};
 
+	if (!params.audioPlayer) throw new TypeError('audioPlayer is required');
+	if (!params.renderer) throw new TypeError('renderer is required');
+
 	// TODO: are these two params needed?
 	this.midi = params.midi;
 	this.animEventsByTimeMs = params.animEventsByTimeMs || {};
@@ -53,12 +56,10 @@ ADT.inherit(D3RendererState, RendererState);
 function ThreeJsRendererState(params) {
 	params = params || {};
 
-	if (!params.shapesByTrack) throw new TypeError('shapesByTrack is required');
 	if (!params.camera) throw new TypeError('camera is required');
 	if (!params.scene) throw new TypeError('scene is required');
 	if (!params.renderer) throw new TypeError('renderer is required');
 
-	this.shapesByTrack = params.shapesByTrack;
 	this.camera = params.camera;
 	this.scene = params.scene;
 	this.renderer = params.renderer;
