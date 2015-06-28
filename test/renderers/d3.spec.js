@@ -7,6 +7,8 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 
+var testHelpers = require('../helpers');
+
 var dataTypes = require('../../src/data-types');
 var D3RenderEvent = dataTypes.D3RenderEvent;
 var D3RendererState = dataTypes.D3RendererState;
@@ -60,36 +62,6 @@ function createMockSvg() {
 	};
 }
 
-function createMockMidi() {
-	return {
-		tracks: [
-			{
-				events: [
-					{ type: 'note', subtype: 'on', note: 1 },
-					{ type: 'note', subtype: 'off', note: 1 },
-					{ type: 'note', subtype: 'on', note: 10 },
-					{ type: 'note', subtype: 'off', note: 10 },
-					{ type: 'note', subtype: 'on', note: 5 },
-					{ type: 'note', subtype: 'off', note: 5 }
-				]
-			},
-			{
-				events: []
-			},
-			{
-				events: [
-					{ type: 'note', subtype: 'on', note: 20 },
-					{ type: 'note', subtype: 'off', note: 20 },
-					{ type: 'note', subtype: 'on', note: 10 },
-					{ type: 'note', subtype: 'off', note: 10 },
-					{ type: 'note', subtype: 'on', note: 30 },
-					{ type: 'note', subtype: 'off', note: 30 }
-				]
-			},
-		]
-	};
-}
-
 function createMockD3() {
 	var d3Stub = sinon.stub({
 		scale: {
@@ -134,7 +106,7 @@ function createMockD3() {
 
 describe('renderers.d3', function () {
 
-	describe('#render', function () {
+	describe.skip('#render', function () {
 		var renderFn, mockState, nowStub, rafStub, mockData, mockSvg, removeStub, eachStub, mockCircle, mockShape, mockDatum;
 
 		beforeEach(function (done) {
@@ -160,6 +132,7 @@ describe('renderers.d3', function () {
 					requestAnimationFrame: rafStub
 				},
 				root: {},
+				raf: sinon.spy(),
 				svg: mockSvg
 			});
 			done();
@@ -255,7 +228,7 @@ describe('renderers.d3', function () {
 		});
 	});
 
-	describe('#init', function () {
+	describe.skip('#init', function () {
 		var mockMidi, mockConfig, mockD3, mockDomain, mockRange, initFn, state, testWidth, testHeight;
 
 		beforeEach(function (done) {
@@ -264,7 +237,7 @@ describe('renderers.d3', function () {
 			mockDomain = d3Mocks.mockDomain;
 			mockRange = d3Mocks.mockRange;
 			initFn = d3Renderer.init;
-			mockMidi = createMockMidi();
+			mockMidi = testHelpers.createMockMidi();
 			testWidth = 999;
 			testHeight = 666;
 			mockConfig = {
@@ -273,6 +246,7 @@ describe('renderers.d3', function () {
 						documentElement: {}
 					}
 				},
+				raf: sinon.spy(),
 				root: {},
 				width: 999,
 				height: 666
@@ -413,6 +387,123 @@ describe('renderers.d3', function () {
 			it('should return our test scales', function (done) {
 				expect(state.scales).to.equal('TEST-SCALES');
 				done();
+			});
+		});
+	});
+
+	describe('#generate', function () {
+		var renderer;
+		var generateConfig, renderConfig;
+		var mockMidi, mockD3, mockState;
+		var rafSpy, rafStub, nowStub, domPrepStub, mockSvg;
+
+		beforeEach(function (done) {
+			rafSpy = sinon.spy();
+			rafStub = sinon.stub();
+			nowStub = sinon.stub();
+			domPrepStub = sinon.stub();
+			mockMidi = testHelpers.createMockMidi();
+			mockD3 = createMockD3();
+			mockSvg = createMockSvg();
+			mockState = new D3RendererState({
+				window: {
+					document: {},
+					performance: {
+						now: nowStub
+					},
+					requestAnimationFrame: rafStub
+				},
+				root: testHelpers.createMockDoc(),
+				raf: rafSpy,
+				svg: mockSvg
+			});
+
+			domPrepStub.returns(mockState);
+
+			generateConfig = {
+				prepDOM: domPrepStub,
+				mapEvents: sinon.spy(),
+				frameRenderFn: sinon.spy(),
+				resize: sinon.spy(),
+				transformers: [sinon.spy(), null, sinon.spy()]
+			};
+
+			renderConfig = {
+				window: {
+					document: {
+						documentElement: {}
+					}
+				},
+				root: testHelpers.createMockDoc(),
+				raf: sinon.spy(),
+				width: 999,
+				height: 666
+			};
+
+			d3Renderer.__with__({
+				d3: mockD3
+			})(function () {
+				renderer = d3Renderer.generate(generateConfig)(mockMidi, renderConfig);
+				done();
+			});
+		});
+
+		it('should have called our genrateConfig.prepDOM', function (done) {
+			expect(domPrepStub.called).to.be.true;
+			done();
+		});
+
+		it('should have called our generateConfig.mapEvents', function (done) {
+			expect(generateConfig.mapEvents.called).to.be.true;
+			done();
+		});
+
+		describe('api', function () {
+
+			describe('#play', function () {
+
+				it('should have a #play method', function (done) {
+					expect(renderer).to.respondTo('play');
+					done();
+				});
+				
+				describe('when no playhead position is supplied', function () {
+
+					it('should start from the beginning and schedule all events to play');
+				});
+
+				describe('when given an explicit playhead position', function () {
+
+					it('should only schedule timers for events happening on or after playhead position');
+				});
+			});
+
+			describe('#pause', function () {
+
+				it('should have a #pause method', function (done) {
+					expect(renderer).to.respondTo('pause');
+					done();
+				});
+				
+				describe('when not currently playing', function () {
+
+					it('should do nothing');
+				});
+
+				describe('when is currently playing', function () {
+
+					it('should clear all timers');
+				});
+			});
+		});
+
+		describe('error cases', function () {
+
+			describe('when no ???', function () {
+				
+				beforeEach(function (done) {
+					done();
+				});
 			});
 		});
 	});

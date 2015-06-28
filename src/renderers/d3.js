@@ -8,6 +8,7 @@ var renderUtils = require('./utils');
 var maxNote = renderUtils.maxNote;
 var minNote = renderUtils.minNote;
 var isNoteOnEvent = renderUtils.isNoteOnEvent;
+var transformMidi = require('../midi-transformer');
 var D3RendererState = require('../data-types').D3RendererState;
 
 function getId(d) { return d.id; }
@@ -70,6 +71,7 @@ function transform(datum) {
    }
 }
 
+// Midi -> Config -> D3RendererState
 function prepDOM(midi, config) {
 	// TODO: Handle resize...
 	var w = config.window;
@@ -115,6 +117,7 @@ function prepDOM(midi, config) {
 	return new D3RendererState({
 		window: w,
 		root: config.root,
+		raf: config.raf,
 		width: x,
 		height: y,
 		scales: config.scalesTuner ? config.scalesTuner(scales, x, y) : scales,
@@ -122,28 +125,53 @@ function prepDOM(midi, config) {
 	});
 }
 
-function rafFn(state, eventsToAdd, currentRunningEvents) {
-	var shapes = state.svg.selectAll('.shape').data(currentRunningEvents, getId);
+function cleanupFn() {}
 
-	// TODO: can we remove based on "off" subtype? (would make currentRunningEvens generalizable for THREEJS)
-	var enter = shapes.enter().append(partial(getShape, state.document)); 
-	enter.attr('fill', getColor);
-	enter.attr('id', getId);
-	enter.each(sizeElem);
-	enter.each(transform);
-	// enter.transition('.drum').duration(shrinkDuration).attr('r', 0);
+// Config -> (Midi -> Config -> Renderer)
+function generate(renderConfig) {
+	var renderer = monad();
 
-	shapes.exit().transition().duration(15).attr('r', 0).remove();
+	// D3JsRendererState -> [RenderEvent] -> undefined
+	function rafFn(state, eventsToAdd, currentRunningEvents) {
+		var shapes = state.svg.selectAll('.shape').data(currentRunningEvents, getId);
+
+		// TODO: can we remove based on "off" subtype? (would make currentRunningEvens generalizable for THREEJS)
+		var enter = shapes.enter().append(partial(getShape, state.document)); 
+		enter.attr('fill', getColor);
+		enter.attr('id', getId);
+		enter.each(sizeElem);
+		enter.each(transform);
+
+		renderConfig.frameRenderer(shapes);
+	}
+
+	// TODO: this is too crazy...we want to have play get the current RendererState and a playheadTime,
+	//       it should then invoke the renderUtils.play() function such that it can set timers to run
+	//       renderUtils.render with the appropriate RendererState, a callback to clean-up dead events,
+	//       a callback for the RAF to render newEvents and to return the currentRunning events ((runningEvents - deadEvents) + newEvents)
+	renderer.lift('play', function _play(state, playheadTimeMs) {
+		return renderUtils.play(state, playheadTimeMs, function _render(state, currentRunningEvents, newEvents) {
+			// But...we want our configured rafFn to be called (either from this rafFn, or ???)
+			return renderUtils.render(state, cleanupFn, rafFn, currentRunningEvents, newEvents);
+		});
+	});
+	renderer.lift('pause', renderUtils.pause);
+
+	return function setupRenderer(midi, config) {
+		var rendererState = renderConfig.prepDOM(midi, config);
+		var animEvents = transformMidi(midi);
+
+		rendererState = rendererState.next({
+			renderEvents: renderConfig.mapEvents(rendererState, animEvents)
+		});
+
+		return renderer(rendererState);
+	};
 }
 
-var render = partial(renderUtils.render, funtils.identity, rafFn);
-
-var d3Renderer = monad();
-
-d3Renderer.lift('play', partial(renderUtils.play, render));
-d3Renderer.lift('pause', renderUtils.pause);
-d3Renderer.prep = renderUtils.prep;
-d3Renderer.init = prepDOM;
-d3Renderer.render = render;
-
-module.exports = d3Renderer;
+module.exports = {
+	prepDOM: prepDOM,
+	resize: function () { throw new Error('Implement'); },
+	generate: generate,
+	D3: d3
+};

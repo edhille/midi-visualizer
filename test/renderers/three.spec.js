@@ -7,43 +7,12 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 
+var testHelpers = require('../helpers');
+
 var dataTypes = require('../../src/data-types');
 var ThreeJsRenderEvent = dataTypes.ThreeJsRenderEvent;
 var ThreeJsRendererState = dataTypes.ThreeJsRendererState;
 var threeJsRenderer = rewire('../../src/renderers/three');
-
-function createMockMidi() {
-	return {
-		header: {
-			timeDivision: 96
-		},
-		tracks: [
-			{
-				events: [
-					{ type: 'note', subtype: 'on', note: 1 },
-					{ type: 'note', subtype: 'off', note: 1 },
-					{ type: 'note', subtype: 'on', note: 10 },
-					{ type: 'note', subtype: 'off', note: 10 },
-					{ type: 'note', subtype: 'on', note: 5 },
-					{ type: 'note', subtype: 'off', note: 5 }
-				]
-			},
-			{
-				events: []
-			},
-			{
-				events: [
-					{ type: 'note', subtype: 'on', note: 20 },
-					{ type: 'note', subtype: 'off', note: 20 },
-					{ type: 'note', subtype: 'on', note: 10 },
-					{ type: 'note', subtype: 'off', note: 10 },
-					{ type: 'note', subtype: 'on', note: 30 },
-					{ type: 'note', subtype: 'off', note: 30 }
-				]
-			},
-		]
-	};
-}
 
 function createThreeJsMock() {
 	var sceneStub = sinon.stub();
@@ -100,12 +69,6 @@ function createScaleMock(domainStub, rangeStub) {
 	};
 }
 
-function createMockDoc() {
-	return {
-		appendChild: sinon.spy()
-	};
-}
-
 function createShapesMock() {
 	var shapesStub = sinon.stub();
 
@@ -141,7 +104,7 @@ describe('renderers.threejs', function () {
 					},
 					requestAnimationFrame: rafStub
 				},
-				root: createMockDoc(),
+				root: testHelpers.createMockDoc(),
 				raf: rafSpy,
 				shapesByTrack: [
 					{ scale: { set: sinon.spy() }, rotation: { x: 0, y: 0 } },
@@ -264,7 +227,7 @@ describe('renderers.threejs', function () {
 		beforeEach(function (done) {
 			initFn = threeJsRenderer.init;
 
-			mockMidi = createMockMidi();
+			mockMidi = testHelpers.createMockMidi();
 			mockThreeJs = createThreeJsMock();
 			mockDomain = sinon.stub();
 			mockRange = sinon.stub();
@@ -280,7 +243,7 @@ describe('renderers.threejs', function () {
 						documentElement: {}
 					}
 				},
-				root: createMockDoc(),
+				root: testHelpers.createMockDoc(),
 				raf: sinon.spy(),
 				width: 999,
 				height: 666,
@@ -395,7 +358,7 @@ describe('renderers.threejs', function () {
 							documentElement: {}
 						}
 					},
-					root: createMockDoc(),
+					root: testHelpers.createMockDoc(),
 					height: 666
 				};
 				done();
@@ -418,7 +381,7 @@ describe('renderers.threejs', function () {
 							documentElement: {}
 						}
 					},
-					root: createMockDoc(),
+					root: testHelpers.createMockDoc(),
 					width: 999
 				};
 				done();
@@ -470,7 +433,7 @@ describe('renderers.threejs', function () {
 				getObjectByName: function () {}
 			});
 
-			mockMidi = createMockMidi();
+			mockMidi = testHelpers.createMockMidi();
 			mockThreeJs = createThreeJsMock();
 			mockState = new ThreeJsRendererState({
 				window: {
@@ -480,7 +443,7 @@ describe('renderers.threejs', function () {
 					},
 					requestAnimationFrame: rafStub
 				},
-				root: createMockDoc(),
+				root: testHelpers.createMockDoc(),
 				raf: rafSpy,
 				camera: {},
 				scene: sceneStub,
@@ -505,7 +468,7 @@ describe('renderers.threejs', function () {
 						documentElement: {}
 					}
 				},
-				root: createMockDoc(),
+				root: testHelpers.createMockDoc(),
 				raf: sinon.spy(),
 				width: 999,
 				height: 666
