@@ -79,7 +79,7 @@ function resize(/* state, dimension */) {
 }
 
 // ThreeJsRendererState -> [RenderEvent] -> undefined
-function cleanupFn(state, eventsToRemove) {
+function cleanup(state, eventsToRemove) {
 	eventsToRemove.map(function (event) {
 		var obj = state.scene.getObjectByName(event.id);
 
@@ -112,7 +112,7 @@ function generate(renderConfig) {
 	renderer.lift('play', function _play(state, playheadTimeMs) {
 		return renderUtils.play(state, playheadTimeMs, function _render(state, currentRunningEvents, newEvents) {
 			// But...we want our configured rafFn to be called (either from this rafFn, or ???)
-			return renderUtils.render(state, cleanupFn, rafFn, currentRunningEvents, newEvents);
+			return renderUtils.render(state, renderConfig.cleanupFn, rafFn, currentRunningEvents, newEvents);
 		});
 	});
 	renderer.lift('pause', renderUtils.pause);
@@ -131,6 +131,7 @@ function generate(renderConfig) {
 
 module.exports = {
 	prepDOM: prepDOM,
+	cleanup: cleanup,
 	resize: resize,
 	generate: generate,
 	THREE: THREE

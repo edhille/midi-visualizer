@@ -76,6 +76,7 @@ function AnimEvent(params) {
 
 	this.event = params.event;
 	this.track = params.track || 0;
+	this.startTimeMicroSec = params.startTimeMicroSec || 0;
 	this.length = params.length || 0;
 	this.id = params.id || this.track + '-' + this.event.note;
 

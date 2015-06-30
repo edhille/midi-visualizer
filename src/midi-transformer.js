@@ -59,7 +59,8 @@ function transformMidi(midi) {
 					newEvent = new AnimEvent({
 						event: startNote.event,
 						length: startNote.length,
-						track: trackIndex
+						track: trackIndex,
+						startTimeMicroSec: startNote.startTimeMicroSec
 					});
 
 					eventsByTime[startTimeMs][startNote.index] = newEvent;

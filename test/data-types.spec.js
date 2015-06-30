@@ -391,6 +391,11 @@ describe('data-types', function() {
                 done();
             });
 
+			it('should set the startTimeMicroSec to zero', function (done) {
+				expect(animEvent.startTimeMicroSec).to.equal(0);
+				done();
+			});
+
 			describe('and track information instantiation', function() {
 
 				beforeEach(function(done) {
