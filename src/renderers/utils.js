@@ -105,7 +105,6 @@ function transformEvents(state, trackTransformers, animEvents) {
 			var transformFn = trackTransformers[event.track];
 			if (transformFn) {
 				renderEvents[timeInMs] = renderEvents[timeInMs].concat(transformFn(state, event));
-				// if (event.track === 10) console.log('transformer returned ' + transformFn(state, event).length + ' render events');
 			} else {
 				console.error('No transform for track "' + event.track + '"');
 			}
