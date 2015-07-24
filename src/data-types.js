@@ -35,6 +35,7 @@ function RendererState(params) {
 	this.height = params.height || 0;
 	this.renderEvents = params.renderEvents || [];
 	this.scales = params.scales || [];
+	this.isPlaying = params.isPlaying || false;
 
 	ADT.call(this);
 }

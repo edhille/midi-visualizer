@@ -20,8 +20,18 @@ function playVisualizer(state) {
 	});
 }
 
+function pauseVisualizer(state) {
+	state.audioPlayer.pause();
+
+	return state.next({
+		isPlaying: false,
+		renderer: state.renderer.pause()
+	});
+}
+
 var midiVisualizer = monad();
 midiVisualizer.lift('play', playVisualizer);
+midiVisualizer.lift('pause', pauseVisualizer);
 
 // Config -> Promise(Visualizer, Error)
 module.exports = function initMidiVisualizer(config) {
