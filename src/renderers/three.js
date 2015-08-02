@@ -95,8 +95,8 @@ function cleanup(state, eventsToRemove) {
 function generate(renderConfig) {
 	var renderer = monad();
 
-	// ThreeJsRendererState -> [RenderEvent] -> undefined
-	function rafFn(state, eventsToAdd) {
+	// ThreeJsRendererState -> [RenderEvent] -> [RenderEvent] -> undefined
+	function rafFn(state, eventsToAdd/*, currentEvents*/) {
 		eventsToAdd.forEach(function (event) {
 			// TODO: do we want to pass state or just the things it needs?
 			return renderConfig.frameRenderer(event, state.scene, state.camera, THREE);

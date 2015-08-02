@@ -54,7 +54,7 @@ function generateMidiData() {
 	};
 }
 
-describe('midi-transformater', function() {
+describe('midi-transformer', function() {
 
 	var animEventsByTimeMs, consoleSpy;
 
@@ -86,10 +86,10 @@ describe('midi-transformater', function() {
 		done();
 	});
 
-	it('should have calculated length of each note', function(done) {
-		expect(animEventsByTimeMs[0][0].length).to.equal(10000);
-		expect(animEventsByTimeMs[10][1].length).to.equal(20000);
-		expect(animEventsByTimeMs[30][1].length).to.equal(20000);
+	it('should have calculated length in microseconds of each note', function(done) {
+		expect(animEventsByTimeMs[0][0].lengthMicroSec).to.equal(10000);
+		expect(animEventsByTimeMs[10][1].lengthMicroSec).to.equal(20000);
+		expect(animEventsByTimeMs[30][1].lengthMicroSec).to.equal(20000);
 		done();
 	});
 

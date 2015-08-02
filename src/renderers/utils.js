@@ -36,8 +36,8 @@ function play(state, playheadTimeMs, renderFn) {
  * @return {RendererState}
  */
 // (RendererState -> [RenderEvent] -> undefined) -> RendererState -> Int -> RendererState
-function setTimers(state, startOffset, renderFn) {
-	startOffset = startOffset || 0;
+function setTimers(state, startOffsetMs, renderFn) {
+	startOffsetMs = startOffsetMs || 0;
 
 	// TODO: do we need a way to prep the resumption of play?
 	// if (startOffset > 0) renderer = renderer.prepResume();
@@ -45,26 +45,17 @@ function setTimers(state, startOffset, renderFn) {
 	// state for timer-defined events...
 	var currentRunningEvents = [];
 
-	Object.keys(state.renderEvents).map(Number).sort(utils.sortNumeric).forEach(function (eventTime) {
-		var events, offsetTime;
+	Object.keys(state.renderEvents).map(Number).sort(utils.sortNumeric).forEach(function (eventTimeMs) {
+		var events, offsetTimeMs;
 
 		/* istanbul ignore else */
-		if (eventTime >= startOffset) {
-			events = state.renderEvents[eventTime];
-			offsetTime = eventTime - startOffset;
-
-			// events.time = eventTime;
-
-			// #<{(| istanbul ignore else |)}>#
-			// if (events.timer) {
-			// 	// TODO: for some reason, we have to double-check that the previous timeout
-			// 	//       was cleared (need to understand why)
-			// 	clearTimeout(events.timer);
-			// }
+		if (eventTimeMs >= startOffsetMs) {
+			events = state.renderEvents[eventTimeMs];
+			offsetTimeMs = eventTimeMs - startOffsetMs;
 
 			events.timer = setTimeout(function (state, events) {
-				currentRunningEvents = renderFn(state, currentRunningEvents, events);
-			}, offsetTime, state, events);
+				currentRunningEvents = renderFn(state, currentRunningEvents, events, eventTimeMs);
+			}, offsetTimeMs, state, events);
 		}
 	});
 
@@ -155,7 +146,7 @@ function isNoteOnEvent(event) {
  *
  * @return {[RenderEvent]} - active running render events for this render call
  */
-// (RendererState -> [RenderEvent] -> undefined) -> (RendererState -> [RenderEvent] -> undefined) -> RendererState -> [RenderEvent] -> [RenderEvent] -> [RenderEvent]
+// (RendererState -> [RenderEvent] -> undefined) -> (RendererState -> [RenderEvent] -> undefined) -> RendererState -> [RenderEvent] -> [RenderEvent] -> Int -> [RenderEvent]
 // function render(cleanupFn, rafFn, state, currentRunningEvents, renderEvents) {
 function render(state, cleanupFn, rafFn, currentRunningEvents, renderEvents) {
 	var eventsToRemove = [];

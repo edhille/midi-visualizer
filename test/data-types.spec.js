@@ -381,8 +381,8 @@ describe('data-types', function() {
                 done();
             });
 
-            it('should default the length to 0', function(done) {
-                expect(animEvent.length).to.equal(0);
+            it('should default the length in microseconds to 0', function(done) {
+                expect(animEvent.lengthMicroSec).to.equal(0);
                 done();
             });
 
@@ -410,8 +410,8 @@ describe('data-types', function() {
 					done();
 				});
 
-				it('should default the length to 0', function(done) {
-					expect(animEvent.length).to.equal(0);
+				it('should default the length in microseconds to 0', function(done) {
+					expect(animEvent.lengthMicroSec).to.equal(0);
 					done();
 				});
 
@@ -420,17 +420,17 @@ describe('data-types', function() {
 					done();
 				});
 
-				describe('and length information instantiation', function() {
+				describe('and length in microseconds information instantiation', function() {
 
 					beforeEach(function(done) {
-						params.length = 100;
+						params.lengthMicroSec = 100;
 						animEvent = new AnimEvent(params);
 
 						done();
 					});
 
-					it('should have the length we set', function(done) {
-						expect(animEvent.length).to.equal(params.length);
+					it('should have the length in microseconds we set', function(done) {
+						expect(animEvent.lengthMicroSec).to.equal(params.lengthMicroSec);
 						done();
 					});
 
@@ -545,16 +545,29 @@ describe('data-types', function() {
 									done();
 								});
 
-								describe('and an length', function () {
+								describe('and an length in microseconds', function () {
 
 									beforeEach(function (done) {
-										params.length = 'TEST-LENGTH';
+										params.lengthMicroSec = 'TEST-LENGTH';
 										done();
 									});
 
-									it('should not throw error', function (done) {
-										expect(function () { new RenderEvent(params); }).not.to.throw(TypeError);
+									it('should throw an error', function (done) {
+										expect(function () { new RenderEvent(params); }).to.throw(TypeError);
 										done();
+									});
+
+									describe('and a start time in microseconds', function () {
+
+										beforeEach(function (done) {
+											params.startTimeMicroSec = 'TEST-START';
+											done();
+										});
+
+										it('should not throw error', function (done) {
+											expect(function () { new RenderEvent(params); }).not.to.throw(TypeError);
+											done();
+										});
 									});
 								});
 							});
@@ -574,7 +587,8 @@ describe('data-types', function() {
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
-					length: 0
+					lengthMicroSec: 0,
+					startTimeMicroSec: 0
 				});
 
 				done();
@@ -630,7 +644,8 @@ describe('data-types', function() {
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
-					length: 0,
+					lengthMicroSec: 0,
+					startTimeMicroSec: 0,
 					radius: 3.14
 				};
 
@@ -670,7 +685,8 @@ describe('data-types', function() {
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
-					length: 0,
+					lengthMicroSec: 0,
+					startTimeMicroSec: 0,
 					path: 'TEST-PATH',
 					scale: 'TEST-LENGTH'
 				};
@@ -710,7 +726,8 @@ describe('data-types', function() {
 					y: 0,
 					z: 0,
 					rotation: 10,
-					length: 0
+					lengthMicroSec: 0,
+					startTimeMicroSec: 0
 				};
 				done();
 			});

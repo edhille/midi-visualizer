@@ -64,6 +64,7 @@ function ThreeJsRendererState(params) {
 	this.camera = params.camera;
 	this.scene = params.scene;
 	this.renderer = params.renderer;
+	this.THREE = params.THREE;
 
 	RendererState.call(this, params);
 }
@@ -78,7 +79,8 @@ function AnimEvent(params) {
 	this.event = params.event;
 	this.track = params.track || 0;
 	this.startTimeMicroSec = params.startTimeMicroSec || 0;
-	this.length = params.length || 0;
+	this.lengthMicroSec = params.lengthMicroSec || 0;
+	this.microSecPerBeat = params.microSecPerBeat || 500000;
 	this.id = params.id || this.track + '-' + this.event.note;
 
 	ADT.call(this);
@@ -94,7 +96,8 @@ function RenderEvent(params) {
 	if (typeof params.subtype === 'undefined') throw new TypeError('no subtype passed in');
 	if (typeof params.x === 'undefined') throw new TypeError('no x passed in');
 	if (typeof params.y === 'undefined') throw new TypeError('no y passed in');
-	if (typeof params.length === 'undefined') throw new TypeError('no length passed in');
+	if (typeof params.lengthMicroSec === 'undefined') throw new TypeError('no lengthMicroSec passed in');
+	if (typeof params.startTimeMicroSec === 'undefined') throw new TypeError('no startTimeMicroSec passed in');
 
 	this.id = params.id;
 	this.track = params.track;
@@ -105,7 +108,8 @@ function RenderEvent(params) {
 	this.y = params.y;
 	this.z = params.z || 0; // Only used in three-dimensional rendering
 
-	this.length = params.length; // how long this event should live
+	this.lengthMicroSec = params.lengthMicroSec; // how long this event should live
+	this.startTimeMicroSec = params.startTimeMicroSec; // when this event is occurring
 
 	this.color = params.color || '#FFFFFF';
 
@@ -138,7 +142,12 @@ function ThreeJsRenderEvent(params) {
 	this.scale = params.scale || 1;
 
 	this.z = params.z;
+	
+	// TODO: rotation needs three dimensions..
 	this.rotation = params.rotation || 0;
+
+	// TODO: need to test this
+	this.shape = params.shape;
 
 	RenderEvent.call(this, params);
 }

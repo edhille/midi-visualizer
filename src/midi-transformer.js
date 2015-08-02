@@ -21,23 +21,24 @@ function transformMidi(midi) {
 		var activeNotes = {};
 
 		return track.events.reduce(function _reduceEvent(eventsByTime, event) {
+			var eventTimeInMicroSec = 0;
 			var eventTimeInMs = 0;
+			var startTimeMicroSec = 0;
 			var startTimeMs = 0;
-			var eventLength = 0;
 			var startNote = {};
 			var newEvent = {};
 
 			if (event instanceof MidiMetaTempoEvent) {
 				// NOTE: this "should" be the first event in a track if not, 
 				//       we would really need to go back and revise the time for all events...
-				tempo = event.tempo;
+				tempo = event.tempo; // microseconds per beat
 				tickInMicroSec = Math.floor(tempo / midi.header.timeDivision);
 
 				return eventsByTime;
 			}
 
 			elapsedTimeInMicroSec += event.delta * tickInMicroSec;
-			eventTimeInMs = Math.floor(elapsedTimeInMicroSec / 1000);
+			eventTimeInMicroSec = elapsedTimeInMicroSec;
 
 			/* istanbul ignore else */
 			if (!trackEventFilter(event)) return eventsByTime;
@@ -54,13 +55,15 @@ function transformMidi(midi) {
 				startNote = activeNotes[event.note] ? activeNotes[event.note][0] : null;
 
 				if (startNote) {
-					startNote.length = elapsedTimeInMicroSec - startNote.startTimeMicroSec;
-					startTimeMs = Math.floor(startNote.startTimeMicroSec / 1000);
+					startNote.lengthMicroSec = elapsedTimeInMicroSec - startNote.startTimeMicroSec;
+					startTimeMicroSec = startNote.startTimeMicroSec;
+					startTimeMs = Math.floor(startTimeMicroSec / 1000);
 					newEvent = new AnimEvent({
 						event: startNote.event,
-						length: startNote.length,
+						lengthMicroSec: startNote.lengthMicroSec,
 						track: trackIndex,
-						startTimeMicroSec: startNote.startTimeMicroSec
+						startTimeMicroSec: startNote.startTimeMicroSec,
+						microSecPerBeat: tempo
 					});
 
 					eventsByTime[startTimeMs][startNote.index] = newEvent;
@@ -77,11 +80,14 @@ function transformMidi(midi) {
 
 			/* istanbul ignore else */
 			if (!activeNotes[event.note] || activeNotes[event.note].length <= 1) {
+				eventTimeInMs = Math.floor(eventTimeInMicroSec / 1000);
 				eventsByTime[eventTimeInMs] = eventsByTime[eventTimeInMs] || [];
 				eventsByTime[eventTimeInMs].push(new AnimEvent({
 					event: event,
-					length: eventLength,
-					track: trackIndex
+					lengthMicroSec: 0,
+					track: trackIndex,
+					startTimeMicroSec: elapsedTimeInMicroSec,
+					microSecPerBeat: tempo
 				}));
 
 				/* istanbul ignore else */
