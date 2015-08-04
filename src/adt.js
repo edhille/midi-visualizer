@@ -1,5 +1,27 @@
 'use strict';
-var _ = require('lodash');
+
+import { merge } from 'lodash';
+
+export default class ADT {
+	constructor() {
+		/* istanbul ignore else */
+		if (Object.freeze) Object.freeze(this);
+	}
+
+	next(changes) {
+		var clone;
+
+		if (!changes || Object.keys(changes).length === 0) {
+			return this;
+		} else {
+			clone = merge(makeCloneable(this), changes, function (a, b) {
+				return b;
+			});
+
+			return new this.constructor(clone);
+		}
+	}
+}
 
 function inherit(subClass, superClass) {
 	if (typeof superClass !== 'function' && superClass !== null) {
@@ -27,26 +49,4 @@ function makeCloneable(obj) {
 	return clone;
 }
 
-function ADT() {
-	/* istanbul ignore else */
-	if (Object.freeze) Object.freeze(this);
-}
-
 ADT.inherit = inherit;
-ADT.prototype = Object.create(null);
-ADT.prototype.constructor = ADT;
-ADT.prototype.next = function next(changes) {
-	var clone;
-
-	if (!changes || Object.keys(changes).length === 0) {
-		return this;
-	} else {
-		clone = _.merge(makeCloneable(this), changes, function (a, b) {
-			return b;
-		});
-
-		return new this.constructor(clone);
-	}
-};
-
-module.exports = ADT;

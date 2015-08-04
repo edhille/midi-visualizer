@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/edhille/midi-visualizer",
   "devDependencies": {
+    "babel": "^5.8.20",
     "browserify": "^9.0.3",
     "chai": "^2.2.0",
     "code": "^1.4.0",

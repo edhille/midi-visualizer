@@ -46,7 +46,8 @@ function test(cb, doCoverage) {
 		.pipe(require('gulp-spawn-mocha')({
 			istanbul: doCoverage,
 			asyncOnly: true,
-			checkLeaks: true
+			checkLeaks: true,
+			compilers: 'js:babel/register'
 		}));
 }
 

@@ -8,5 +8,6 @@
 	"singleGroups": true,
 	"undef": true,
 	"unused": true,
-	"proto": true
+	"proto": true,
+  "esnext": true
 }
