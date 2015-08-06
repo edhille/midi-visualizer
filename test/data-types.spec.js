@@ -31,6 +31,14 @@ describe('data-types', function() {
 
                 done();
             });
+
+            it('should throw an error regarding a missing "renderer"', function(done) {
+				expect(function () {
+					midiVisualizerState = new MidiVisualizerState({ audioPlayer: sinon.spy() });
+				}).to.throw(/renderer/);
+
+                done();
+            });
         });
 
         describe('empty params instantiation', function() {
