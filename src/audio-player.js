@@ -142,7 +142,7 @@ AudioPlayer.prototype.play = function play(startTimeOffset) {
 	return this.isPlaying;
 };
 
-AudioPlayer.prototype.pause = function play( /* AudioBufferSourceNode.stop params */ ) {
+AudioPlayer.prototype.pause = function pause( /* AudioBufferSourceNode.stop params */ ) {
 	if (!this.isLoaded) return false; // nothing to play...
 	if (!this.isPlaying) return true; // already paused
 

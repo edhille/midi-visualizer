@@ -22,6 +22,7 @@ function stubAudioLoader(loadDataStub) {
 function stubAudioPlayer() {
 	return sinon.stub({
 		play: function() {},
+		pause: function() {},
 		getPlayheadTime: function() {}
 	});
 }
@@ -40,35 +41,27 @@ function stubMidiParser() {
 	});
 }
 
-function stubRenderer(schedulerStub) {
+function stubRenderer() {
 	var stub = sinon.stub({
-		prep: function() {}
+		play: function() {},
+		pause: function() {}
 	});
-
-	stub.prep.returns(schedulerStub);
 
 	return stub;
-}
-
-function stubScheduler() {
-	return sinon.stub({
-		play: function() {}
-	});
 }
 
 describe('midi-visualizer', function() {
 
 	describe('with valid instantaion', function() {
 		var testVisualizer, config, setupError;
-		var audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub, schedulerStub;
+		var audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub;
 
 		beforeEach(function(done) {
 			setupError = null;
 			midiParserStub = stubMidiParser();
 			audioPlayerStub = stubAudioPlayer();
-			schedulerStub = stubScheduler();
 
-			rendererStub = stubRenderer(schedulerStub);
+			rendererStub = stubRenderer();
 			loadDataStub = stubLoadData(audioPlayerStub);
 
 			audioLoaderStub = stubAudioLoader(loadDataStub);
@@ -84,7 +77,7 @@ describe('midi-visualizer', function() {
 					data: new Uint8Array(10)
 				},
 				window: {},
-				renderer: function () { return schedulerStub; },
+				renderer: function () { return rendererStub; },
 				raf: sinon.spy()
 			};
 
@@ -98,7 +91,7 @@ describe('midi-visualizer', function() {
 		});
 
 		afterEach(function(done) {
-			audioLoaderStub = midiParserStub = config = testVisualizer = setupError = schedulerStub = null;
+			audioLoaderStub = midiParserStub = config = testVisualizer = setupError = null;
 			done();
 		});
 
@@ -114,11 +107,6 @@ describe('midi-visualizer', function() {
 
 		it('should have called audioPlayer.loadData', function(done) {
 			expect(loadDataStub.called).to.be.true;
-			done();
-		});
-
-		it.skip('should have called config.renderer.prep', function(done) {
-			expect(config.renderer.prep.called).to.be.true;
 			done();
 		});
 
@@ -159,23 +147,40 @@ describe('midi-visualizer', function() {
 				done();
 			});
 
-			it('should ask renderer to play animations', function(done) {
-				expect(schedulerStub.play.called).to.be.true;
-				done();
+			describe('#pause', function() {
+				var state;
+
+				beforeEach(function(done) {
+					testVisualizer = testVisualizer.pause();
+					state = testVisualizer.value();
+
+					done();
+				});
+
+				it('should set the state to not playing', function(done) {
+					expect(state.isPlaying).to.be.false;
+
+					done();
+				});
+
+				it('should pause the audioPlayer', function(done) {
+					expect(audioPlayerStub.pause.called).to.be.true;
+
+					done();
+				});
 			});
 		});
 	});
 
 	describe('with invalid instantiation', function () {
 		var testVisualizer, config, setupError;
-		var audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub, schedulerStub;
+		var audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub;
 
 		beforeEach(function(done) {
 			midiParserStub = stubMidiParser();
 			audioPlayerStub = stubAudioPlayer();
-			schedulerStub = stubScheduler();
 
-			rendererStub = stubRenderer(schedulerStub);
+			rendererStub = stubRenderer();
 			loadDataStub = stubLoadData(audioPlayerStub);
 
 			audioLoaderStub = stubAudioLoader(loadDataStub);
@@ -197,7 +202,7 @@ describe('midi-visualizer', function() {
 		});
 
 		afterEach(function(done) {
-			audioLoaderStub = midiParserStub = config = testVisualizer = setupError = schedulerStub = null;
+			audioLoaderStub = midiParserStub = config = testVisualizer = setupError = null;
 			done();
 		});
 
