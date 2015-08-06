@@ -320,9 +320,34 @@ describe('renderer.utils', function () {
 			done();
 		});
 
-		it('should return no renderEvents if passed no animEvents');
+		it('should return no renderEvents if passed no animEvents', function (done) {
+			expect(Object.keys(transformEvents(null, null, []))).to.have.length(0);
+			done();
+		});
 
-		it('should log error to console if no transformer function');
+		it('should log error to console if no transformer function', function (done) {
+			var consoleStub = {
+				error: sinon.spy()
+			};
+			renderUtils.__with__({
+				console: consoleStub
+			})(function () {
+				transformEvents(null, [], [[{track: 0}]]);
+				expect(consoleStub.error.lastCall.calledWithMatch(/No transform/)).to.be.true;
+				done();
+			});
+		});
+
+		it('should pass events to the transform', function (done) {
+			var transformSpy = sinon.spy();
+			var animEvent = { track: 0 };
+			var state = null;
+			transformEvents(state, [transformSpy], [[animEvent]]);
+			expect(transformSpy.lastCall.calledWith(state, animEvent)).to.be.true;
+			done();
+		});
+
+		it('should return events with the same time-keys as those passed in');
 	});
 
 	describe('#maxNote', function () {
