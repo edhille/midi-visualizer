@@ -350,6 +350,37 @@ describe('renderer.utils', function () {
 		it('should return events with the same time-keys as those passed in');
 	});
 
+	describe('#mapEvents', function () {
+		var mapEvents;
+
+		beforeEach(function (done) {
+			mapEvents = renderUtils.mapEvents;
+			done();
+		});
+
+		it('should call transformMidi helper', function (done) {
+			var transformSpy = sinon.stub();
+			transformSpy.returns([]);
+
+			renderUtils.__with__({
+				transformMidi: transformSpy
+			})(function () {
+				var initialState = new RendererState({
+					root: {},
+					window: { document: {} }
+				});
+				var testConfig = { tranformers: [] };
+				var testMidi = [];
+				var mockState = mapEvents(initialState, testMidi, testConfig);
+
+				expect(transformSpy.calledWithExactly(testMidi)).to.be.true;
+				expect(Object.keys(mockState.renderEvents)).to.have.length(0);
+
+				done();
+			});
+		});
+	});
+
 	describe('#maxNote', function () {
 		var maxNote;
 
@@ -358,9 +389,15 @@ describe('renderer.utils', function () {
 			done();
 		});
 
-		it('should return current note if it is highest');
+		it('should return current note if it is highest', function (done) {
+			expect(maxNote(127, { note: 0 })).to.equal(127);
+			done();
+		});
 
-		it('should return new note if it is highest');
+		it('should return new note if it is highest', function (done) {
+			expect(maxNote(0, { note: 127 })).to.equal(127);
+			done();
+		});
 	});
 
 	describe('#minNote', function () {
@@ -371,24 +408,39 @@ describe('renderer.utils', function () {
 			done();
 		});
 
-		it('should return current note if it is lowest');
-
-		it('should new current note if it is lowest');
-	});
-
-	describe('#isNoteEvent', function () {
-		var isNoteEvent;
-
-		beforeEach(function (done) {
-			isNoteEvent = renderUtils.isNoteEvent;
+		it('should return current note if it is lowest', function (done) {
+			expect(minNote(0, { note: 127 })).to.equal(0);
 			done();
 		});
 
-		it('should return true if note is an "on" note');
+		it('should new note if it is lowest', function (done) {
+			expect(minNote(127, { note: 0 })).to.equal(0);
+			done();
+		});
+	});
 
-		it('should return false if note is an "off" event');
+	describe('#isNoteOnEvent', function () {
+		var isNoteOnEvent;
 
-		it('should return false if event is not a note event');
+		beforeEach(function (done) {
+			isNoteOnEvent = renderUtils.isNoteOnEvent;
+			done();
+		});
+
+		it('should return true if note is an "on" note', function (done) {
+			expect(isNoteOnEvent({ type: 'note', subtype: 'on' })).to.be.true;
+			done();
+		});
+
+		it('should return false if note is an "off" event', function (done) {
+			expect(isNoteOnEvent({ type: 'note', subtype: 'off' })).to.be.false;
+			done();
+		});
+
+		it('should return false if event is not a note event', function (done) {
+			expect(isNoteOnEvent({ type: 'meta' })).to.be.false;
+			done();
+		});
 	});
 
 	describe('#scale', function () {
