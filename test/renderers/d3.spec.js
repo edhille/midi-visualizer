@@ -14,9 +14,6 @@ var D3RenderEvent = dataTypes.D3RenderEvent;
 var D3RendererState = dataTypes.D3RendererState;
 var d3Renderer = rewire('../../src/renderers/d3');
 
-var TEST_NOTE_MIN = 20;
-var TEST_NOTE_MAX = 30;
-
 function createMockSvg() {
 	// wow...chaining makes mocking really hard...
 	var svgStub = sinon.stub({
@@ -334,16 +331,18 @@ describe('renderers.d3', function () {
 		var renderer;
 		var generateConfig, renderConfig;
 		var mockMidi, mockD3, mockState;
-		var rafSpy, rafStub, nowStub, domPrepStub, mockSvg;
+		var rafSpy, rafStub, nowStub, domPrepStub, mockSvg, mockSvgEach;
 
 		beforeEach(function (done) {
+			var svgMocks = createMockSvg();
 			rafSpy = sinon.spy();
 			rafStub = sinon.stub();
 			nowStub = sinon.stub();
 			domPrepStub = sinon.stub();
 			mockMidi = testHelpers.createMockMidi();
 			mockD3 = createMockD3();
-			mockSvg = createMockSvg();
+			mockSvg = svgMocks.svgMock;
+			mockSvgEach = svgMocks.eachMock;
 			mockState = new D3RendererState({
 				window: {
 					document: {},
@@ -362,7 +361,7 @@ describe('renderers.d3', function () {
 			generateConfig = {
 				prepDOM: domPrepStub,
 				mapEvents: sinon.spy(),
-				frameRenderFn: sinon.spy(),
+				frameRenderer: sinon.spy(),
 				resize: sinon.spy(),
 				transformers: [sinon.spy(), null, sinon.spy()]
 			};
@@ -400,6 +399,20 @@ describe('renderers.d3', function () {
 		describe('api', function () {
 
 			describe('#play', function () {
+				var utilsPlaySpy, utilsRenderSpy;
+
+				beforeEach(function (done) {
+					utilsPlaySpy = sinon.stub();
+					utilsRenderSpy = sinon.stub();
+
+					// set it to call the _render callback it is provided with empty data
+					utilsPlaySpy.callsArgWith(2, mockState, [], []);
+
+					// have the renderer call the "rafFn"
+					utilsRenderSpy.callsArgWith(2, mockState, [], []);
+
+					done();
+				});
 
 				it('should have a #play method', function (done) {
 					expect(renderer).to.respondTo('play');
@@ -408,12 +421,78 @@ describe('renderers.d3', function () {
 				
 				describe('when no playhead position is supplied', function () {
 
-					it('should start from the beginning and schedule all events to play');
+					it('should call renderUtils.play with no playheadTime', function (done) {
+						d3Renderer.__with__({
+							renderUtils: {
+								play: utilsPlaySpy,
+								render: sinon.spy()
+							}
+						})(function () {
+							renderer.play(null);
+
+							var utilsPlaySecondArg = utilsPlaySpy.firstCall.args[1];
+
+							expect(utilsPlaySecondArg).to.be.null;
+
+							done();
+						});
+					});
 				});
 
 				describe('when given an explicit playhead position', function () {
 
-					it('should only schedule timers for events happening on or after playhead position');
+					it('should only schedule timers for events happening on or after playhead position', function (done) {
+						d3Renderer.__with__({
+							renderUtils: {
+								play: utilsPlaySpy,
+								render: sinon.spy()
+							}
+						})(function () {
+							renderer.play(100);
+
+							expect(utilsPlaySpy.args[0][1]).to.be.equal(100);
+
+							done();
+						});
+					});
+				});
+
+				describe('internal rafFn', function () {
+					var getBBoxSpy, setAttrSpy;
+
+					beforeEach(function (done) {
+						getBBoxSpy = sinon.stub();
+						setAttrSpy = sinon.spy();
+
+						getBBoxSpy.returns({ width: 1, height: 1 });
+
+						mockSvgEach.callsArgOnWith(0, {
+							tagName: 'path',
+							getBBox: getBBoxSpy,
+							setAttribute: setAttrSpy
+						}, {});
+
+						d3Renderer.__with__({
+							renderUtils: {
+								play: utilsPlaySpy,
+								render: utilsRenderSpy
+							}
+						})(function () {
+							renderer.play();
+
+							done();
+						});
+					});
+
+					it('should have been passed the given state', function (done) {
+						expect(utilsRenderSpy.firstCall.args[0]).to.equal(mockState);
+						done();
+					});
+
+					it('should have set a transform', function (done) {
+						expect(setAttrSpy.firstCall.args[1]).to.match(/matrix/);
+						done();
+					});
 				});
 			});
 

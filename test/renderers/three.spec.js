@@ -82,6 +82,7 @@ function createThreeJsMock() {
 // 	return shapesStub;
 // }
 
+// TODO: switch to helpers.createMockMidi
 function createMidiMock() {
 
 	return {
@@ -289,7 +290,10 @@ describe('renderers.threejs', function () {
 
 				beforeEach(function (done) {
 					utilsPlaySpy = sinon.stub();
+
+					// set it to call the _render callback it is provided with empty data
 					utilsPlaySpy.callsArgOnWith(2, null, [], []);
+
 					done();
 				});
 
@@ -309,7 +313,9 @@ describe('renderers.threejs', function () {
 						})(function () {
 							renderer.play(null);
 
-							expect(utilsPlaySpy.args[0][1]).to.be.null;
+							var utilsPlaySecondArg = utilsPlaySpy.firstCall.args[1];
+
+							expect(utilsPlaySecondArg).to.be.null;
 
 							done();
 						});
@@ -364,7 +370,6 @@ describe('renderers.threejs', function () {
 			});
 		});
 	});
-
 
 	describe('#resize', function () {
 		var resize;
