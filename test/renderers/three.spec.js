@@ -10,7 +10,6 @@ var sinon = require('sinon');
 var testHelpers = require('../helpers');
 
 var dataTypes = require('../../src/data-types');
-var ThreeJsRenderEvent = dataTypes.ThreeJsRenderEvent;
 var ThreeJsRendererState = dataTypes.ThreeJsRendererState;
 var threeJsRenderer = rewire('../../src/renderers/three');
 var TEST_NOTE_MIN = 20;

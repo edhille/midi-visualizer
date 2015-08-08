@@ -86,12 +86,10 @@ function prepDOM(midi, config) {
 	var svg = d3.select('body').append('svg');
 	svg.attr('id', 'stage');
 
-	var scales = [];
+	var songScales = midi.tracks.reduce(function (scales, track, index) {
+		if (track.events.length === 0) return scales;
 
-	midi.tracks.forEach(function (track, index) {
-		if (track.events.length === 0) return;
-
-		var scale = scales[index] = {
+		var trackScale = scales[index] = {
 			x: d3.scale.linear(),
 			y: d3.scale.linear(),
 			note: d3.scale.linear()
@@ -101,18 +99,20 @@ function prepDOM(midi, config) {
 		var highestNote = onNotes.reduce(maxNote, 0);
 		var lowestNote = onNotes.reduce(minNote, highestNote);
 
-		scale.y.range([25, y]);
-		scale.y.domain([lowestNote, highestNote]);
+		trackScale.y.range([25, y]);
+		trackScale.y.domain([lowestNote, highestNote]);
 
-		scale.x.range([25, x]);
-		scale.x.domain([lowestNote, highestNote]);
+		trackScale.x.range([25, x]);
+		trackScale.x.domain([lowestNote, highestNote]);
 
-		scale.note.range([50, 100]);
-		scale.note.domain(scale.x.domain());
+		trackScale.note.range([50, 100]);
+		trackScale.note.domain(trackScale.x.domain());
 
-		scale.hue = d3.scale.linear().range([0,360]).domain([0,8]);
-		scale.velocity = d3.scale.linear().range([30,60]).domain([0, 256]);
-	});
+		trackScale.hue = d3.scale.linear().range([0,360]).domain([0,8]);
+		trackScale.velocity = d3.scale.linear().range([30,60]).domain([0, 256]);
+
+		return scales;
+	}, []);
 
 	return new D3RendererState({
 		window: w,
@@ -120,17 +120,19 @@ function prepDOM(midi, config) {
 		raf: config.raf,
 		width: x,
 		height: y,
-		scales: config.scalesTuner ? config.scalesTuner(scales, x, y) : scales,
+		scales: config.scalesTuner ? config.scalesTuner(songScales, x, y) : songScales,
 		svg: svg
 	});
 }
 
+/* istanbul ignore next */ // no need to test this
 function cleanupFn() {}
 
 // Config -> (Midi -> Config -> Renderer)
 function generate(renderConfig) {
 	var renderer = monad();
 
+	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// D3JsRendererState -> [RenderEvent] -> undefined
 	function rafFn(state, eventsToAdd, currentRunningEvents) {
 		var shapes = state.svg.selectAll('.shape').data(currentRunningEvents, getId);
@@ -173,5 +175,6 @@ module.exports = {
 	prepDOM: prepDOM,
 	resize: function () { throw new Error('Implement'); },
 	generate: generate,
+	cleanupFn: cleanupFn,
 	D3: d3
 };

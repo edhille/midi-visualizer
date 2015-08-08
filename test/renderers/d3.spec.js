@@ -14,6 +14,9 @@ var D3RenderEvent = dataTypes.D3RenderEvent;
 var D3RendererState = dataTypes.D3RendererState;
 var d3Renderer = rewire('../../src/renderers/d3');
 
+var TEST_NOTE_MIN = 20;
+var TEST_NOTE_MAX = 30;
+
 function createMockSvg() {
 	// wow...chaining makes mocking really hard...
 	var svgStub = sinon.stub({
@@ -105,6 +108,105 @@ function createMockD3() {
 }
 
 describe('renderers.d3', function () {
+
+	describe('#prepDOM', function () {
+		var prepDOM, mockMidi, mockConfig, mockD3, mockDomain, mockRange, state, testWidth, testHeight;
+
+		beforeEach(function (done) {
+			prepDOM = d3Renderer.prepDOM;
+			done();
+		});
+
+		describe('minimal working behavior', function () {
+
+			beforeEach(function (done) {
+				var d3Mocks = createMockD3();
+				mockD3 = d3Mocks.d3;
+				mockDomain = d3Mocks.mockDomain;
+				mockRange = d3Mocks.mockRange;
+				mockMidi = testHelpers.createMockMidi();
+				testWidth = 999;
+				testHeight = 666;
+				mockConfig = {
+					window: {
+						document: {
+							documentElement: {}
+						}
+					},
+					root: {},
+					width: testWidth,
+					height: testHeight
+				};
+				d3Renderer.__with__({
+					d3: mockD3
+				})(function () {
+					state = prepDOM(mockMidi, mockConfig);
+					done();
+				});
+			});
+
+			afterEach(function (done) {
+				mockDomain.reset();
+				mockRange.reset();
+				prepDOM = mockMidi = mockConfig = mockD3 = mockDomain = mockRange = state = testWidth = testHeight = null;
+				done();
+			});
+
+			it('should have set scales in the state with our min/max note', function (done) {
+				var trackOneWidthScale = state.scales[0].x.domain.args[0][0];
+				expect(trackOneWidthScale[0]).to.equal(1);
+				expect(trackOneWidthScale[1]).to.equal(10);
+				done();
+			});
+
+			it('should have not set scales for second track (with no events to base scale from)', function (done) {
+				expect(state.scales[1]);
+				done();
+			});
+		});
+
+		describe('error cases', function () {
+			
+			it('should throw an error trying to access the document if window is not passed in the config', function (done) {
+				expect(function () {
+					prepDOM(null, {});
+				}).to.throw(/document/);
+
+				done();
+			});
+			
+			it('should throw an error if width cannot be determined', function (done) {
+				expect(function () {
+					prepDOM(null, {
+						window: {
+							innerWidth: null,
+							document: {
+								documentElement: {}
+							}
+						}
+					});
+				}).to.throw(/width/);
+
+				done();
+			});
+			
+			it('should throw an error if height cannot be determined', function (done) {
+				expect(function () {
+					prepDOM(null, {
+						window: {
+							innerWidth: 100,
+							innerHeight: null,
+							document: {
+								documentElement: {}
+							}
+						}
+					});
+				}).to.throw(/height/);
+
+				done();
+			});
+		});
+	});
 
 	describe.skip('#render', function () {
 		var renderFn, mockState, nowStub, rafStub, mockData, mockSvg, removeStub, eachStub, mockCircle, mockShape, mockDatum;
@@ -228,169 +330,6 @@ describe('renderers.d3', function () {
 		});
 	});
 
-	describe.skip('#init', function () {
-		var mockMidi, mockConfig, mockD3, mockDomain, mockRange, initFn, state, testWidth, testHeight;
-
-		beforeEach(function (done) {
-			var d3Mocks = createMockD3();
-			mockD3 = d3Mocks.d3;
-			mockDomain = d3Mocks.mockDomain;
-			mockRange = d3Mocks.mockRange;
-			initFn = d3Renderer.init;
-			mockMidi = testHelpers.createMockMidi();
-			testWidth = 999;
-			testHeight = 666;
-			mockConfig = {
-				window: {
-					document: {
-						documentElement: {}
-					}
-				},
-				raf: sinon.spy(),
-				root: {},
-				width: 999,
-				height: 666
-			};
-			d3Renderer.__with__({
-				d3: mockD3
-			})(function () {
-				state = initFn(mockMidi, mockConfig);
-				done();
-			});
-		});
-
-		afterEach(function (done) {
-			mockDomain.reset();
-			mockRange.reset();
-			mockMidi = mockConfig = mockD3 = mockDomain = mockRange = initFn = state = testWidth = testHeight = null;
-			done();
-		});
-
-		it('should have set scales on the state', function (done) {
-			expect(state.scales).not.to.be.undefined;
-			done();
-		});
-
-		it('should have set three scales on the state', function (done) {
-			expect(state.scales).to.have.length(3);
-			done();
-		});
-
-		it('should have set first scale on the state to a defined value', function (done) {
-			expect(state.scales[0]).not.to.be.undefined;
-			done();
-		});
-
-		it('should have set second scale on the state to an undefined value', function (done) {
-			expect(state.scales[1]).to.be.undefined;
-			done();
-		});
-
-		it('should have set third scale on the state to a defined value', function (done) {
-			expect(state.scales[2]).not.to.be.undefined;
-			done();
-		});
-
-		it('should have set the domain for the first scale to ???', function (done) {
-			done();
-		});
-
-		it('should have set the width of the state', function (done) {
-			expect(state.width).to.equal(testWidth);
-			done();
-		});
-
-		it('should have set the height of the state', function (done) {
-			expect(state.height).to.equal(testHeight);
-			done();
-		});
-
-		it('should have set the first range using the height', function (done) {
-			expect(mockRange.firstCall.args[0]).to.have.members([25, testHeight]);
-			done();
-		});
-
-		it('should have set the second range using the width', function (done) {
-			expect(mockRange.secondCall.args[0]).to.have.members([25, testWidth]);
-			done();
-		});
-
-		it('should have set the third range to hard-coded values', function (done) {
-			expect(mockRange.thirdCall.args[0]).to.have.members([50, 100]);
-			done();
-		});
-
-		it('should have set the first domain using the lowest/highest notes for the track', function (done) {
-			expect(mockDomain.firstCall.args[0]).to.have.members([1, 10]);
-			done();
-		});
-
-		describe('when unable to calculate width', function () {
-
-			beforeEach(function (done) {
-				mockConfig = {
-					window: {
-						document: {
-							documentElement: {}
-						}
-					},
-					root: {},
-					height: 666
-				};
-				done();
-			});
-
-			it('should throw an error', function (done) {
-				expect(function () {
-					initFn(mockMidi, mockConfig);
-				}).to.throw(TypeError);
-				done();
-			});
-		});
-
-		describe('when unable to calculate height', function () {
-
-			beforeEach(function (done) {
-				mockConfig = {
-					window: {
-						document: {
-							documentElement: {}
-						}
-					},
-					root: {},
-					width: 999
-				};
-				done();
-			});
-
-			it('should throw an error', function (done) {
-				expect(function () {
-					initFn(mockMidi, mockConfig);
-				}).to.throw(TypeError);
-				done();
-			});
-		});
-
-		describe('when there is a configure scalesTunner', function () {
-			
-			beforeEach(function (done) {
-				mockConfig.scalesTuner = sinon.stub();
-				mockConfig.scalesTuner.returns('TEST-SCALES');
-				d3Renderer.__with__({
-					d3: mockD3
-				})(function () {
-					state = initFn(mockMidi, mockConfig);
-					done();
-				});
-			});
-
-			it('should return our test scales', function (done) {
-				expect(state.scales).to.equal('TEST-SCALES');
-				done();
-			});
-		});
-	});
-
 	describe('#generate', function () {
 		var renderer;
 		var generateConfig, renderConfig;
@@ -505,6 +444,17 @@ describe('renderers.d3', function () {
 					done();
 				});
 			});
+		});
+	});
+
+	describe('#resize', function () {
+		
+		it('should throw an error if we call resize', function (done) {
+			expect(function () {
+				d3Renderer.resize();
+			}).to.throw(/Implement/);
+
+			done();
 		});
 	});
 });
