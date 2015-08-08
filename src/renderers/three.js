@@ -19,17 +19,20 @@ function prepDOM(midi, config) {
 	var x = config.width || w.innerWidth || e.clientWidth;
 	var y = config.height || w.innerHeight|| e.clientHeight;
 
+	/* istanbul ignore else */
 	if (!x) throw new TypeError('unable to calculate width');
+	/* istanbul ignore else */
 	if (!y) throw new TypeError('unable to calculate height');
 
 	var scene = new THREE.Scene();
+	/* istanbul ignore next */ // not important to check both sides of this ternary
 	var camera = new THREE.PerspectiveCamera(45, x / y, 0.1, x > y ? x*2 : y*2);
 	var renderer = new THREE.WebGLRenderer();
 
 	renderer.setSize(x, y);
 
 	var songScales = midi.tracks.reduce(function (scales, track, index) {
-		if (track.events.length === 0) return;
+		if (track.events.length === 0) return scales;
 
 		var trackScale = scales[index] = {
 			x: scale.linear(),
@@ -86,7 +89,7 @@ function cleanup(state, eventsToRemove) {
 		if (obj) {
 			state.scene.remove(obj);
 		} else {
-			console.log('NO OBJ', event.id);
+			console.error('NO OBJ', event.id);
 		}
 	});
 }
@@ -95,6 +98,7 @@ function cleanup(state, eventsToRemove) {
 function generate(renderConfig) {
 	var renderer = monad();
 
+	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// ThreeJsRendererState -> [RenderEvent] -> [RenderEvent] -> undefined
 	function rafFn(state, eventsToAdd/*, currentEvents*/) {
 		eventsToAdd.forEach(function (event) {
