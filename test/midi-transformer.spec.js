@@ -6,6 +6,8 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 
+var _ = require('lodash');
+
 var midiParser = require('func-midi-parser');
 var MidiNoteOnEvent = midiParser.types.MidiNoteOnEvent;
 var MidiNoteOffEvent = midiParser.types.MidiNoteOffEvent;
@@ -75,14 +77,14 @@ describe('midi-transformer', function() {
 		done();
 	});
 
-	it('should have converted midi data into animEvents by time', function(done) {
-		expect(Object.keys(animEventsByTimeMs)).to.eql(['0', '10', '30', '50']);
+	it('should have converted midi data into animEvents by time, adding in 1/32 note timer events', function(done) {
+		expect(Object.keys(animEventsByTimeMs)).to.eql(_.range(0, 52, 2).map(function (num) { return num.toString(); }));
 		done();
 	});
 
-	it('should have two notes for the second two slots', function(done) {
-		expect(animEventsByTimeMs[10]).to.have.length(2);
-		expect(animEventsByTimeMs[30]).to.have.length(2);
+	it('should have three events for the second two slots that have notes (10 and 30)', function(done) {
+		expect(animEventsByTimeMs[10]).to.have.length(3);
+		expect(animEventsByTimeMs[30]).to.have.length(3);
 		done();
 	});
 

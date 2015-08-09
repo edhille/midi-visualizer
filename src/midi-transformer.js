@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('lodash');
 var types = require('./data-types');
 var AnimEvent = types.AnimEvent;
 var midiParser = require('func-midi-parser');
@@ -15,12 +16,12 @@ function trackEventFilter(event) {
 function transformMidi(midi) {
 	var tempo = 500000; // default of 120bpm
 	var tickInMicroSec = tempo / midi.header.timeDivision;
+	var totalTimeMicroSec = 0;
 
-	return midi.tracks.reduce(function _reduceTrack(eventsByTime, track, trackIndex) {
+	var eventsByTime = midi.tracks.reduce(function _reduceTrack(eventsByTime, track, trackIndex) {
 		var elapsedTimeInMicroSec = 0;
 		var activeNotes = {};
-
-		return track.events.reduce(function _reduceEvent(eventsByTime, event) {
+		var trackEventsByTime = track.events.reduce(function _reduceEvent(eventsByTime, event) {
 			var eventTimeInMicroSec = 0;
 			var eventTimeInMs = 0;
 			var startTimeMicroSec = 0;
@@ -99,7 +100,29 @@ function transformMidi(midi) {
 
 			return eventsByTime;
 		}, eventsByTime);
+
+		// assume the longest track is the length of the song
+		if (elapsedTimeInMicroSec > totalTimeMicroSec) totalTimeMicroSec = elapsedTimeInMicroSec;
+
+		return trackEventsByTime;
 	}, {});
+
+	// add empty events for every 1/32 note to allow for non-note events in renderering
+	var totalTimeMs = Math.floor(totalTimeMicroSec / 1000);
+	var thirtySecondNoteInMs = Math.floor(tempo / 4000);
+	
+	return _.range(0, totalTimeMs + 1, thirtySecondNoteInMs).reduce(function _registerEmptyRenderEvent(eventsByTime, timeMs) {
+		 var events = eventsByTime[timeMs] || [];
+		 eventsByTime[timeMs] = events.concat([new AnimEvent({
+			event: { subtype: 'timer' },
+			track: 0,
+			lengthMicroSec: 0,
+			startTimeMicroSec: timeMs * 1000,
+			microSecPerBeat: tempo
+		 })]);
+
+		 return eventsByTime;
+	}, eventsByTime);
 }
 
 module.exports = transformMidi;

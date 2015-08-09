@@ -81,7 +81,7 @@ function AnimEvent(params) {
 	this.startTimeMicroSec = params.startTimeMicroSec || 0;
 	this.lengthMicroSec = params.lengthMicroSec || 0;
 	this.microSecPerBeat = params.microSecPerBeat || 500000;
-	this.id = params.id || this.track + '-' + this.event.note;
+	this.id = params.id || this.track + '-' + (this.event.note || this.startTimeInMicroSec);
 
 	ADT.call(this);
 }

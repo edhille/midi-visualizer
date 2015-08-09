@@ -158,22 +158,28 @@ function render(state, cleanupFn, rafFn, currentRunningEvents, renderEvents) {
 			return event.id === id ? matchIndices.concat([index]) : matchIndices;
 		}, []);
 
-		if (event.subtype === 'on') {
-			/* istanbul ignore else */
-			if (matchIndices.length === 0) {
-				eventsToAdd.push(event);
-				currentRunningEvents.push(event);
-			}
-		} else if (event.subtype === 'off') {
-			eventsToRemove = eventsToRemove.concat(currentRunningEvents.filter(function (elem, index) {
-				return matchIndices.indexOf(index) > -1;
-			}));
+		switch (event.subtype) {
+			case 'on':
+				/* istanbul ignore else */
+				if (matchIndices.length === 0) {
+					eventsToAdd.push(event);
+					currentRunningEvents.push(event);
+				}
+				break;
+			case 'off':
+				eventsToRemove = eventsToRemove.concat(currentRunningEvents.filter(function (elem, index) {
+					return matchIndices.indexOf(index) > -1;
+				}));
 
-			currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
-				return -1 === matchIndices.indexOf(index);
-			});
-		} else {
-			console.error('unknown render event subtype "' + event.subtype + '"');
+				currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
+					return -1 === matchIndices.indexOf(index);
+				});
+				break;
+			case 'timer':
+				eventsToAdd.push(event);
+				break;
+			default:
+				console.error('unknown render event subtype "' + event.subtype + '"');
 		}
 	});
 
