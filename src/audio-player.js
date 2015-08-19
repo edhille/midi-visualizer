@@ -28,6 +28,7 @@ function AudioPlayer(params) {
 
 	this.lastStartTime = 0;
 	this.startOffset = 0;
+	this.lengthMs = 0;
 }
 
 Object.defineProperties(AudioPlayer, {
@@ -78,6 +79,12 @@ Object.defineProperties(AudioPlayer, {
 		writeable: false,
 		configurable: false,
 		enumerable: false
+	},
+	lengthMs: {
+		value: 0,
+		writeable: false,
+		configurable: false,
+		enumerable: true
 	}
 });
 
@@ -109,6 +116,7 @@ AudioPlayer.prototype.loadData = function loadData(audioData, callback) { /* jsh
 		self.buffer = buffer;
 		self.isLoading = false;
 		self.isLoaded = true;
+		self.lengthMs = buffer.duration * SEC_TO_MS;
 
 		callback(null, self);
 	}

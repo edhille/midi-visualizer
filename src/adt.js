@@ -36,17 +36,20 @@ ADT.inherit = inherit;
 ADT.prototype = Object.create(null);
 ADT.prototype.constructor = ADT;
 ADT.prototype.next = function next(changes) {
-	var clone;
-
 	if (!changes || Object.keys(changes).length === 0) {
 		return this;
 	} else {
-		clone = _.merge(makeCloneable(this), changes, function (a, b) {
-			return b;
-		});
-
-		return new this.constructor(clone);
+		return this.copy(changes);
 	}
+};
+ADT.prototype.copy = function copy(changes) {
+	changes = changes || {};
+
+	var clone = _.merge(makeCloneable(this), changes, function (a, b) {
+		return b;
+	});
+
+	return new this.constructor(clone);
 };
 
 module.exports = ADT;

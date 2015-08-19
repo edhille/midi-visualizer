@@ -110,6 +110,7 @@ function RenderEvent(params) {
 
 	this.lengthMicroSec = params.lengthMicroSec; // how long this event should live
 	this.startTimeMicroSec = params.startTimeMicroSec; // when this event is occurring
+	this.microSecPerBeat = params.microSecPerBeat || 500000;
 
 	this.color = params.color || '#FFFFFF';
 

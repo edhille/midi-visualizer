@@ -109,7 +109,7 @@ function transformMidi(midi) {
 
 	// add empty events for every 1/32 note to allow for non-note events in renderering
 	var totalTimeMs = Math.floor(totalTimeMicroSec / 1000);
-	var thirtySecondNoteInMs = Math.floor(tempo / 4000);
+	var thirtySecondNoteInMs = Math.floor(tempo / 8000);
 	
 	return _.range(0, totalTimeMs + 1, thirtySecondNoteInMs).reduce(function _registerEmptyRenderEvent(eventsByTime, timeMs) {
 		 var events = eventsByTime[timeMs] || [];
