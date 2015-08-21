@@ -21,43 +21,19 @@ module.exports = function closure() {
 	 *
 	 * @return {RendererState} - new monad state
 	 */
-	// (RendererState -> Int -> [RenderEvent] -> [RenderEvent]) -> RendererState -> Int -> RendererState
-	function play(state, playheadTimeMs, player, renderFn) {
-		console.log('before', state.window.performance.now());
-		var nextState = setTimers(state, playheadTimeMs, player, renderFn);
-		console.log('after', state.window.performance.now());
-		return nextState;
-	}
+	// (RendererState -> AudioPlayer -> [RenderEvent] -> [RenderEvent]) -> RendererState -> Int -> RendererState
+	function play(state, player, renderFn) {
+		// if (player.getPlayheadTime() > 0) renderer = renderer.prepResume();
 
-	/**
-	 * setTimers
-	 *
-	 * Does actual scheulding, building a closure over the state of "current" RenderEvents to keep track across timer callbacks
-	 * 
-	 *
-	 * @param {RendererState} state - monad state
-	 * @param {number} startOffsetMs - milliseconds from beginning of song to start animation
-	 * @param {RenderUtils~render} renderFn - actual renderer function
-	 *
-	 * @return {RendererState}
-	 */
-	// RendererState -> Int -> (RendererState -> [RenderEvent] -> undefined) -> RendererState
-	function setTimers(state, startOffsetMs, player, renderFn) {
-		startOffsetMs = startOffsetMs || 0;
-
-		// TODO: do we need a way to prep the resumption of play?
-		// if (startOffset > 0) renderer = renderer.prepResume();
-
-		// state for timer-defined events...
 		var currentRunningEvents = [];
-
 		var stateSnapshot = state.copy();
 		var raf = stateSnapshot.window.requestAnimationFrame;
+		var songLengthMs = player.lengthMs;
 
 		function animate(/* now */) {
 			var nowMs = player.getPlayheadTime();
 
-			if (nowMs >= player.lengthMs) {
+			if (nowMs >= songLengthMs) {
 				lastRafId = null;
 				return;
 			}
@@ -75,7 +51,6 @@ module.exports = function closure() {
 			lastRafId = raf(animate);
 		}
 
-		// TODO: delay start until we are at the time of the first render event;
 		lastRafId = raf(animate);
 
 		return state;
@@ -85,23 +60,6 @@ module.exports = function closure() {
 	function pause(state) {
 		state.window.cancelAnimationFrame(lastRafId);
 		return state;
-	}
-
-	// RendererState -> RendererState
-	function clearTimers(state) {
-		var renderEvents = state.renderEvents;
-
-		Object.keys(renderEvents).forEach(function (timeInMs) {
-			var events = renderEvents[timeInMs];
-
-			/* istanbul ignore else */
-			if (events.timer) {
-				clearTimeout(events.timer);
-				delete events.timer;
-			}
-		});
-
-		return renderEvents;
 	}
 
 	// RendererState -> [(RendererState -> AnimEvent -> [RenderEvent])] -> [AnimEvent] -> [RenderEvent]
@@ -228,8 +186,6 @@ module.exports = function closure() {
 		pause: pause,
 
 		render: render,
-		setTimers: setTimers,
-		clearTimers: clearTimers,
 
 		transformEvents: transformEvents,
 

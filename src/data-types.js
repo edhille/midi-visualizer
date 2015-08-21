@@ -145,7 +145,7 @@ function ThreeJsRenderEvent(params) {
 	this.z = params.z;
 	
 	// TODO: rotation needs three dimensions..
-	this.rotation = params.rotation || 0;
+	this.zRot = params.zRot || 0;
 
 	// TODO: need to test this
 	this.shape = params.shape;

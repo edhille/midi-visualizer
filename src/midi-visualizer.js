@@ -16,7 +16,7 @@ function playVisualizer(state) {
 
 	return state.next({
 		isPlaying: true,
-		renderer: state.renderer.play(state.audioPlayer.getPlayheadTime(), state.audioPlayer)
+		renderer: state.renderer.play(state.audioPlayer)
 	});
 }
 

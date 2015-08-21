@@ -143,6 +143,10 @@ AudioPlayer.prototype.play = function play(startTimeOffset) {
 	this.audioSource.buffer = this.buffer;
 	this.audioSource.connect(this.context.destination);
 
+	this.audioSource.onended = function () {
+		this.pause();
+	}.bind(this);
+
 	this.audioSource.start(startTimeOffset, calcPlayhead(currTime, this.lastStartTime, this.startOffset, this.buffer.duration));
 
 	this.isPlaying = true;

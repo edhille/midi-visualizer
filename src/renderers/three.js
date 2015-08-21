@@ -127,8 +127,8 @@ function generate(renderConfig) {
 	//       it should then invoke the renderUtils.play() function such that it can set timers to run
 	//       renderUtils.render with the appropriate RendererState, a callback to clean-up dead events,
 	//       a callback for the RAF to render newEvents and to return the currentRunning events ((runningEvents - deadEvents) + newEvents)
-	renderer.lift('play', function _play(state, playheadTimeMs, player) {
-		return renderUtils.play(state, playheadTimeMs, player, function _render(state, currentRunningEvents, newEvents) {
+	renderer.lift('play', function _play(state, player) {
+		return renderUtils.play(state, player, function _render(state, currentRunningEvents, newEvents) {
 			// But...we want our configured rafFn to be called (either from this rafFn, or ???)
 			return renderUtils.render(state, renderConfig.cleanupFn, rafFn, currentRunningEvents, newEvents);
 		});
