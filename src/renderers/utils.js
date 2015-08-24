@@ -31,6 +31,8 @@ module.exports = function closure() {
 		var songLengthMs = player.lengthMs;
 
 		function animate(/* now */) {
+			if (!player.isPlaying) return;
+
 			var nowMs = player.getPlayheadTime();
 
 			if (nowMs >= songLengthMs) {
