@@ -32,7 +32,7 @@ function transformMidi(midi) {
 			if (event instanceof MidiMetaTempoEvent) {
 				// NOTE: this "should" be the first event in a track if not, 
 				//       we would really need to go back and revise the time for all events...
-				tempo = event.tempo; // microseconds per beat
+				tempo = event.microsecPerQn;
 				tickInMicroSec = Math.floor(tempo / midi.header.timeDivision);
 
 				return eventsByTime;
@@ -49,7 +49,7 @@ function transformMidi(midi) {
 				activeNotes[event.note] = activeNotes[event.note] || [];
 				activeNotes[event.note].push({
 					event: event,
-					startTimeMicroSec: elapsedTimeInMicroSec,
+					startTimeMicroSec: eventTimeInMicroSec,
 					index: 0 // assume we are the first note for this time-slice
 				});
 			} else /* istanbul ignore else */ if (event instanceof MidiNoteOffEvent) {
