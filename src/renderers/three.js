@@ -76,8 +76,12 @@ function prepDOM(midi, config) {
 	return state;
 }
 
-function resize(/* state, dimension */) {
-	// TODO: handle resize...
+function resize(state, dimension) {
+	console.log('default resize', dimension);
+
+	state.renderer.setSize(dimension.width, dimension.height);
+
+	return state;
 }
 
 // ThreeJsRendererState -> [RenderEvent] -> undefined
@@ -134,6 +138,7 @@ function generate(renderConfig) {
 		});
 	});
 	renderer.lift('pause', renderUtils.pause);
+	renderer.lift('resize', resize);
 
 	return function setupRenderer(midi, config) {
 		var rendererState = renderConfig.prepDOM(midi, config);
