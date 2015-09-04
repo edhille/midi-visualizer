@@ -11,6 +11,36 @@ var isNoteOnEvent = renderUtils.isNoteOnEvent;
 var transformMidi = require('../midi-transformer');
 var ThreeJsRendererState = require('../data-types').ThreeJsRendererState;
 
+function genSongScales(dimension, midi) {
+	return midi.tracks.reduce(function (scales, track, index) {
+		if (track.events.length === 0) return scales;
+
+		var trackScale = scales[index] = {
+			x: scale.linear(),
+			y: scale.linear(),
+			note: scale.linear()
+		};
+
+		var onNotes = track.events.filter(isNoteOnEvent);
+		var highestNote = onNotes.reduce(maxNote, 0);
+		var lowestNote = onNotes.reduce(minNote, highestNote);
+
+		trackScale.y.range([25, dimension.height]);
+		trackScale.y.domain([lowestNote, highestNote]);
+
+		trackScale.x.range([25, dimension.height]);
+		trackScale.x.domain([lowestNote, highestNote]);
+
+		trackScale.note.range([50, 100]);
+		trackScale.note.domain(trackScale.x.domain());
+
+		trackScale.hue = scale.linear().range([0,360]).domain([0,8]);
+		trackScale.velocity = scale.linear().range([30,60]).domain([0, 256]);
+
+		return scales;
+	}, []);
+}
+
 // Midi -> Config -> ThreeJsRendererState
 function prepDOM(midi, config) {
 	var w = config.window;
@@ -33,40 +63,12 @@ function prepDOM(midi, config) {
    
 	config.root.appendChild(renderer.domElement);
 
-	var songScales = midi.tracks.reduce(function (scales, track, index) {
-		if (track.events.length === 0) return scales;
-
-		var trackScale = scales[index] = {
-			x: scale.linear(),
-			y: scale.linear(),
-			note: scale.linear()
-		};
-
-		var onNotes = track.events.filter(isNoteOnEvent);
-		var highestNote = onNotes.reduce(maxNote, 0);
-		var lowestNote = onNotes.reduce(minNote, highestNote);
-
-		trackScale.y.range([25, y]);
-		trackScale.y.domain([lowestNote, highestNote]);
-
-		trackScale.x.range([25, x]);
-		trackScale.x.domain([lowestNote, highestNote]);
-
-		trackScale.note.range([50, 100]);
-		trackScale.note.domain(trackScale.x.domain());
-
-		trackScale.hue = scale.linear().range([0,360]).domain([0,8]);
-		trackScale.velocity = scale.linear().range([30,60]).domain([0, 256]);
-
-		return scales;
-	}, []);
-
 	var state = new ThreeJsRendererState({
 		window: w,
 		root: config.root,
 		width: x,
 		height: y,
-		scales: songScales,
+		scales: genSongScales({ width: x, height: y }, midi),
 		camera: camera,
 		scene: scene,
 		renderer: renderer,
@@ -77,11 +79,14 @@ function prepDOM(midi, config) {
 }
 
 function resize(state, dimension) {
-	console.log('default resize', dimension);
+	var renderer = state.renderer;
+	
+	renderer.sizeSize(dimension.width, dimension.height);
+	renderer.render();
 
-	state.renderer.setSize(dimension.width, dimension.height);
-
-	return state;
+	return state.next({
+		renderer: renderer
+	});
 }
 
 // ThreeJsRendererState -> [RenderEvent] -> undefined
