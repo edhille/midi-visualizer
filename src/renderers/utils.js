@@ -7,8 +7,10 @@ var transformMidi = require('../midi-transformer');
 var MAX_RAF_DELTA_MS = 15;
 
 module.exports = function closure() {
+	// Some things we need to keep track of between play/pause calls
 	var lastRafId = null;
 	var lastPlayheadTimeMs = 0;
+	var currentRunningEvents = [];
 
 	/**
 	 * play
@@ -21,11 +23,8 @@ module.exports = function closure() {
 	 *
 	 * @return {RendererState} - new monad state
 	 */
-	// (RendererState -> AudioPlayer -> [RenderEvent] -> [RenderEvent]) -> RendererState -> Int -> RendererState
-	function play(state, player, renderFn) {
-		// if (player.getPlayheadTime() > 0) renderer = renderer.prepResume();
-
-		var currentRunningEvents = [];
+	// (RendererState -> AudioPlayer -> [RenderEvent] -> [RenderEvent]) -> RendererState -> Int -> (RendererState -> undefined) -> RendererState
+	function play(state, player, renderFn, resumeFn) {
 		var stateSnapshot = state.copy();
 		var raf = stateSnapshot.window.requestAnimationFrame;
 		var songLengthMs = player.lengthMs;
@@ -40,7 +39,15 @@ module.exports = function closure() {
 				return;
 			}
 
-			var eventKeys = Object.keys(stateSnapshot.renderEvents).map(Number).filter(function (eventTimeMs) { return lastPlayheadTimeMs < eventTimeMs && eventTimeMs <= nowMs; });
+			if (nowMs < lastPlayheadTimeMs) {
+				resumeFn(state, nowMs);
+				lastPlayheadTimeMs = nowMs;
+			}
+
+			var eventKeys = Object.keys(stateSnapshot.renderEvents)
+								.map(Number).filter(function (eventTimeMs) {
+									return lastPlayheadTimeMs < eventTimeMs && eventTimeMs <= nowMs;
+								});
 
 			if (eventKeys.length > 0) {
 				var events = eventKeys.reduce(function (events, key) { return events.concat(stateSnapshot.renderEvents[key]); }, []);
@@ -127,9 +134,10 @@ module.exports = function closure() {
 	 */
 	// (RendererState -> [RenderEvent] -> undefined) -> (RendererState -> [RenderEvent] -> undefined) -> RendererState -> [RenderEvent] -> [RenderEvent] -> [RenderEvent]
 	// function render(cleanupFn, rafFn, state, currentRunningEvents, renderEvents) {
-	function render(state, cleanupFn, rafFn, currentRunningEvents, renderEvents) {
-		var eventsToRemove = [];
+	function render(state, cleanupFn, rafFn, currentRunningEvents, renderEvents, nowMs) {
+		var expiredEvents = [];
 		var eventsToAdd = [];
+		var nowMicroSec = nowMs * 1000;
 
 		renderEvents.forEach(function (event) {
 			var id = event.id;
@@ -146,7 +154,7 @@ module.exports = function closure() {
 					}
 					break;
 				case 'off':
-					eventsToRemove = eventsToRemove.concat(currentRunningEvents.filter(function (elem, index) {
+					expiredEvents = expiredEvents.concat(currentRunningEvents.filter(function (elem, index) {
 						return matchIndices.indexOf(index) > -1;
 					}));
 
@@ -162,12 +170,16 @@ module.exports = function closure() {
 			}
 		});
 
+		expiredEvents = currentRunningEvents.concat(currentRunningEvents.filter(function (event) {
+			return event.startTimeMicroSec > nowMicroSec;
+		}));
+
 		var timestamp = state.window.performance.now();
 
 		state.window.requestAnimationFrame(function (now) {
 			var delta = now - timestamp;
 
-			cleanupFn(state, eventsToRemove);
+			cleanupFn(state, currentRunningEvents, expiredEvents, nowMs);
 
 			if (delta < MAX_RAF_DELTA_MS) {
 				// TODO: should we be passing the state in, or just what is needed?

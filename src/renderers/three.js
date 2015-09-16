@@ -89,10 +89,11 @@ function resize(state, dimension) {
 	});
 }
 
-// ThreeJsRendererState -> [RenderEvent] -> undefined
-function cleanup(state, eventsToRemove) {
+// ThreeJsRendererState -> [RenderEvent] -> [RenderEvent] -> undefined
+function cleanup(state, currentRunningEvents, expiredEvents/*, nowMs */) {
+	// TODO: this is not currently being used...need an example that uses it...
 	console.log('cleanup');
-	eventsToRemove.map(function (event) {
+	expiredEvents.map(function (event) {
 		var obj = state.scene.getObjectByName(event.id);
 
 		if (obj) {
@@ -115,11 +116,6 @@ function generate(renderConfig) {
 	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// ThreeJsRendererState -> [RenderEvent] -> [RenderEvent] -> undefined
 	function rafFn(state, eventsToAdd/*, currentEvents*/) {
-		// eventsToAdd.forEach(function (event) {
-		// 	// TODO: do we want to pass state or just the things it needs?
-		// 	return renderConfig.frameRenderer(event, state.scene, state.camera, THREE);
-		// });
-
 		var shapes = renderConfig.frameRenderer(eventsToAdd, state.scene, state.camera, THREE);
 		var geometry = new THREE.Object3D();
 
@@ -132,15 +128,10 @@ function generate(renderConfig) {
 		state.renderer.render(state.scene, state.camera);
 	}
 
-	// TODO: this is too crazy...we want to have play get the current RendererState and a playheadTime,
-	//       it should then invoke the renderUtils.play() function such that it can set timers to run
-	//       renderUtils.render with the appropriate RendererState, a callback to clean-up dead events,
-	//       a callback for the RAF to render newEvents and to return the currentRunning events ((runningEvents - deadEvents) + newEvents)
 	renderer.lift('play', function _play(state, player) {
-		return renderUtils.play(state, player, function _render(state, currentRunningEvents, newEvents) {
-			// But...we want our configured rafFn to be called (either from this rafFn, or ???)
-			return renderUtils.render(state, renderConfig.cleanupFn, rafFn, currentRunningEvents, newEvents);
-		});
+		return renderUtils.play(state, player, function _render(state, currentRunningEvents, newEvents, nowMs) {
+			return renderUtils.render(state, renderConfig.cleanupFn, rafFn, currentRunningEvents, newEvents, nowMs);
+		}, renderConfig.resumeFn || funtils.noop);
 	});
 	renderer.lift('pause', renderUtils.pause);
 	renderer.lift('resize', resize);

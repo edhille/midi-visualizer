@@ -11,8 +11,10 @@ var monad = utils.monad;
 var MidiVisualizerState = require('./data-types').MidiVisualizerState;
 
 // VisualizerState -> VisualizerState
-function playVisualizer(state) {
-	state.audioPlayer.play();
+function playVisualizer(state, playheadSec) {
+	playheadSec = playheadSec || 0;
+
+	state.audioPlayer.play(0, playheadSec);
 
 	return state.next({
 		isPlaying: true,
