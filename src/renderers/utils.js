@@ -170,8 +170,12 @@ module.exports = function closure() {
 			}
 		});
 
-		expiredEvents = currentRunningEvents.concat(currentRunningEvents.filter(function (event) {
-			return event.startTimeMicroSec > nowMicroSec;
+		expiredEvents = expiredEvents.concat(currentRunningEvents.filter(function (event) {
+			if (event.startTimeMicroSec > nowMicroSec) {
+				return true;
+			}
+
+			return false;
 		}));
 
 		var timestamp = state.window.performance.now();
