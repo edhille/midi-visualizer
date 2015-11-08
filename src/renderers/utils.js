@@ -4,7 +4,7 @@
 
 var d3 = require('d3');
 var transformMidi = require('../midi-transformer');
-var MAX_RAF_DELTA_MS = 15;
+var MAX_RAF_DELTA_MS = 16;
 
 module.exports = function closure() {
 	// Some things we need to keep track of between play/pause calls
