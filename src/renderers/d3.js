@@ -84,7 +84,13 @@ function prepDOM(midi, config) {
 	if (!y) throw new TypeError('unable to calculate height');
 
 	var svg = d3.select('body').append('svg');
-	svg.attr('id', 'stage');
+	var g = svg.append('g');
+
+	g.classed('stage', true);
+
+	var defs = svg.append('defs');
+
+	defs.attr('id', 'defs');
 
 	var songScales = midi.tracks.reduce(function (scales, track, index) {
 		if (track.events.length === 0) return scales;
@@ -135,16 +141,15 @@ function generate(renderConfig) {
 	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// D3JsRendererState -> [RenderEvent] -> undefined
 	function rafFn(state, eventsToAdd, currentRunningEvents) {
-		var shapes = state.svg.selectAll('.shape').data(currentRunningEvents, getId);
-
-		// TODO: can we remove based on "off" subtype? (would make currentRunningEvens generalizable for THREEJS)
+		var shapes = state.svg.selectAll('.stage').selectAll('.shape').data(currentRunningEvents, getId);
 		var enter = shapes.enter().append(partial(getShape, state.document)); 
+
 		enter.attr('fill', getColor);
 		enter.attr('id', getId);
 		enter.each(sizeElem);
 		enter.each(transform);
 
-		renderConfig.frameRenderer(shapes);
+		renderConfig.frameRenderer(state, shapes);
 	}
 
 	// TODO: this is too crazy...we want to have play get the current RendererState and a playheadTime,
