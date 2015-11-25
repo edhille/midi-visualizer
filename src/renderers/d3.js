@@ -131,9 +131,6 @@ function prepDOM(midi, config) {
 	});
 }
 
-/* istanbul ignore next */ // no need to test this
-function cleanupFn() {}
-
 // Config -> (Midi -> Config -> Renderer)
 function generate(renderConfig) {
 	var renderer = monad();
@@ -152,15 +149,10 @@ function generate(renderConfig) {
 		renderConfig.frameRenderer(state, shapes);
 	}
 
-	// TODO: this is too crazy...we want to have play get the current RendererState and a playheadTime,
-	//       it should then invoke the renderUtils.play() function such that it can set timers to run
-	//       renderUtils.render with the appropriate RendererState, a callback to clean-up dead events,
-	//       a callback for the RAF to render newEvents and to return the currentRunning events ((runningEvents - deadEvents) + newEvents)
 	renderer.lift('play', function _play(state, player) {
-		return renderUtils.play(state, player, function _render(state, currentRunningEvents, newEvents) {
-			// But...we want our configured rafFn to be called (either from this rafFn, or ???)
-			return renderUtils.render(state, cleanupFn, rafFn, currentRunningEvents, newEvents);
-		});
+		return renderUtils.play(state, player, function _render(state, currentRunningEvents, newEvents, nowMs) {
+			return renderUtils.render(state, renderConfig.cleanupFn || funtils.noop, rafFn, currentRunningEvents, newEvents, nowMs);
+		}, renderConfig.resumeFn || funtils.noop);
 	});
 	renderer.lift('pause', renderUtils.pause);
 
@@ -180,6 +172,5 @@ module.exports = {
 	prepDOM: prepDOM,
 	resize: function () { throw new Error('Implement'); },
 	generate: generate,
-	cleanupFn: cleanupFn,
 	D3: d3
 };
