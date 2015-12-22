@@ -61,7 +61,10 @@ function prepDOM(midi, config) {
 
 	renderer.setSize(x, y);
    
-	config.root.appendChild(renderer.domElement);
+	var domElement = renderer.domElement;
+	domElement.className = 'threejs-stage';
+
+	config.root.appendChild(domElement);
 
 	var state = new ThreeJsRendererState({
 		window: w,
@@ -134,6 +137,7 @@ function generate(renderConfig) {
 		}, renderConfig.resumeFn || funtils.noop);
 	});
 	renderer.lift('pause', renderUtils.pause);
+	renderer.lift('stop', renderUtils.stop);
 	renderer.lift('resize', resize);
 
 	return function setupRenderer(midi, config) {

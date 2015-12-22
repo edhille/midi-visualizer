@@ -71,6 +71,12 @@ module.exports = function closure() {
 		return state;
 	}
 
+	// RendererState -> RendererState
+	function stop(state) {
+		currentRunningEvents = [];
+		return pause(state);
+	}
+
 	// RendererState -> [(RendererState -> AnimEvent -> [RenderEvent])] -> [AnimEvent] -> [RenderEvent]
 	function transformEvents(state, trackTransformers, animEvents) {
 		var renderEvents = {};
@@ -202,6 +208,7 @@ module.exports = function closure() {
 		mapEvents: mapEvents,
 		play: play,
 		pause: pause,
+		stop: stop,
 
 		render: render,
 

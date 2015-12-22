@@ -9,6 +9,7 @@ var maxNote = renderUtils.maxNote;
 var minNote = renderUtils.minNote;
 var isNoteOnEvent = renderUtils.isNoteOnEvent;
 var transformMidi = require('../midi-transformer');
+var D3RenderEvent = require('../data-types').D3RenderEvent;
 var D3RendererState = require('../data-types').D3RendererState;
 
 function getId(d) { return d.id; }
@@ -83,7 +84,10 @@ function prepDOM(midi, config) {
 	if (!x) throw new TypeError('unable to calculate width');
 	if (!y) throw new TypeError('unable to calculate height');
 
-	var svg = d3.select('body').append('svg');
+	var svg = d3.select(config.root).append('svg');
+	svg.attr('style', 'width: 100%; height: 100%;');
+	svg.classed('d3-stage', true);
+
 	var g = svg.append('g');
 
 	g.classed('stage', true);
@@ -138,15 +142,17 @@ function generate(renderConfig) {
 	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// D3JsRendererState -> [RenderEvent] -> undefined
 	function rafFn(state, eventsToAdd, currentRunningEvents) {
-		var shapes = state.svg.selectAll('.stage').selectAll('.shape').data(currentRunningEvents, getId);
-		var enter = shapes.enter().append(partial(getShape, state.document)); 
+		if (eventsToAdd && eventsToAdd.length > 0 && eventsToAdd[0] instanceof D3RenderEvent) {
+			var shapes = state.svg.selectAll('.stage').selectAll('.shape').data(currentRunningEvents, getId);
+			var enter = shapes.enter().append(partial(getShape, state.document)); 
 
-		enter.attr('fill', getColor);
-		enter.attr('id', getId);
-		enter.each(sizeElem);
-		enter.each(transform);
+			enter.attr('fill', getColor);
+			enter.attr('id', getId);
+			enter.each(sizeElem);
+			enter.each(transform);
 
-		renderConfig.frameRenderer(state, shapes);
+			renderConfig.frameRenderer(state, shapes);
+		}
 	}
 
 	renderer.lift('play', function _play(state, player) {
@@ -155,6 +161,7 @@ function generate(renderConfig) {
 		}, renderConfig.resumeFn || funtils.noop);
 	});
 	renderer.lift('pause', renderUtils.pause);
+	renderer.lift('stop', renderUtils.stop);
 
 	return function setupRenderer(midi, config) {
 		var rendererState = renderConfig.prepDOM(midi, config);

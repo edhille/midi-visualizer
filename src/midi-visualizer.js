@@ -31,6 +31,15 @@ function pauseVisualizer(state) {
 	});
 }
 
+function stopVisualizer(state) {
+	state.audioPlayer.pause();
+
+	return state.next({
+		isPlaying: false,
+		renderer: state.renderer.stop()
+	});
+}
+
 function resizeVisualizer(state, dimensions) {
 	return state.next({
 		renderer: state.renderer.resize(dimensions)
@@ -40,6 +49,7 @@ function resizeVisualizer(state, dimensions) {
 var midiVisualizer = monad();
 midiVisualizer.lift('play', playVisualizer);
 midiVisualizer.lift('pause', pauseVisualizer);
+midiVisualizer.lift('stop', stopVisualizer);
 midiVisualizer.lift('resize', resizeVisualizer);
 
 // Config -> Promise(Visualizer, Error)
