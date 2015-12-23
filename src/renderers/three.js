@@ -11,6 +11,8 @@ var isNoteOnEvent = renderUtils.isNoteOnEvent;
 var transformMidi = require('../midi-transformer');
 var ThreeJsRendererState = require('../data-types').ThreeJsRendererState;
 
+var DOM_ID = 'threejs';
+
 function genSongScales(dimension, midi) {
 	return midi.tracks.reduce(function (scales, track, index) {
 		if (track.events.length === 0) return scales;
@@ -61,8 +63,10 @@ function prepDOM(midi, config) {
 
 	renderer.setSize(x, y);
    
+	// TODO: need to be able to account for multiple instances of this renderer (i.e. several songs on a page using this base
+	// renderer functionality)
 	var domElement = renderer.domElement;
-	domElement.className = 'threejs-stage';
+	domElement.className = DOM_ID;
 
 	config.root.appendChild(domElement);
 
@@ -116,6 +120,8 @@ function cleanup(state, currentRunningEvents, expiredEvents/*, nowMs */) {
 function generate(renderConfig) {
 	var renderer = monad();
 
+	renderer.DOM_ID = DOM_ID;
+
 	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// ThreeJsRendererState -> [RenderEvent] -> [RenderEvent] -> undefined
 	function rafFn(state, eventsToAdd/*, currentEvents*/) {
@@ -140,7 +146,7 @@ function generate(renderConfig) {
 	renderer.lift('stop', renderUtils.stop);
 	renderer.lift('resize', resize);
 
-	return function setupRenderer(midi, config) {
+	var setupFn = function setupRenderer(midi, config) {
 		var rendererState = renderConfig.prepDOM(midi, config);
 		var animEvents = transformMidi(midi);
 
@@ -150,6 +156,10 @@ function generate(renderConfig) {
 
 		return renderer(rendererState);
 	};
+
+	setupFn.DOM_ID = DOM_ID;
+
+	return setupFn;
 }
 
 module.exports = {

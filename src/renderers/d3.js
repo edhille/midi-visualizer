@@ -12,6 +12,8 @@ var transformMidi = require('../midi-transformer');
 var D3RenderEvent = require('../data-types').D3RenderEvent;
 var D3RendererState = require('../data-types').D3RendererState;
 
+var DOM_ID = 'd3-stage';
+
 function getId(d) { return d.id; }
 function getColor(d) { return d.color; }
 function getR(d) { return d.radius; }
@@ -84,17 +86,21 @@ function prepDOM(midi, config) {
 	if (!x) throw new TypeError('unable to calculate width');
 	if (!y) throw new TypeError('unable to calculate height');
 
-	var svg = d3.select(config.root).append('svg');
-	svg.attr('style', 'width: 100%; height: 100%;');
-	svg.classed('d3-stage', true);
+	var svg = d3.select('.' + DOM_ID);
+	
+	if (svg.empty()) {
+		svg = d3.select(config.root).append('svg');
+		svg.attr('style', 'width: 100%; height: 100%;');
+		svg.classed(DOM_ID, true);
 
-	var g = svg.append('g');
+		var g = svg.append('g');
 
-	g.classed('stage', true);
+		g.classed('stage', true);
 
-	var defs = svg.append('defs');
+		var defs = svg.append('defs');
 
-	defs.attr('id', 'defs');
+		defs.attr('id', 'defs');
+	}
 
 	var songScales = midi.tracks.reduce(function (scales, track, index) {
 		if (track.events.length === 0) return scales;
@@ -139,6 +145,8 @@ function prepDOM(midi, config) {
 function generate(renderConfig) {
 	var renderer = monad();
 
+	renderer.DOM_ID = DOM_ID;
+
 	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// D3JsRendererState -> [RenderEvent] -> undefined
 	function rafFn(state, eventsToAdd, currentRunningEvents) {
@@ -163,7 +171,7 @@ function generate(renderConfig) {
 	renderer.lift('pause', renderUtils.pause);
 	renderer.lift('stop', renderUtils.stop);
 
-	return function setupRenderer(midi, config) {
+	var setupFn = function setupRenderer(midi, config) {
 		var rendererState = renderConfig.prepDOM(midi, config);
 		var animEvents = transformMidi(midi);
 
@@ -173,6 +181,10 @@ function generate(renderConfig) {
 
 		return renderer(rendererState);
 	};
+
+	setupFn.DOM_ID = DOM_ID;
+
+	return setupFn;
 }
 
 module.exports = {
