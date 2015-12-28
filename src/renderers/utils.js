@@ -89,6 +89,7 @@ module.exports = function closure() {
 					// renderEvents[timeInMs] = renderEvents[timeInMs].concat(transformFn(state, event));
 					renderEvents[timeInMs].push.apply(renderEvents[timeInMs], transformFn(state, event));
 				} else {
+					/*eslint-disable no-console*/
 					console.error('No transform for track "' + event.track + '"');
 				}
 			});
@@ -152,27 +153,27 @@ module.exports = function closure() {
 			}, []);
 
 			switch (event.subtype) {
-				case 'on':
-					/* istanbul ignore else */
-					if (matchIndices.length === 0) {
-						eventsToAdd.push(event);
-						currentRunningEvents.push(event);
-					}
-					break;
-				case 'off':
-					expiredEvents = expiredEvents.concat(currentRunningEvents.filter(function (elem, index) {
-						return matchIndices.indexOf(index) > -1;
-					}));
-
-					currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
-						return -1 === matchIndices.indexOf(index);
-					});
-					break;
-				case 'timer':
+			case 'on':
+				/* istanbul ignore else */
+				if (matchIndices.length === 0) {
 					eventsToAdd.push(event);
-					break;
-				default:
-					console.error('unknown render event subtype "' + event.subtype + '"');
+					currentRunningEvents.push(event);
+				}
+				break;
+			case 'off':
+				expiredEvents = expiredEvents.concat(currentRunningEvents.filter(function (elem, index) {
+					return matchIndices.indexOf(index) > -1;
+				}));
+
+				currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
+					return -1 === matchIndices.indexOf(index);
+				});
+				break;
+			case 'timer':
+				eventsToAdd.push(event);
+				break;
+			default:
+				console.error('unknown render event subtype "' + event.subtype + '"');
 			}
 		});
 

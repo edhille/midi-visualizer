@@ -106,6 +106,7 @@ function resize(state, dimension) {
 // ThreeJsRendererState -> [RenderEvent] -> [RenderEvent] -> undefined
 function cleanup(state, currentRunningEvents, expiredEvents/*, nowMs */) {
 	// TODO: this is not currently being used...need an example that uses it...
+	/*eslint-disable no-console*/
 	console.log('cleanup');
 	expiredEvents.map(function (event) {
 		var obj = state.scene.getObjectByName(event.id);

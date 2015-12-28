@@ -22,56 +22,55 @@ function getX(d) { return d.x; }
 function getScale(d) { return d.scale; }
 
 function getShape(document, datum) {
-   var type = datum.path ? 'path' : 'circle';
-   var elem = document.createElementNS('http://www.w3.org/2000/svg', type);
+	var type = datum.path ? 'path' : 'circle';
+	var elem = document.createElementNS('http://www.w3.org/2000/svg', type);
 
-   elem.classList.add('shape');
-   
-   if (type === 'path') {
-      elem.setAttribute('d', datum.path);
-   }
+	elem.classList.add('shape');
 
-   return elem;
+	if (type === 'path') {
+		elem.setAttribute('d', datum.path);
+	}
+
+	return elem;
 }
 
 function sizeElem(datum) {
-   /* jshint validthis: true */
-   switch (this.tagName) {
-      case 'circle':
-         this.setAttribute('r', getR(datum));
-         break;
-      case 'path':
-         // We don't size, but instead lump that into the transform()
-         break;
-      default:
-         console.error('do know how to size "' + this.tagName + '"');
-         break;
-   }
+	switch (this.tagName) {
+	case 'circle':
+		this.setAttribute('r', getR(datum));
+		break;
+	case 'path':
+		// We don't size, but instead lump that into the transform()
+		break;
+	default:
+		/*eslint-disable no-console*/
+		console.error('do know how to size "' + this.tagName + '"');
+		break;
+	}
 }
 
 function transform(datum) {
-   var x = getX(datum);
-   var y = getY(datum);
+	var x = getX(datum);
+	var y = getY(datum);
 
-   /* jshint validthis: true */
-   switch (this.tagName) {
-      case 'circle':
-         this.setAttribute('cy', y);
-         this.setAttribute('cx', x);
-         break;
-      case 'path':
-         var scale = getScale(datum);
-         var box = this.getBBox();
-		 // jshint singleGroups: false
-		 // (the grouping is actually needed here...)
-         var newTransform = 'matrix(' + scale + ', 0, 0, ' + scale + ', ' + (x - box.width*scale/2) + ', ' + (y - box.height*scale/2) + ')'; 
+	switch (this.tagName) {
+	case 'circle':
+		this.setAttribute('cy', y);
+		this.setAttribute('cx', x);
+		break;
+	case 'path':
+		var scale = getScale(datum);
+		var box = this.getBBox();
+		// (the grouping is actually needed here...)
+		var newTransform = 'matrix(' + scale + ', 0, 0, ' + scale + ', ' + (x - box.width*scale/2) + ', ' + (y - box.height*scale/2) + ')'; 
 
-         this.setAttribute('transform', newTransform);
-         break;
-      default:
-         console.error('do not know how to position "' + this.tagName + '"');
-         break;
-   }
+		this.setAttribute('transform', newTransform);
+		break;
+	default:
+		/*eslint-disable no-console*/
+		console.error('do not know how to position "' + this.tagName + '"');
+		break;
+	}
 }
 
 // Midi -> Config -> D3RendererState

@@ -73,6 +73,7 @@ function transformMidi(midi) {
 					/* istanbul ignore else */
 					if (activeNotes[event.note].length === 0) delete activeNotes[event.note];
 				} else {
+					/*eslint-disable no-console */
 					console.error('no active note "' + event.note + '", track "' + trackIndex + '"');
 
 					return eventsByTime;
@@ -112,16 +113,16 @@ function transformMidi(midi) {
 	var thirtySecondNoteInMs = Math.floor(tempo / 8000);
 	
 	return _.range(0, totalTimeMs + 1, thirtySecondNoteInMs).reduce(function _registerEmptyRenderEvent(eventsByTime, timeMs) {
-		 var events = eventsByTime[timeMs] || [];
-		 eventsByTime[timeMs] = events.concat([new AnimEvent({
+		var events = eventsByTime[timeMs] || [];
+		eventsByTime[timeMs] = events.concat([new AnimEvent({
 			event: { subtype: 'timer' },
 			track: 0,
 			lengthMicroSec: 0,
 			startTimeMicroSec: timeMs * 1000,
 			microSecPerBeat: tempo
-		 })]);
+		})]);
 
-		 return eventsByTime;
+		return eventsByTime;
 	}, eventsByTime);
 }
 
