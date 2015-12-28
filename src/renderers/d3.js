@@ -91,6 +91,7 @@ function prepDOM(midi, config) {
 	if (svg.empty()) {
 		svg = d3.select(config.root).append('svg');
 		svg.attr('style', 'width: 100%; height: 100%;');
+		svg.attr('id', DOM_ID);
 		svg.classed(DOM_ID, true);
 
 		var g = svg.append('g');
@@ -131,6 +132,7 @@ function prepDOM(midi, config) {
 	}, []);
 
 	return new D3RendererState({
+		id: DOM_ID,
 		window: w,
 		root: config.root,
 		raf: config.raf,
@@ -163,10 +165,20 @@ function generate(renderConfig) {
 		}
 	}
 
-	renderer.lift('play', function _play(state, player) {
+	function play(state, player) {
 		return renderUtils.play(state, player, function _render(state, currentRunningEvents, newEvents, nowMs) {
 			return renderUtils.render(state, renderConfig.cleanupFn || funtils.noop, rafFn, currentRunningEvents, newEvents, nowMs);
 		}, renderConfig.resumeFn || funtils.noop);
+	}
+	renderer.lift('play', play);
+	renderer.lift('restart', function _restart(state, player) {
+		var id = state.id;
+
+		[].map.call(state.root.getElementsByClassName(DOM_ID), function (node) {
+			node.style.display = node.getAttribute('id') === id ? 'block' : 'none';
+		});
+
+		return play(state, player);
 	});
 	renderer.lift('pause', renderUtils.pause);
 	renderer.lift('stop', renderUtils.stop);

@@ -22,6 +22,17 @@ function playVisualizer(state, playheadSec) {
 	});
 }
 
+function restartVisualizer(state, playheadSec) {
+	playheadSec = playheadSec || 0;
+
+	state.audioPlayer.play(0, playheadSec);
+
+	return state.next({
+		isPlaying: true,
+		renderer: state.renderer.restart(state.audioPlayer)
+	});
+}
+
 function pauseVisualizer(state) {
 	state.audioPlayer.pause();
 
@@ -48,6 +59,7 @@ function resizeVisualizer(state, dimensions) {
 
 var midiVisualizer = monad();
 midiVisualizer.lift('play', playVisualizer);
+midiVisualizer.lift('restart', restartVisualizer);
 midiVisualizer.lift('pause', pauseVisualizer);
 midiVisualizer.lift('stop', stopVisualizer);
 midiVisualizer.lift('resize', resizeVisualizer);

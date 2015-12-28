@@ -63,16 +63,23 @@ function prepDOM(midi, config) {
 
 	renderer.setSize(x, y);
    
-	// TODO: need to be able to account for multiple instances of this renderer (i.e. several songs on a page using this base
-	// renderer functionality)
 	var domElement = renderer.domElement;
 	domElement.className = DOM_ID;
+	
+	// TODO: get a real UUID implementation..
+	var id = domElement.getAttribute('id') || Date.now().toString().split('').map(function (char) { return (Math.random() * char).toString(16); }).join('');
+	domElement.setAttribute('id', id);
+
+	[].map.call(config.root.getElementsByClassName(DOM_ID), function (node) {
+		node.style.display = node.getAttribute('id') === id ? 'block' : 'none';
+	});
 
 	config.root.appendChild(domElement);
 
 	var state = new ThreeJsRendererState({
-		window: w,
+		id: id,
 		root: config.root,
+		window: w,
 		width: x,
 		height: y,
 		scales: genSongScales({ width: x, height: y }, midi),
@@ -137,10 +144,21 @@ function generate(renderConfig) {
 		state.renderer.render(state.scene, state.camera);
 	}
 
-	renderer.lift('play', function _play(state, player) {
+	function play(state, player) {
 		return renderUtils.play(state, player, function _render(state, currentRunningEvents, newEvents, nowMs) {
 			return renderUtils.render(state, renderConfig.cleanupFn, rafFn, currentRunningEvents, newEvents, nowMs);
 		}, renderConfig.resumeFn || funtils.noop);
+	}
+
+	renderer.lift('play', play);
+	renderer.lift('restart', function _restart(state, player) {
+		var id = state.id;
+
+		[].map.call(state.root.getElementsByClassName(DOM_ID), function (node) {
+			node.style.display = node.getAttribute('id') === id ? 'block' : 'none';
+		});
+
+		return play(state, player);
 	});
 	renderer.lift('pause', renderUtils.pause);
 	renderer.lift('stop', renderUtils.stop);

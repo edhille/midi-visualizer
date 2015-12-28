@@ -24,13 +24,16 @@ ADT.inherit(MidiVisualizerState, ADT);
 function RendererState(params) {
 	params = params || {};
 
+	if (!params.id) throw new TypeError('id required');
 	if (!params.root) throw new TypeError('root required');
 	if (!params.window) throw new TypeError('window required');
 	if (!params.window.document) throw new TypeError('window must have document property');
 
+	this.id = params.id;
+	this.root = params.root;
 	this.window = params.window;
 	this.document = params.window.document;
-	this.root = params.root;
+
 	this.width = params.width || 0;
 	this.height = params.height || 0;
 	this.renderEvents = params.renderEvents || [];
