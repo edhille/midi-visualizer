@@ -122,6 +122,24 @@ describe('data-types', function() {
 			});
 		});
 
+		describe('missing id param instantiation', function() {
+
+			it('should throw a TypeError', function (done) {
+				expect(function () {
+					new RendererState({
+						root: {}, 
+						width: 100,
+						height: 100,
+						renderEvents: [],
+						scales: [],
+						window: { document: {} },
+					});
+				}).to.throw(TypeError);
+
+				done();
+			});
+		});
+
 		describe('missing window param instantiation', function() {
 
 			it('should throw a TypeError', function (done) {
@@ -160,6 +178,7 @@ describe('data-types', function() {
         describe('defaulted params instantiation', function() {
             beforeEach(function(done) {
 				rendererState = new RendererState({
+					id: 'TEST-ID',
 					window: { document: {} },
 					root: {}
 				});
@@ -197,6 +216,7 @@ describe('data-types', function() {
         describe('full params instantiation', function() {
             beforeEach(function(done) {
                 rendererState = new RendererState({
+					id: 'TEST-ID',
 					window: { document: {} },
                     root: {},
                     width: 100,
@@ -251,6 +271,7 @@ describe('data-types', function() {
 		
 		beforeEach(function (done) {
 			rendererState = new D3RendererState({
+				id: 'TEST-ID',
 				window: { document: {} },
 				root: {},
 				svg: 'TEST-SVG'
@@ -285,6 +306,7 @@ describe('data-types', function() {
 		
 		beforeEach(function (done) {
 			params = {
+				id: 'TEST-ID',
 				window: { document: {} },
 				root: {},
 				camera: 'TEST-CAMERA',
@@ -733,7 +755,7 @@ describe('data-types', function() {
 					x: 0,
 					y: 0,
 					z: 0,
-					rotation: 10,
+					zRot: 10,
 					lengthMicroSec: 0,
 					startTimeMicroSec: 0
 				};
@@ -746,8 +768,8 @@ describe('data-types', function() {
 			});
 
 			it('should default rotation to zero when it is left out', function (done) {
-				delete params.rotation;
-				expect((new ThreeJsRenderEvent(params)).rotation).to.equal(0);
+				delete params.zRot;
+				expect((new ThreeJsRenderEvent(params)).zRot).to.equal(0);
 				done();
 			});
 
