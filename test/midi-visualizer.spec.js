@@ -141,12 +141,6 @@ describe('midi-visualizer', function() {
 				done();
 			});
 
-			it('should start get the audioPlayer playhead time', function(done) {
-				expect(audioPlayerStub.getPlayheadTime.called).to.be.true;
-
-				done();
-			});
-
 			describe('#pause', function() {
 				var state;
 
