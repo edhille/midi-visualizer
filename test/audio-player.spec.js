@@ -406,7 +406,7 @@ describe('AudioPlayer', function() {
 								mockAudioSource = setupMockAudioSource(mockAudioContext);
 								audioPlayer.pause();
 								mockAudioContext.currentTime = 20; // 20s of time elapsed
-								audioPlayer.play();
+								audioPlayer.play(10); // start at last pause spot
 								mockAudioContext.currentTime = 25; // add 5s more playback
 
 								done();
@@ -423,7 +423,7 @@ describe('AudioPlayer', function() {
 									mockAudioSource = setupMockAudioSource(mockAudioContext);
 									audioPlayer.pause();
 									mockAudioContext.currentTime = 30; // 30s of time elapsed
-									audioPlayer.play();
+									audioPlayer.play(15); // start at last pause spot
 									mockAudioContext.currentTime = 35; // add 5s more playback
 
 									done();

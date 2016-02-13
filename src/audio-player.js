@@ -128,7 +128,7 @@ AudioPlayer.prototype.getPlayheadTime = function getPlayheadTime() {
 	return calcPlayhead(this.context.currentTime, this.lastStartTime, this.startOffset, this.buffer.duration) * SEC_TO_MS;
 };
 
-AudioPlayer.prototype.play = function play(startTimeOffset, playhead) {
+AudioPlayer.prototype.play = function play(startTimeOffset, playheadSec) {
 	var currTime;
 
 	if (!this.isLoaded) return false; // nothing to play...
@@ -138,20 +138,20 @@ AudioPlayer.prototype.play = function play(startTimeOffset, playhead) {
 	// play because the old audio source will end and call this...
 	if (this.audioSource) this.audioSource.onended = null;
 
-	playhead = playhead || 0;
+	playheadSec = playheadSec || 0;
 	startTimeOffset = startTimeOffset || 0;
 	currTime = this.context.currentTime;
 
 	this.startOffset = startTimeOffset;
-	this.lastStartTime = currTime - playhead;
+	this.lastStartTime = currTime - playheadSec;
 
 	this.audioSource = this.context.createBufferSource();
 	this.audioSource.buffer = this.buffer;
 	this.audioSource.connect(this.context.destination);
 
-	playhead = calcPlayhead(currTime, this.lastStartTime, this.startOffset, this.buffer.duration);
+	playheadSec = calcPlayhead(currTime, this.lastStartTime, this.startOffset, this.buffer.duration);
 
-	this.audioSource.start(startTimeOffset, playhead); 
+	this.audioSource.start(startTimeOffset, playheadSec); 
 
 	this.isPlaying = true;
 
