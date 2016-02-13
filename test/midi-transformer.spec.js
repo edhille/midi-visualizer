@@ -24,7 +24,7 @@ function generateMidiData() {
 		tracks: [{
 			events: [new MidiMetaTempoEvent({
 				delta: 0,
-				tempo: 10000
+				microsecPerQn: 10000
 			}), new MidiNoteOnEvent({
 				note: 1,
 				delta: 0
@@ -78,7 +78,7 @@ describe('midi-transformer', function() {
 	});
 
 	it('should have converted midi data into animEvents by time, adding in 1/32 note timer events', function(done) {
-		expect(Object.keys(animEventsByTimeMs)).to.eql(_.range(0, 52, 2).map(function (num) { return num.toString(); }));
+		expect(Object.keys(animEventsByTimeMs)).to.eql(_.range(0, 51).map(function (num) { return num.toString(); }));
 		done();
 	});
 
