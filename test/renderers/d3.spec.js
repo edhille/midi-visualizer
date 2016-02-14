@@ -17,7 +17,12 @@ var d3Renderer = rewire('../../src/renderers/d3');
 function createMockSvg() {
 	// wow...chaining makes mocking really hard...
 	var svgStub = sinon.stub({
-		selectAll: function () {}
+		selectAll: function () {},
+		select: function () {},
+		classed: function () {},
+		attr: function () {},
+		append: function () {},
+		data: function () {}
 	});
 	var dataStub = sinon.stub();
 	var enterStub = sinon.stub();
@@ -29,8 +34,10 @@ function createMockSvg() {
 	var removeStub = sinon.stub();
 	var eachStub = sinon.stub();
 
-	svgStub.selectAll.returns({ data: dataStub });
-	dataStub.returns({
+	svgStub.select.returns(svgStub);
+	svgStub.append.returns(svgStub);
+	svgStub.selectAll.returns(svgStub);
+	svgStub.data.returns({
 		enter: enterStub,
 		exit: exitStub,
 		remove: removeStub
@@ -75,14 +82,12 @@ function createMockD3() {
 	};
 
 	var appendStub = sinon.stub();
-	var attrStub = sinon.stub();
 
-	appendStub.returns({
-		attr: attrStub
-	});
+	appendStub.returns(createMockSvg().svgMock);
 
 	d3Stub.select.returns({
-		append: appendStub
+		append: appendStub,
+		empty: function () { return true; }
 	});
 
 	var rangeStub = sinon.stub();
@@ -125,6 +130,7 @@ describe('renderers.d3', function () {
 				testWidth = 999;
 				testHeight = 666;
 				mockConfig = {
+					id: 'TEST-D3',
 					window: {
 						document: {
 							documentElement: {}
@@ -205,12 +211,12 @@ describe('renderers.d3', function () {
 		});
 	});
 
+	// TODO: this needs to be refactored to be a part of the #play test
 	describe.skip('#render', function () {
-		var renderFn, mockState, nowStub, rafStub, mockData, mockSvg, removeStub, eachStub, mockCircle, mockShape, mockDatum;
+		var renderFn, mockState, nowStub, rafStub, mockData, mockSvg, removeStub, eachStub, mockCircle, mockDatum;
 
 		beforeEach(function (done) {
 			mockCircle =  { tagName: 'circle', setAttribute: sinon.spy() };
-			mockShape = { tagName: 'shape', setAttribute: sinon.spy() };
 			mockDatum = { id: 'TEST-ID', x: 100, y: 200 };
 			var svgMocks = createMockSvg();
 			mockSvg = svgMocks.svgMock;
@@ -223,6 +229,7 @@ describe('renderers.d3', function () {
 			eachStub.onSecondCall().callsArgOnWith(0, mockCircle, mockDatum);
 			renderFn = d3Renderer.render;
 			mockState = new D3RendererState({
+				id: 'TEST-ID',
 				window: {
 					document: {},
 					performance: {
@@ -238,12 +245,13 @@ describe('renderers.d3', function () {
 		});
 
 		afterEach(function (done) {
+			mockSvg.reset();
 			mockData.reset();
 			rafStub.reset();
 			nowStub.reset();
 			removeStub.reset();
 			eachStub.reset();
-			renderFn = mockState = nowStub = rafStub = mockSvg = mockData = removeStub = eachStub = mockCircle = mockShape = mockDatum = null;
+			renderFn = mockState = nowStub = rafStub = mockSvg = mockData = removeStub = eachStub = mockCircle = mockDatum = null;
 
 			done();
 		});
@@ -258,7 +266,8 @@ describe('renderers.d3', function () {
 						id: 'TEST-ONE',
 						track: 1,
 						subtype: 'on',
-						length: 1,
+						startTimeMicroSec: 0,
+						lengthMicroSec: 1,
 						x: 0,
 						y: 0,
 						radius: 1,
@@ -268,19 +277,20 @@ describe('renderers.d3', function () {
 						id: 'TEST-TWO',
 						track: 2,
 						subtype: 'on',
-						length: 1,
+						startTimeMicroSec: 1,
+						lengthMicroSec: 1,
 						x: 1,
 						y: 1,
 						radius: 1,
 						color: 'red'
 					})
 				];
-				mockState = renderFn(mockState, [], renderEvents);
+				mockState = renderFn(mockState, renderEvents, []);
 				done();
 			});
 
 			it('should have added two events to svg.data', function (done) {
-				expect(mockData.lastCall.args[0]).to.have.length(2);
+				expect(mockSvg.data.lastCall.args[0]).to.have.length(2);
 				done();
 			});
 		});
@@ -294,7 +304,8 @@ describe('renderers.d3', function () {
 					id: 'TEST-ONE',
 					subtype: 'on',
 					track: 1,
-					length: 1,
+					startTimeMicroSec: 0,
+					lengthMicroSec: 1,
 					x: 0,
 					y: 0,
 					radius: 1,
@@ -306,7 +317,8 @@ describe('renderers.d3', function () {
 						id: 'TEST-TWO',
 						track: 2,
 						subtype: 'on',
-						length: 1,
+						startTimeMicroSec: 1,
+						lengthMicroSec: 1,
 						x: 1,
 						y: 1,
 						radius: 1,
@@ -344,6 +356,7 @@ describe('renderers.d3', function () {
 			mockSvg = svgMocks.svgMock;
 			mockSvgEach = svgMocks.eachMock;
 			mockState = new D3RendererState({
+				id: 'TEST-D3',
 				window: {
 					document: {},
 					performance: {
@@ -409,7 +422,18 @@ describe('renderers.d3', function () {
 					utilsPlaySpy.callsArgWith(2, mockState, [], []);
 
 					// have the renderer call the "rafFn"
-					utilsRenderSpy.callsArgWith(2, mockState, [], []);
+					var renderEvent = new D3RenderEvent({
+						id: 'TEST-ONE',
+						track: 1,
+						subtype: 'on',
+						startTimeMicroSec: 0,
+						lengthMicroSec: 1,
+						x: 0,
+						y: 0,
+						radius: 1,
+						color: 'blue'
+					});
+					utilsRenderSpy.callsArgWith(2, mockState, [renderEvent], []);
 
 					done();
 				});
