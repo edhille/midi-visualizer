@@ -6,7 +6,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 
-var ADT = require('../src/adt');
+var ADT = require('fadt');
 var types = require('../src/data-types');
 var MidiVisualizerState = types.MidiVisualizerState;
 var RendererState = types.RendererState;

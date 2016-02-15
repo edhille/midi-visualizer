@@ -1,6 +1,6 @@
 'use strict';
 
-var ADT = require('./adt');
+var ADT = require('fadt');
 
 function MidiVisualizerState(params) {
 	params = params || {};
