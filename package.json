@@ -1,6 +1,6 @@
 {
   "name": "func-midi-visualizer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A functional-based visualizer for midi data, syncrhonized with audio file",
   "main": "index.js",
   "directories": {
