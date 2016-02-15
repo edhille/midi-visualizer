@@ -74,6 +74,7 @@ module.exports = function closure() {
 	// RendererState -> RendererState
 	function stop(state) {
 		currentRunningEvents = [];
+		lastPlayheadTimeMs = 0;
 		return pause(state);
 	}
 
@@ -140,7 +141,6 @@ module.exports = function closure() {
 	 * @return {[RenderEvent]} - active running render events for this render call
 	 */
 	// (RendererState -> [RenderEvent] -> undefined) -> (RendererState -> [RenderEvent] -> undefined) -> RendererState -> [RenderEvent] -> [RenderEvent] -> [RenderEvent]
-	// function render(cleanupFn, rafFn, state, currentRunningEvents, renderEvents) {
 	function render(state, cleanupFn, rafFn, currentRunningEvents, renderEvents, nowMs) {
 		var expiredEvents = [];
 		var eventsToAdd = [];
