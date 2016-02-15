@@ -27,7 +27,10 @@ function createThreeJsMock() {
 
 	rendererStub.returns({
 		setSize: sinon.spy(),
-		domElement: {}
+		domElement: {
+			getAttribute: sinon.spy(),
+			setAttribute: sinon.spy()
+		}
 	});
 
 	cameraStub.returns({
@@ -138,7 +141,8 @@ describe('renderers.threejs', function () {
 							}
 						},
 						root: {
-							appendChild: sinon.spy()
+							appendChild: sinon.spy(),
+							getElementsByClassName: sinon.stub()
 						}
 					});
 
@@ -227,6 +231,7 @@ describe('renderers.threejs', function () {
 			mockMidi = testHelpers.createMockMidi();
 			mockThreeJs = createThreeJsMock();
 			mockState = new ThreeJsRendererState({
+				id: 'TEST-ID',
 				window: {
 					document: {},
 					performance: {
@@ -409,7 +414,7 @@ describe('renderers.threejs', function () {
 		
 		it('should do nothing if there are no events to clean up', function (done) {
 
-			cleanup(mockState, []);
+			cleanup(mockState, [], []);
 
 			expect(mockState.scene.getObjectByName.called).to.be.false;
 
@@ -424,7 +429,7 @@ describe('renderers.threejs', function () {
 					error: consoleSpy
 				}
 			})(function () {
-				cleanup(mockState, [{ id: 'NOT THERE' }]);
+				cleanup(mockState, [], [{ id: 'NOT THERE' }]);
 
 				expect(consoleSpy.args).to.match(/NO OBJ/);
 
@@ -437,7 +442,7 @@ describe('renderers.threejs', function () {
 
 			mockState.scene.getObjectByName.returns({});
 
-			cleanup(mockState, [{ id: TEST_ID }]);
+			cleanup(mockState, [], [{ id: TEST_ID }]);
 
 			expect(mockState.scene.getObjectByName.calledWith(TEST_ID)).to.be.true;
 			expect(mockState.scene.remove.called).to.be.true;

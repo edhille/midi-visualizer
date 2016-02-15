@@ -70,7 +70,7 @@ function prepDOM(midi, config) {
 	var id = domElement.getAttribute('id') || Date.now().toString().split('').map(function (char) { return (Math.random() * char).toString(16); }).join('');
 	domElement.setAttribute('id', id);
 
-	[].map.call(config.root.getElementsByClassName(DOM_ID), function (node) {
+	[].map.call(config.root.getElementsByClassName(DOM_ID) || [], function (node) {
 		node.style.display = node.getAttribute('id') === id ? 'block' : 'none';
 	});
 
@@ -107,15 +107,15 @@ function resize(state, dimension) {
 function cleanup(state, currentRunningEvents, expiredEvents/*, nowMs */) {
 	// TODO: this is not currently being used...need an example that uses it...
 	/*eslint-disable no-console*/
-	console.log('cleanup');
+	console.error('cleanup');
 	expiredEvents.map(function (event) {
 		var obj = state.scene.getObjectByName(event.id);
 
 		if (obj) {
-			console.log('removing', obj);
+			console.error('removing', obj);
 			state.scene.remove(obj);
 			if (obj.dispose) {
-				console.log('disposing...');
+				console.error('disposing...');
 				obj.dispose();
 			}
 		} else {
