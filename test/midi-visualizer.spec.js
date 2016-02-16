@@ -43,9 +43,12 @@ function stubMidiParser() {
 
 function stubRenderer() {
 	var stub = sinon.stub({
-		play: function() {},
-		pause: function() {}
+		play: function() { },
+		pause: function() { }
 	});
+
+	stub.play.returns(stub);
+	stub.pause.returns(stub);
 
 	return stub;
 }
