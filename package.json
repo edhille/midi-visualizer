@@ -7,6 +7,7 @@
     "test": "test"
   },
   "scripts": {
+    "lint": "./node_modules/eslint/bin/eslint.js src",
     "test": "./node_modules/mocha/bin/mocha test",
     "coverage": "./node_modules/gulp/bin/gulp.js coverage"
   },
@@ -40,6 +41,7 @@
   "dependencies": {
     "d3": "^3.5.5",
     "es6-promise": "^3.1.2",
+    "eslint": "^2.2.0",
     "fadt": "^1.1.0",
     "func-midi-parser": "^0.0.4",
     "funtils": "^0.3.2",
