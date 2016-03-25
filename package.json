@@ -43,8 +43,8 @@
     "es6-promise": "^3.1.2",
     "eslint": "^2.2.0",
     "fadt": "^1.1.0",
-    "func-midi-parser": "^0.0.4",
-    "funtils": "^0.3.2",
+    "func-midi-parser": "^1.0.1",
+    "funtils": "^0.4.0",
     "lodash": "^4.5.0",
     "three": "^0.74.0"
   }

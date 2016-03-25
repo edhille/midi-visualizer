@@ -1,10 +1,8 @@
 'use strict';
 
-var ADT = require('fadt');
+var createDataType = require('fadt');
 
-function MidiVisualizerState(params) {
-	params = params || {};
-
+var MidiVisualizerState = createDataType(function (params) {
 	if (!params.audioPlayer) throw new TypeError('audioPlayer is required');
 	if (!params.renderer) throw new TypeError('renderer is required');
 
@@ -15,15 +13,9 @@ function MidiVisualizerState(params) {
 	this.renderer = params.renderer;
 	this.isPlaying = params.isPlaying || false;
 	this.audioPlayer = params.audioPlayer;
+});
 
-	ADT.call(this);
-}
-
-ADT.inherit(MidiVisualizerState, ADT);
-
-function RendererState(params) {
-	params = params || {};
-
+var RendererState = createDataType(function (params) {
 	if (!params.id) throw new TypeError('id required');
 	if (!params.root) throw new TypeError('root required');
 	if (!params.window) throw new TypeError('window required');
@@ -39,27 +31,15 @@ function RendererState(params) {
 	this.renderEvents = params.renderEvents || [];
 	this.scales = params.scales || [];
 	this.isPlaying = params.isPlaying || false;
+});
 
-	ADT.call(this);
-}
-
-ADT.inherit(RendererState, ADT);
-
-function D3RendererState(params) {
-	params = params || {};
-	
+var D3RendererState = createDataType(function (params) {
 	if(!params.svg) throw new TypeError('svg is required');
 
 	this.svg = params.svg;
+}, RendererState);
 
-	RendererState.call(this, params);
-}
-
-ADT.inherit(D3RendererState, RendererState);
-
-function ThreeJsRendererState(params) {
-	params = params || {};
-
+var ThreeJsRendererState = createDataType(function (params) {
 	if (!params.camera) throw new TypeError('camera is required');
 	if (!params.scene) throw new TypeError('scene is required');
 	if (!params.renderer) throw new TypeError('renderer is required');
@@ -68,15 +48,9 @@ function ThreeJsRendererState(params) {
 	this.scene = params.scene;
 	this.renderer = params.renderer;
 	this.THREE = params.THREE;
+}, RendererState);
 
-	RendererState.call(this, params);
-}
-
-ADT.inherit(ThreeJsRendererState, RendererState);
-
-function AnimEvent(params) {
-	params = params || {};
-
+var AnimEvent = createDataType(function (params) {
 	if (!params.event) throw new TypeError('no MidiEvent passed in');
 
 	this.event = params.event;
@@ -85,15 +59,9 @@ function AnimEvent(params) {
 	this.lengthMicroSec = params.lengthMicroSec || 0;
 	this.microSecPerBeat = params.microSecPerBeat || 500000;
 	this.id = params.id || this.track + '-' + (this.event.note || this.startTimeInMicroSec);
+});
 
-	ADT.call(this);
-}
-
-ADT.inherit(AnimEvent, ADT);
-
-function RenderEvent(params) {
-	params = params || {};
-
+var RenderEvent = createDataType(function (params) {
 	if (typeof params.id === 'undefined') throw new TypeError('no id passed in');
 	if (typeof params.track === 'undefined') throw new TypeError('no track passed in');
 	if (typeof params.subtype === 'undefined') throw new TypeError('no subtype passed in');
@@ -116,15 +84,9 @@ function RenderEvent(params) {
 	this.microSecPerBeat = params.microSecPerBeat || 500000;
 
 	this.color = params.color || '#FFFFFF';
+});
 
-	ADT.call(this);
-}
-
-ADT.inherit(RenderEvent, ADT);
-
-function D3RenderEvent(params) {
-	params = params || {};
-
+var D3RenderEvent = createDataType(function (params) {
 	if (typeof params.path !== 'undefined' && typeof params.radius !== 'undefined') throw new TypeError('cannot have path and radius');
 	if (typeof params.path === 'undefined' && typeof params.radius === 'undefined') throw new TypeError('no path or radius passed in');
 	if (typeof params.scale === 'undefined' && typeof params.path !== 'undefined') throw new TypeError('scale required if path passed in');
@@ -132,15 +94,9 @@ function D3RenderEvent(params) {
 	this.path = params.path;
 	this.radius = params.radius;
 	this.scale = params.scale;
+}, RenderEvent);
 
-	RenderEvent.call(this, params);
-}
-
-ADT.inherit(D3RenderEvent, RenderEvent);
-
-function ThreeJsRenderEvent(params) {
-	params = params || {};
-
+var ThreeJsRenderEvent = createDataType(function (params) {
 	if (typeof params.z === 'undefined') throw new TypeError('no z passed in');
 
 	this.scale = params.scale || 1;
@@ -155,11 +111,7 @@ function ThreeJsRenderEvent(params) {
 	this.shape = params.shape;
 
 	this.note = params.note;
-
-	RenderEvent.call(this, params);
-}
-
-ADT.inherit(ThreeJsRenderEvent, RenderEvent);
+}, RenderEvent);
 
 module.exports = {
 	MidiVisualizerState: MidiVisualizerState,
