@@ -128,10 +128,28 @@ describe('data-types', function() {
 			});
 		});
 
+		describe('missing root param instantiation', function() {
+			it('should throw a TypeError', function (done) {
+				expect(function () {
+					new RendererState({
+						id: 'TEST-ID',
+						window: {}, 
+						width: 100,
+						height: 100,
+						renderEvents: [],
+						scales: []
+					});
+				}).to.throw(TypeError);
+
+				done();
+			});
+		});
+
 		describe('missing window param instantiation', function() {
 			it('should throw a TypeError', function (done) {
 				expect(function () {
 					new RendererState({
+						id: 'TEST-ID',
 						root: {}, 
 						width: 100,
 						height: 100,
@@ -148,6 +166,7 @@ describe('data-types', function() {
 			it('should throw a TypeError', function (done) {
 				expect(function () {
 					new RendererState({
+						id: 'TEST-ID',
 						root: {},
 						window: {}, 
 						width: 100,
@@ -253,35 +272,57 @@ describe('data-types', function() {
 	describe('D3RendererState', function () {
 		var rendererState;
 		
-		beforeEach(function (done) {
-			rendererState = new D3RendererState({
-				id: 'TEST-ID',
-				window: { document: {} },
-				root: {},
-				svg: 'TEST-SVG'
+		describe('missing svg param instantiation', function () {
+			
+			it('should throw a TypeError', function (done) {
+				expect(function () {
+					new D3RendererState({
+						id: 'TEST-ID',
+						window: { document: {} },
+						root: {},
+						width: 100,
+						height: 100,
+						renderEvents: ['not empty'],
+						scales: ['not empty']
+					});
+				}).to.throw(TypeError);
+
+				done();
+			});
+		});
+
+		describe('full params instantiation', function () {
+
+			beforeEach(function (done) {
+				rendererState = new D3RendererState({
+					id: 'TEST-ID',
+					window: { document: {} },
+					root: {},
+					svg: 'TEST-SVG'
+				});
+
+				done();
 			});
 
-			done();
-		});
+			it('should be a RendererState', function (done) {
+				expect(rendererState).to.be.instanceof(RendererState);
+				done();
+			});
 
-		it('should be a RendererState', function (done) {
-			expect(rendererState).to.be.instanceof(RendererState);
-			done();
-		});
+			it('should have an svg property', function (done) {
+				expect(rendererState.svg).to.equal('TEST-SVG');
+				done();
+			});
 
-		it('should have an svg property', function (done) {
-			expect(rendererState.svg).to.equal('TEST-SVG');
-			done();
-		});
+			it('should throw an error if no params', function (done) {
+				expect(function () { new D3RendererState(); }).to.throw(TypeError);
+				done();
+			});
 
-		it('should throw an error if no params', function (done) {
-			expect(function () { new D3RendererState(); }).to.throw(TypeError);
-			done();
-		});
-
-		it('should throw an error if empty params', function (done) {
-			expect(function () { new D3RendererState({}); }).to.throw(TypeError);
-			done();
+			it('should throw an error if empty params', function (done) {
+				expect(function () { new D3RendererState({}); }).to.throw(TypeError);
+				done();
+			});
 		});
 	});
 
