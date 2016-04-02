@@ -49,8 +49,10 @@ module.exports = function closure() {
 									return lastPlayheadTimeMs < eventTimeMs && eventTimeMs <= nowMs;
 								});
 
+			/* istanbul ignore else */
 			if (eventKeys.length > 0) {
 				var events = eventKeys.reduce(function (events, key) { return events.concat(stateSnapshot.renderEvents[key]); }, []);
+				/* istanbul ignore else */
 				if (events.length > 0) {
 					currentRunningEvents = renderFn(state, currentRunningEvents, events, nowMs);
 				}
