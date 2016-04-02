@@ -44,11 +44,17 @@ function stubMidiParser() {
 function stubRenderer() {
 	var stub = sinon.stub({
 		play: function() { },
-		pause: function() { }
+		pause: function() { },
+		stop: function() { },
+		restart: function () { },
+		resize: function () { }
 	});
 
 	stub.play.returns(stub);
 	stub.pause.returns(stub);
+	stub.stop.returns(stub);
+	stub.restart.returns(stub);
+	stub.resize.returns(stub);
 
 	return stub;
 }
@@ -165,6 +171,68 @@ describe('midi-visualizer', function() {
 
 					done();
 				});
+			});
+
+			describe('#stop', function() {
+				var state;
+
+				beforeEach(function(done) {
+					testVisualizer = testVisualizer.stop();
+					state = testVisualizer.value();
+
+					done();
+				});
+
+				it('should set the state to not playing', function(done) {
+					expect(state.isPlaying).to.be.false;
+
+					done();
+				});
+
+				it('should pause the audioPlayer', function(done) {
+					expect(audioPlayerStub.pause.called).to.be.true;
+
+					done();
+				});
+
+				describe('#restart', function () {
+					var state;
+
+					beforeEach(function(done) {
+						testVisualizer = testVisualizer.restart();
+						state = testVisualizer.value();
+
+						done();
+					});
+
+					it('should set the state to playing', function(done) {
+						expect(state.isPlaying).to.be.true;
+						done();
+					});
+
+					it('should start the audioPlayer', function(done) {
+						expect(audioPlayerStub.play.called).to.be.true;
+
+						done();
+					});
+					
+				});
+			});
+		});
+
+		describe('#resize', function () {
+			var state;
+
+			beforeEach(function(done) {
+				testVisualizer = testVisualizer.resize({ width: 100, height: 200 });
+				state = testVisualizer.value();
+
+				done();
+			});
+			
+			it('should call renderer resize', function (done) {
+				expect(state.renderer.resize.called).to.be.true;
+				done();
 			});
 		});
 	});
