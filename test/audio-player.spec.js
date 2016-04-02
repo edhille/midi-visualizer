@@ -288,8 +288,32 @@ describe('AudioPlayer', function() {
 			});
 
 			describe('when loaded', function() {
+				var playReturn, mockAudioSource;
 
-				it('should delay start of play if given an offset');
+				beforeEach(function(done) {
+					mockAudioSource = loadPlayer(audioPlayer, function() {
+						setTimeout(done, 0);
+
+						playReturn = audioPlayer.play();
+					}, mockAudioContext);
+				});
+
+				it('should return true', function(done) {
+					expect(playReturn).to.be.true;
+					done();
+				});
+
+				it('should attempt to create an AudioBuffer', function(done) {
+					expect(mockAudioContext.createBufferSource.called).to.be.true;
+					done();
+				});
+
+				it('should call pause when audio source ends', function (done) {
+					audioPlayer.pause = sinon.spy();
+					mockAudioSource.onended();
+					expect(audioPlayer.pause.called).to.be.true;
+					done();
+				});
 			});
 		});
 
