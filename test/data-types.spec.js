@@ -665,11 +665,68 @@ describe('data-types', function() {
 			done();
 		});
 
+		describe('with a scale, path and radius', function () {
+			var params;
+
+			beforeEach(function (done) {
+				params = {
+					id: 'TEST-ID',
+					track: 1,
+					subtype: 'TEST-SUBTYPE',
+					x: 0,
+					y: 0,
+					lengthMicroSec: 0,
+					startTimeMicroSec: 0,
+					path: 'TEST-PATH',
+					radius: 10,
+					scales: ['TEST-SCALE']
+				};
+				done();
+			});
+
+			it('should throw an error (since it cannot have a path and radius)', function (done) {
+				expect(function () { new D3RenderEvent(params); }).to.throw(TypeError);
+				done();
+			});
+
+		});
+
+		describe('with a scale, but no path or radius', function () {
+			var params;
+
+			beforeEach(function (done) {
+				params = {
+					id: 'TEST-ID',
+					track: 1,
+					subtype: 'TEST-SUBTYPE',
+					x: 0,
+					y: 0,
+					lengthMicroSec: 0,
+					startTimeMicroSec: 0,
+					scales: ['TEST-SCALE']
+				};
+				done();
+			});
+
+			it('should throw an error', function (done) {
+				expect(function () { new D3RenderEvent(params); }).to.throw(TypeError);
+				done();
+			});
+
+		});
+
 		describe('with a path, no radius and no scale', function () {
 			var params;
 
 			beforeEach(function (done) {
 				params = {
+					id: 'TEST-ID',
+					track: 1,
+					subtype: 'TEST-SUBTYPE',
+					x: 0,
+					y: 0,
+					lengthMicroSec: 0,
+					startTimeMicroSec: 0,
 					path: 'TEST-PATH'
 				};
 				done();
