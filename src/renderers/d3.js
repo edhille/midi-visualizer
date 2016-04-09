@@ -87,6 +87,7 @@ function prepDOM(midi, config) {
 
 	var svg = d3.select('.' + DOM_ID);
 	
+	/* istanbul ignore else */
 	if (svg.empty()) {
 		svg = d3.select(config.root).append('svg');
 		svg.attr('style', 'width: 100%; height: 100%;');

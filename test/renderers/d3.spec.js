@@ -163,7 +163,7 @@ describe('renderers.d3', function () {
 			});
 
 			it('should have not set scales for second track (with no events to base scale from)', function (done) {
-				expect(state.scales[1]);
+				expect(state.scales[1]);// .to.have.length(0);
 				done();
 			});
 		});
@@ -206,134 +206,6 @@ describe('renderers.d3', function () {
 					});
 				}).to.throw(/height/);
 
-				done();
-			});
-		});
-	});
-
-	// TODO: this needs to be refactored to be a part of the #play test
-	describe.skip('#render', function () {
-		var renderFn, mockState, nowStub, rafStub, mockData, mockSvg, removeStub, eachStub, mockCircle, mockDatum;
-
-		beforeEach(function (done) {
-			mockCircle =  { tagName: 'circle', setAttribute: sinon.spy() };
-			mockDatum = { id: 'TEST-ID', x: 100, y: 200 };
-			var svgMocks = createMockSvg();
-			mockSvg = svgMocks.svgMock;
-			mockData = svgMocks.dataMock;
-			nowStub = sinon.stub();
-			rafStub = sinon.stub();
-			removeStub = svgMocks.removeMock;
-			eachStub = svgMocks.eachMock;
-			eachStub.onFirstCall().callsArgOnWith(0, mockCircle, mockDatum);
-			eachStub.onSecondCall().callsArgOnWith(0, mockCircle, mockDatum);
-			renderFn = d3Renderer.render;
-			mockState = new D3RendererState({
-				id: 'TEST-ID',
-				window: {
-					document: {},
-					performance: {
-						now: nowStub
-					},
-					requestAnimationFrame: rafStub
-				},
-				root: {},
-				raf: sinon.spy(),
-				svg: mockSvg
-			});
-			done();
-		});
-
-		afterEach(function (done) {
-			mockSvg.reset();
-			mockData.reset();
-			rafStub.reset();
-			nowStub.reset();
-			removeStub.reset();
-			eachStub.reset();
-			renderFn = mockState = nowStub = rafStub = mockSvg = mockData = removeStub = eachStub = mockCircle = mockDatum = null;
-
-			done();
-		});
-
-		describe('when there are no previous events and only "on" events to render', function () {
-
-			beforeEach(function (done) {
-				nowStub.returns(0);
-				rafStub.callsArgWith(0, 14);
-				var renderEvents = [
-					new D3RenderEvent({
-						id: 'TEST-ONE',
-						track: 1,
-						subtype: 'on',
-						startTimeMicroSec: 0,
-						lengthMicroSec: 1,
-						x: 0,
-						y: 0,
-						radius: 1,
-						color: 'blue'
-					}),
-					new D3RenderEvent({
-						id: 'TEST-TWO',
-						track: 2,
-						subtype: 'on',
-						startTimeMicroSec: 1,
-						lengthMicroSec: 1,
-						x: 1,
-						y: 1,
-						radius: 1,
-						color: 'red'
-					})
-				];
-				mockState = renderFn(mockState, renderEvents, []);
-				done();
-			});
-
-			it('should have added two events to svg.data', function (done) {
-				expect(mockSvg.data.lastCall.args[0]).to.have.length(2);
-				done();
-			});
-		});
-
-		describe('when turning off only one event', function () {
-			
-			beforeEach(function (done) {
-				nowStub.returns(0);
-				rafStub.callsArgWith(0, 14);
-				var offEvent = new D3RenderEvent({
-					id: 'TEST-ONE',
-					subtype: 'on',
-					track: 1,
-					startTimeMicroSec: 0,
-					lengthMicroSec: 1,
-					x: 0,
-					y: 0,
-					radius: 1,
-					color: 'blue'
-				});
-				var runningEvents = [
-					offEvent,
-					new D3RenderEvent({
-						id: 'TEST-TWO',
-						track: 2,
-						subtype: 'on',
-						startTimeMicroSec: 1,
-						lengthMicroSec: 1,
-						x: 1,
-						y: 1,
-						radius: 1,
-						color: 'red'
-					})
-				];
-				var renderEvents = [
-					offEvent.next({ subtype: 'off' })
-				];
-				mockState = renderFn(mockState, runningEvents, renderEvents);
-				done();
-			});
-
-			it('should have removed one event from currentRunningEvents (passing only one to svg.data)', function (done) {
-				expect(mockData.lastCall.args[0]).to.have.length(1);
 				done();
 			});
 		});
@@ -411,6 +283,17 @@ describe('renderers.d3', function () {
 
 		describe('api', function () {
 
+			describe('#resize', function () {
+				
+				it('should throw an error if we call resize', function (done) {
+					expect(function () {
+						d3Renderer.resize();
+					}).to.throw(/Implement/);
+
+					done();
+				});
+			});
+
 			describe('#play', function () {
 				var utilsPlaySpy, utilsRenderSpy;
 
@@ -452,7 +335,7 @@ describe('renderers.d3', function () {
 								render: sinon.spy()
 							}
 						})(function () {
-							renderer.play(null);
+							renderer.play(null); // TODO: should we pass audioPlayer?
 
 							var utilsPlaySecondArg = utilsPlaySpy.firstCall.args[1];
 
@@ -466,15 +349,17 @@ describe('renderers.d3', function () {
 				describe('when given an explicit playhead position', function () {
 
 					it('should only schedule timers for events happening on or after playhead position', function (done) {
+						var TEST_PLAYHEAD_TIME = 100;
+
 						d3Renderer.__with__({
 							renderUtils: {
 								play: utilsPlaySpy,
 								render: sinon.spy()
 							}
 						})(function () {
-							renderer.play(100);
+							renderer.play(TEST_PLAYHEAD_TIME);
 
-							expect(utilsPlaySpy.args[0][1]).to.be.equal(100);
+							expect(utilsPlaySpy.args[0][1]).to.be.equal(TEST_PLAYHEAD_TIME);
 
 							done();
 						});
@@ -490,7 +375,7 @@ describe('renderers.d3', function () {
 
 						getBBoxSpy.returns({ width: 1, height: 1 });
 
-						mockSvgEach.callsArgOnWith(0, {
+						mockSvgEach.yieldsOn({
 							tagName: 'path',
 							getBBox: getBBoxSpy,
 							setAttribute: setAttrSpy
@@ -518,23 +403,17 @@ describe('renderers.d3', function () {
 						done();
 					});
 				});
-			});
-
-			describe('#pause', function () {
 
 				it('should have a #pause method', function (done) {
 					expect(renderer).to.respondTo('pause');
 					done();
 				});
-				
-				describe('when not currently playing', function () {
+			});
 
-					it('should do nothing');
-				});
+			describe('#stop', function () {
 
-				describe('when is currently playing', function () {
-
-					it('should clear all timers');
+				describe('#restart', function () {
+					
 				});
 			});
 		});
@@ -547,17 +426,6 @@ describe('renderers.d3', function () {
 					done();
 				});
 			});
-		});
-	});
-
-	describe('#resize', function () {
-		
-		it('should throw an error if we call resize', function (done) {
-			expect(function () {
-				d3Renderer.resize();
-			}).to.throw(/Implement/);
-
-			done();
 		});
 	});
 });

@@ -24,7 +24,6 @@ function generateAnimEvents() {
 describe('renderer.utils', function () {
 
 	describe.skip('#prep', function () {
-		var testRenderer;
 		var prep = renderUtils.prep;
 		var midiStub, rendererStub, transformMidiStub, testConfig, nextStub;
 
@@ -59,14 +58,14 @@ describe('renderer.utils', function () {
 				]
 			};
 
-			testRenderer = prep(midiStub, testConfig);
+			prep(midiStub, testConfig);
 
 			done();
 		});
 
 		afterEach(function (done) {
 			nextStub.restore();
-			testRenderer = midiStub = rendererStub = transformMidiStub = testConfig = nextStub = null;
+			midiStub = rendererStub = transformMidiStub = testConfig = nextStub = null;
 			done();
 		});
 
@@ -106,7 +105,7 @@ describe('renderer.utils', function () {
 					console: consoleStub
 				})(function () {
 					testConfig.transformers.pop();
-					testRenderer = prep(midiStub, testConfig);
+					prep(midiStub, testConfig);
 					expect(consoleStub.error.calledWithMatch(/no transform/i)).to.be.true;
 					done();
 				});
@@ -114,9 +113,9 @@ describe('renderer.utils', function () {
 		});
 	});
 
-	describe('#play (inital call)', function () {
+	describe('#play', function () {
 		var play;
-		var testState, rendererState, renderFnSpy;
+		var testState, rendererState, renderFnSpy, audioPlayerMock, playheadStub;
 
 		beforeEach(function (done) {
 			play = renderUtils.play;
@@ -152,46 +151,75 @@ describe('renderer.utils', function () {
 				}
 			});
 
-			var playheadStub = sinon.stub();
-			playheadStub.onFirstCall().returns(100);
-			playheadStub.onSecondCall().returns(1001);
-
-			var audioPlayerMock = {
-				lengthInMs: 1000,
-				isPlaying: true,
-				getPlayheadTime: playheadStub };
-
-			testState = play(rendererState, audioPlayerMock, renderFnSpy);
+			playheadStub = sinon.stub();
 
 			done();
 		});
 
 		afterEach(function (done) {
 			renderUtils.stop(testState); // since play is a closure, we have to "stop" it
-			play = testState = rendererState = renderFnSpy = null;
+			play = testState = rendererState = renderFnSpy = audioPlayerMock = playheadStub = null;
 			done();
 		});
 
-		it('should have renderEvents, by time', function (done) {
-			expect(testState.renderEvents).to.have.keys(['0', '100', '200']);
-			done();
-		});
+		describe('initial call', function () {
 
-		it('should have scales', function (done) {
-			// TOOD: or not???
-			expect(testState.scales).to.have.length(0);
-			done();
-		});
+			beforeEach(function (done) {
+				playheadStub.onFirstCall().returns(100);
+				playheadStub.onSecondCall().returns(1001);
 
-		it('should have called renderFn with state and render events', function (done) {
-			setTimeout(function () {
-				expect(renderFnSpy.called).to.be.true;
-				// expect(renderFnSpy.calledWith(rendererState, [], rendererState.renderEvents[100], 300)).to.be.true;
+				audioPlayerMock = {
+					lengthInMs: 1000,
+					isPlaying: true,
+					getPlayheadTime: playheadStub };
+
+				testState = play(rendererState, audioPlayerMock, renderFnSpy);
+
 				done();
-			}, 0);
+			});
+
+			it('should have renderEvents, by time', function (done) {
+				expect(testState.renderEvents).to.have.keys(['0', '100', '200']);
+				done();
+			});
+
+			it('should have scales', function (done) {
+				// TOOD: or not???
+				expect(testState.scales).to.have.length(0);
+				done();
+			});
+
+			it('should have called renderFn with state and render events', function (done) {
+				setTimeout(function () {
+					expect(renderFnSpy.called).to.be.true;
+					// expect(renderFnSpy.calledWith(rendererState, [], rendererState.renderEvents[100], 300)).to.be.true;
+					done();
+				}, 0);
+			});
 		});
 
-		describe.skip('#pause', function () {
+		describe('when audioPlayer is not playing', function () {
+			
+			beforeEach(function(done) {
+				playheadStub.reset();
+
+				audioPlayerMock = {
+					lengthInMs: 1000,
+					isPlaying: false,
+					getPlayheadTime: playheadStub };
+
+				testState = play(rendererState, audioPlayerMock, renderFnSpy);
+
+				done();
+			});
+
+			it('should not try to get playhead time', function(done) {
+				expect(playheadStub.called).to.be.false;
+				done();
+			});
+		});
+
+		describe('#pause', function () {
 			var pause = renderUtils.pause;
 			
 			beforeEach(function (done) {
@@ -396,6 +424,28 @@ describe('renderer.utils', function () {
 				rafStub.callsArgWith(0, 14);
 				var renderEvents = [
 					new RenderEvent({
+						id: 'TEST-TMER-ONE',
+						track: 0,
+						subtype: 'timer',
+						lengthMicroSec: 1,
+						startTimeMicroSec: 1,
+						x: 0,
+						y: 0,
+						radius: 1,
+						color: 'blue'
+					}),
+					new RenderEvent({
+						id: 'TEST-ONE',
+						track: 1,
+						subtype: 'on',
+						lengthMicroSec: 1,
+						startTimeMicroSec: 1,
+						x: 0,
+						y: 0,
+						radius: 1,
+						color: 'blue'
+					}),
+					new RenderEvent({
 						id: 'TEST-ONE',
 						track: 1,
 						subtype: 'on',
@@ -428,7 +478,7 @@ describe('renderer.utils', function () {
 			});
 
 			it('should have called raf with two events to add', function (done) {
-				expect(rafSpy.firstCall.args[1]).to.have.length(2);
+				expect(rafSpy.firstCall.args[1]).to.have.length(3);
 				done();
 			});
 		});
