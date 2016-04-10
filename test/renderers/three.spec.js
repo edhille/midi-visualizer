@@ -12,9 +12,8 @@ var testHelpers = require('../helpers');
 var dataTypes = require('../../src/data-types');
 var ThreeJsRendererState = dataTypes.ThreeJsRendererState;
 var threeJsRenderer = rewire('../../src/renderers/three');
-var TEST_NOTE_MIN = 20;
-var TEST_NOTE_MAX = 30;
-
+var TEST_NOTE_MIN = 1;
+var TEST_NOTE_MAX = 10;
 
 function createThreeJsMock() {
 	var sceneStub = sinon.stub();
@@ -61,48 +60,6 @@ function createThreeJsMock() {
 	};
 }
 
-//
-// function createScaleMock(domainStub, rangeStub) {
-// 	var linearStub = sinon.stub();
-//
-// 	rangeStub.returns({ domain: domainStub });
-//
-// 	linearStub.returns({
-// 		range: rangeStub,
-// 		domain: domainStub
-// 	});
-//
-// 	return {
-// 		linear: linearStub
-// 	};
-// }
-//
-// function createShapesMock() {
-// 	var shapesStub = sinon.stub();
-//
-// 	shapesStub.returns([]);
-//
-// 	return shapesStub;
-// }
-
-// TODO: switch to helpers.createMockMidi
-function createMidiMock() {
-
-	return {
-		tracks: [
-			{
-				events: [
-					{ type: 'note', subtype: 'on', note: TEST_NOTE_MIN },
-					{ type: 'note', subtype: 'on', note: TEST_NOTE_MAX }
-				]
-			},
-			{
-				events: []
-			}
-		]
-	};
-}
-
 describe('renderers.threejs', function () {
 
 	describe('#prepDOM', function () {
@@ -111,7 +68,7 @@ describe('renderers.threejs', function () {
 		beforeEach(function (done) {
 			prepDOM = threeJsRenderer.prepDOM;
 			threeMock = createThreeJsMock();
-			mockMidi = createMidiMock();
+			mockMidi = testHelpers.createMockMidi();
 			TEST_WIDTH = 100;
 			TEST_HEIGHT = 150;
 			done();
