@@ -7,111 +7,12 @@ var chai = require('chai');
 var expect = chai.expect;
 var sinon = require('sinon');
 
-var AnimEvent = require('../../src/data-types').AnimEvent;
 var RenderEvent = require('../../src/data-types').RenderEvent;
 var RendererState = require('../../src/data-types').RendererState;
 
 var renderUtils = rewire('../../src/renderers/utils');
 
-function generateAnimEvents() {
-	return {
-		0: [new AnimEvent({ event: { note: 127 }, track: 0, length: 100 }), new AnimEvent({ event: { note: 100 }, track: 1, length: 200 })],
-		100: [new AnimEvent({ event: { note: 127 }, track: 0, length: 0 })],
-		200: [new AnimEvent({ event: { note: 100 }, track: 1, length: 0 })]
-	};
-}
-
 describe('renderer.utils', function () {
-
-	describe.skip('#prep', function () {
-		var prep = renderUtils.prep;
-		var midiStub, rendererStub, transformMidiStub, testConfig, nextStub;
-
-		beforeEach(function (done) {
-			midiStub = sinon.stub();
-
-			rendererStub = sinon.stub();
-			rendererStub.init = sinon.stub();
-			rendererStub.init.returns(new RendererState({
-				id: 'TEST-ID',
-				window: { document: {} },
-				root: {},
-				raf: sinon.spy()
-			}));
-
-			nextStub = sinon.spy(RendererState.prototype, 'next');
-
-			transformMidiStub = sinon.stub();
-			transformMidiStub.returns(generateAnimEvents());
-
-			renderUtils.__set__('transformMidi', transformMidiStub);
-
-			testConfig = {
-				document: {},
-				root: 'TEST-ROOT',
-				width: 666,
-				height: 999,
-				renderer: rendererStub,
-				transformers: [
-					function (state, animEvent) { return [{ id: 'test-0-' + animEvent.id }, { id: 'test-1-' + animEvent.id }]; },
-					function (state, animEvent) { return [{ id: animEvent.id }]; }
-				]
-			};
-
-			prep(midiStub, testConfig);
-
-			done();
-		});
-
-		afterEach(function (done) {
-			nextStub.restore();
-			midiStub = rendererStub = transformMidiStub = testConfig = nextStub = null;
-			done();
-		});
-
-		it('should have called our renderer', function (done) {
-			expect(rendererStub.called).to.be.true;
-			done();
-		});
-
-		it('should have correctly transformed the render events', function (done) {
-			expect(nextStub.lastCall.calledWithMatch({
-				renderEvents: {
-					0: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }, { id: '1-100' }],
-					100: [{ id: 'test-0-0-127' }, { id: 'test-1-0-127' }],
-					200: [{ id: '1-100' }]
-				}
-			})).to.be.true;
-
-			done();
-		});
-
-		it('should have called our init with midi data, width, and height', function (done) {
-			expect(rendererStub.init.lastCall.calledWithExactly(
-				midiStub,
-				testConfig
-			)).to.be.true;
-
-			done();
-		});
-
-		describe('when transform function missing for a track', function () {
-
-			it('should log to console.error', function (done) {
-				var consoleStub = {
-					error: sinon.spy()
-				};
-				renderUtils.__with__({
-					console: consoleStub
-				})(function () {
-					testConfig.transformers.pop();
-					prep(midiStub, testConfig);
-					expect(consoleStub.error.calledWithMatch(/no transform/i)).to.be.true;
-					done();
-				});
-			});
-		});
-	});
 
 	describe('#play', function () {
 		var play;
@@ -169,7 +70,7 @@ describe('renderer.utils', function () {
 				playheadStub.onSecondCall().returns(1001);
 
 				audioPlayerMock = {
-					lengthInMs: 1000,
+					lengthMs: 1000,
 					isPlaying: true,
 					getPlayheadTime: playheadStub };
 
@@ -204,7 +105,7 @@ describe('renderer.utils', function () {
 				playheadStub.reset();
 
 				audioPlayerMock = {
-					lengthInMs: 1000,
+					lengthMs: 1000,
 					isPlaying: false,
 					getPlayheadTime: playheadStub };
 
@@ -216,6 +117,72 @@ describe('renderer.utils', function () {
 			it('should not try to get playhead time', function(done) {
 				expect(playheadStub.called).to.be.false;
 				done();
+			});
+		});
+
+		describe('when audioPlayer is past the end of the song', function () {
+			
+			beforeEach(function(done) {
+				playheadStub.reset();
+
+				audioPlayerMock = {
+					lengthMs: 1000,
+					isPlaying: true,
+					getPlayheadTime: playheadStub };
+
+				playheadStub.returns(audioPlayerMock.lengthMs + 1);
+
+				testState = play(rendererState, audioPlayerMock, renderFnSpy);
+
+				done();
+			});
+
+			it('should try to get playhead time', function(done) {
+				setTimeout(function () {
+					expect(playheadStub.called).to.be.true;
+					done();
+				}, 0);
+			});
+
+			it('should not have called renderFn', function (done) {
+				setTimeout(function () {
+					expect(renderFnSpy.called).to.be.false;
+					done();
+				}, 0);
+			});
+		});
+
+		describe('when audioPlayer has been rewound', function () {
+			var resumeStub;
+			
+			beforeEach(function(done) {
+				resumeStub = sinon.spy();
+				playheadStub.reset();
+
+				audioPlayerMock = {
+					lengthMs: 1000,
+					isPlaying: true,
+					getPlayheadTime: playheadStub };
+
+				playheadStub.returns(-1);
+
+				testState = play(rendererState, audioPlayerMock, renderFnSpy, resumeStub);
+
+				done();
+			});
+
+			it('should try to get playhead time', function(done) {
+				setTimeout(function () {
+					expect(playheadStub.called).to.be.true;
+					done();
+				}, 0);
+			});
+
+			it('should have called resumeFn', function (done) {
+				setTimeout(function () {
+					expect(resumeStub.called).to.be.true;
+					done();
+				}, 0);
 			});
 		});
 

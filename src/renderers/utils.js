@@ -45,13 +45,14 @@ module.exports = function closure() {
 			}
 
 			var eventKeys = Object.keys(stateSnapshot.renderEvents)
-								.map(Number).filter(function (eventTimeMs) {
+								.map(Number)
+								.filter(function (eventTimeMs) {
 									return lastPlayheadTimeMs < eventTimeMs && eventTimeMs <= nowMs;
 								});
 
-			/* istanbul ignore else */
 			if (eventKeys.length > 0) {
 				var events = eventKeys.reduce(function (events, key) { return events.concat(stateSnapshot.renderEvents[key]); }, []);
+
 				/* istanbul ignore else */
 				if (events.length > 0) {
 					currentRunningEvents = renderFn(state, currentRunningEvents, events, nowMs);
@@ -156,7 +157,6 @@ module.exports = function closure() {
 
 			switch (event.subtype) {
 			case 'on':
-				/* istanbul ignore else */
 				if (matchIndices.length === 0) {
 					eventsToAdd.push(event);
 					currentRunningEvents.push(event);
@@ -179,13 +179,7 @@ module.exports = function closure() {
 			}
 		});
 
-		expiredEvents = expiredEvents.concat(currentRunningEvents.filter(function (event) {
-			if (event.startTimeMicroSec > nowMicroSec) {
-				return true;
-			}
-
-			return false;
-		}));
+		expiredEvents = expiredEvents.concat(currentRunningEvents.filter(function (event) { return event.startTimeMicroSec > nowMicroSec; }));
 
 		var timestamp = state.window.performance.now();
 
