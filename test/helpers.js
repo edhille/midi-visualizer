@@ -31,14 +31,15 @@ function createMockMidi() {
 					{ type: 'note', subtype: 'on', note: 30 },
 					{ type: 'note', subtype: 'off', note: 30 }
 				]
-			},
+			}
 		]
 	};
 }
 
 function createMockDoc() {
 	return {
-		appendChild: sinon.spy()
+		appendChild: sinon.spy(),
+		getElementsByClassName: sinon.stub()
 	};
 }
 

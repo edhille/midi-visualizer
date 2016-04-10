@@ -410,10 +410,35 @@ describe('renderers.d3', function () {
 				});
 			});
 
-			describe('#stop', function () {
+			describe('#restart', function () {
+				var utilsPlaySpy;
 
-				describe('#restart', function () {
-					
+				beforeEach(function (done) {
+					utilsPlaySpy = sinon.stub();
+
+					// set it to call the _render callback it is provided with empty data
+					utilsPlaySpy.callsArgWith(2, mockState, [], []);
+
+					mockState.root.getElementsByClassName.returns([{
+						style: { display: 'none' },
+						getAttribute: sinon.stub()
+					}]);
+
+					d3Renderer.__with__({
+						renderUtils: {
+							play: utilsPlaySpy,
+							render: sinon.spy()
+						}
+					})(function () {
+						renderer.restart(null); // TODO: should we pass audioPlayer?
+
+						done();
+					});
+				});
+
+				it('should call play', function (done) {
+					expect(utilsPlaySpy.called).to.be.true;
+					done();
 				});
 			});
 		});

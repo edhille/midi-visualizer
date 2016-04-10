@@ -174,6 +174,7 @@ function generate(renderConfig) {
 	renderer.lift('restart', function _restart(state, player) {
 		var id = state.id;
 
+		// ensure the DOM node for this instance is the only one visible
 		[].map.call(state.root.getElementsByClassName(DOM_ID), function (node) {
 			node.style.display = node.getAttribute('id') === id ? 'block' : 'none';
 		});
