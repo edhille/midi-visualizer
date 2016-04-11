@@ -13,6 +13,12 @@ var ThreeJsRendererState = require('../data-types').ThreeJsRendererState;
 
 var DOM_ID = 'threejs';
 
+function toggleStage(root, id) {
+	[].map.call(root.getElementsByClassName(DOM_ID) || [], function (node) {
+		node.style.display = node.getAttribute('id') === id ? 'block' : 'none';
+	});
+}
+
 function genSongScales(dimension, midi) {
 	return midi.tracks.reduce(function (scales, track, index) {
 		if (track.events.length === 0) return scales;
@@ -51,9 +57,7 @@ function prepDOM(midi, config) {
 	var x = config.width || w.innerWidth || e.clientWidth;
 	var y = config.height || w.innerHeight|| e.clientHeight;
 
-	/* istanbul ignore else */
 	if (!x) throw new TypeError('unable to calculate width');
-	/* istanbul ignore else */
 	if (!y) throw new TypeError('unable to calculate height');
 
 	var scene = new THREE.Scene();
@@ -70,9 +74,7 @@ function prepDOM(midi, config) {
 	var id = domElement.getAttribute('id') || Date.now().toString().split('').map(function (char) { return (Math.random() * char).toString(16); }).join('');
 	domElement.setAttribute('id', id);
 
-	[].map.call(config.root.getElementsByClassName(DOM_ID) || [], function (node) {
-		node.style.display = node.getAttribute('id') === id ? 'block' : 'none';
-	});
+	toggleStage(config.root, id);
 
 	config.root.appendChild(domElement);
 
@@ -153,11 +155,7 @@ function generate(renderConfig) {
 
 	renderer.lift('play', play);
 	renderer.lift('restart', function _restart(state, player) {
-		var id = state.id;
-
-		[].map.call(state.root.getElementsByClassName(DOM_ID), function (node) {
-			node.style.display = node.getAttribute('id') === id ? 'block' : 'none';
-		});
+		toggleStage(state.root, state.id);
 
 		return play(state, player);
 	});

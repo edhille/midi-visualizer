@@ -320,6 +320,38 @@ describe('renderers.threejs', function () {
 					it('should clear all timers');
 				});
 			});
+
+			describe('#restart', function () {
+				var utilsPlaySpy;
+
+				beforeEach(function (done) {
+					utilsPlaySpy = sinon.stub();
+
+					// set it to call the _render callback it is provided with empty data
+					utilsPlaySpy.callsArgWith(2, mockState, [], []);
+
+					mockState.root.getElementsByClassName.returns([{
+						style: { display: 'none' },
+						getAttribute: sinon.stub()
+					}]);
+
+					threeJsRenderer.__with__({
+						renderUtils: {
+							play: utilsPlaySpy,
+							render: sinon.spy()
+						}
+					})(function () {
+						renderer.restart(null); // TODO: should we pass audioPlayer?
+
+						done();
+					});
+				});
+
+				it('should call play', function (done) {
+					expect(utilsPlaySpy.called).to.be.true;
+					done();
+				});
+			});
 		});
 
 		describe('error cases', function () {
