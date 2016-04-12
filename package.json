@@ -9,17 +9,18 @@
   "scripts": {
     "lint": "./node_modules/eslint/bin/eslint.js src",
     "test": "./node_modules/mocha/bin/mocha test",
-    "coverage": "./node_modules/gulp/bin/gulp.js coverage"
+    "coverage": "./node_modules/gulp/bin/gulp.js coverage",
+    "doc": "./node_modules/jsdoc-to-markdown/bin/cli.js --template jsdoc.template.hbs src/**/*.js > README.md"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/edhille/midi-visualizer.git"
   },
   "keywords": [
-    "javascript",
-    "midi",
-    "visualization",
-    "functional"
+    "JavaScript",
+    "Midi",
+    "Visualization",
+    "Functional"
   ],
   "author": "Ted Hille",
   "license": "MIT",
@@ -33,6 +34,7 @@
     "gulp": "^3.8.11",
     "gulp-spawn-mocha": "^2.0.1",
     "jsdoc": "^3.3.0-beta3",
+    "jsdoc-to-markdown": "^1.3.3",
     "mocha": "^2.4.5",
     "rewire": "^2.3.1",
     "sinon": "^1.14.1",

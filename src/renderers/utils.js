@@ -138,10 +138,10 @@ module.exports = function closure() {
 	 * @param {function} cleanupFn - callback to remove expired animation artifacts
 	 * @param {function} rafFn - RAF callback to do actual animation
 	 * @param {RendererState} state - monad state
-	 * @param {[RenderEvent]} currentRunningEvents - RenderEvents currently being animated
-	 * @param {[RenderEvent]} renderEvents - new RenderEvents to animate
+	 * @param {RenderEvent[]} currentRunningEvents - RenderEvents currently being animated
+	 * @param {RenderEvent[]} renderEvents - new RenderEvents to animate
 	 *
-	 * @return {[RenderEvent]} - active running render events for this render call
+	 * @return {RenderEvent[]} - active running render events for this render call
 	 */
 	// (RendererState -> [RenderEvent] -> undefined) -> (RendererState -> [RenderEvent] -> undefined) -> RendererState -> [RenderEvent] -> [RenderEvent] -> [RenderEvent]
 	function render(state, cleanupFn, rafFn, currentRunningEvents, renderEvents, nowMs) {
