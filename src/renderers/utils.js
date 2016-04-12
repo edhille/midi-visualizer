@@ -1,4 +1,4 @@
-/** @namespace RenderUtils */
+/** @module RenderUtils */
 
 'use strict';
 
@@ -13,9 +13,9 @@ module.exports = function closure() {
 	var currentRunningEvents = [];
 
 	/**
-	 * play
-	 *
-	 * Put visualizer in "play" state (where audio player is playing and animations are running)
+	 * @name play
+	 * @function
+	 * @description Put visualizer in "play" state (where audio player is playing and animations are running)
 	 *
 	 * @param {RenderUtils~render} renderFn - callback for actual rendering
 	 * @param {RendererState} state - current monad state
