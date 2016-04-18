@@ -4,6 +4,12 @@
 
 var d3 = require('d3');
 var transformMidi = require('../midi-transformer');
+
+/** @constant
+ *  @type {number}
+ *  @name MAX_RAF_DELTA_MS
+ *  @default
+ */
 var MAX_RAF_DELTA_MS = 16;
 
 module.exports = function closure() {
@@ -17,9 +23,10 @@ module.exports = function closure() {
 	 * @function
 	 * @description Put visualizer in "play" state (where audio player is playing and animations are running)
 	 *
-	 * @param {RenderUtils~render} renderFn - callback for actual rendering
 	 * @param {RendererState} state - current monad state
-	 * @param {number} playheadTimeMs - current playhead place in milliseconds
+	 * @param {AudioPlayer} player - audio player used for audio playback we are syncing to
+	 * @param {RenderUtils~render} renderFn - callback for actual rendering
+	 * @param {RenderUtils~resume} resumeFn - callback for resuming playback after stopping
 	 *
 	 * @return {RendererState} - new monad state
 	 */
@@ -68,12 +75,30 @@ module.exports = function closure() {
 		return state;
 	}
 
+	/**
+	 * @name pause
+	 * @function
+	 * @description Put visualizer in "paused" state (where audio player is paused and animations are not running)
+	 *
+	 * @param {RendererState} state - current monad state
+	 *
+	 * @return {RendererState} - new monad state
+	 */
 	// RendererState -> RendererState
 	function pause(state) {
 		state.window.cancelAnimationFrame(lastRafId);
 		return state;
 	}
 
+	/**
+	 * @name stop
+	 * @function
+	 * @description Put visualizer in "stopped" state (where audio player is stopped and animations are not running)
+	 *
+	 * @param {RendererState} state - current monad state
+	 *
+	 * @return {RendererState} - new monad state
+	 */
 	// RendererState -> RendererState
 	function stop(state) {
 		currentRunningEvents = [];
@@ -81,6 +106,17 @@ module.exports = function closure() {
 		return pause(state);
 	}
 
+	/**
+	 * @name transformEvents
+	 * @function
+	 * @description Applies given track transforms to animation events
+	 *
+	 * @param {RendererState} state - state monad
+	 * @param {function[]} trackTransforms - callback functions (TODO: document)
+	 * @param {AnimEvent[]} animEvents - given animation events to transform
+	 *
+	 * @return {RenderEvent[]} array of transformed renderEvents
+	 */
 	// RendererState -> [(RendererState -> AnimEvent -> [RenderEvent])] -> [AnimEvent] -> [RenderEvent]
 	function transformEvents(state, trackTransformers, animEvents) {
 		var renderEvents = {};
@@ -102,6 +138,17 @@ module.exports = function closure() {
 		return renderEvents;
 	}
 
+	/**
+	 * @name mapEvents
+	 * @function
+	 * @description Map over given Midi data, transforming MidiEvents into RenderEvents
+	 *
+	 * @param {RendererState} state - current monad state
+	 * @param {Midi} midi - midi data to map to RenderEvents
+	 * @param {object} config - configuration data
+	 *
+	 * @return {RendererState} - new monad state
+	 */
 	// RendererState -> Midi -> Config -> RendererState
 	function mapEvents(rendererState, midi, config) {
 		var animEvents = transformMidi(midi);
@@ -111,39 +158,79 @@ module.exports = function closure() {
 		});
 	}
 
+	/**
+	 * @name maxNote
+	 * @function
+	 * @description Compare given note with note in given RenderEvent, returning whichever is larger
+	 *
+	 * @param {number} currentMaxNote - value of current "max" note
+	 * @param {RenderEvent} event - RenderEvent containing note to compare
+	 *
+	 * @return {number} - largest of two notes
+	 */
 	// Int -> MidiEvent -> Int
 	function maxNote(currMaxNote, event) {
 		return currMaxNote > event.note ? currMaxNote : event.note;
 	}
 
+	/**
+	 * @name minNote
+	 * @function
+	 * @description Compare given note with note in given RenderEvent, returning whichever is smaller
+	 *
+	 * @param {number} currentMinNote - value of current "min" note
+	 * @param {RenderEvent} event - RenderEvent containing note to compare
+	 *
+	 * @return {number} - smallest of two notes
+	 */
 	// Int -> MidiEvent -> Int
 	function minNote(currMinNote, event) {
 		return currMinNote < event.note ? currMinNote : event.note;
 	}
 
+	/**
+	 * @name isNoteToggleEvent
+	 * @function
+	 * @description Predicate to test whether given RenderEvent is for a note on/off event
+	 *
+	 * @param {RenderEvent} event - RenderEvent to test
+	 *
+	 * @return {boolean} - is it a note on/off event
+	 */
 	// MidiEvent -> Boolean
 	function isNoteToggleEvent(event) {
 		return event.type === 'note';
 	}
 
+	/**
+	 * @name isNoteOnEvent
+	 * @function
+	 * @description Predicate to test whether given RenderEvent is for a note on event
+	 *
+	 * @param {RenderEvent} event - RenderEvent to test
+	 *
+	 * @return {boolean} - is it a note on event
+	 */
 	// MidiEvent -> Boolean
 	function isNoteOnEvent(event) {
 		return isNoteToggleEvent(event) && event.subtype === 'on';
 	}
 
 	/**
-	 * render
+	 * @name render
+	 * @function
+	 * @description render function
 	 *
-	 *
+	 * @param {RendererState} state - monad state
 	 * @param {function} cleanupFn - callback to remove expired animation artifacts
 	 * @param {function} rafFn - RAF callback to do actual animation
-	 * @param {RendererState} state - monad state
 	 * @param {RenderEvent[]} currentRunningEvents - RenderEvents currently being animated
 	 * @param {RenderEvent[]} renderEvents - new RenderEvents to animate
+	 * @param {number} nowMs - current time in milliseconds
 	 *
 	 * @return {RenderEvent[]} - active running render events for this render call
 	 */
-	// (RendererState -> [RenderEvent] -> undefined) -> (RendererState -> [RenderEvent] -> undefined) -> RendererState -> [RenderEvent] -> [RenderEvent] -> [RenderEvent]
+	// RendererState -> (RendererState -> [RenderEvent] -> undefined) -> (RendererState -> [RenderEvent] -> undefined) -> [RenderEvent] -> [RenderEvent] -> Int -> [RenderEvent]
 	function render(state, cleanupFn, rafFn, currentRunningEvents, renderEvents, nowMs) {
 		var expiredEvents = [];
 		var eventsToAdd = [];
