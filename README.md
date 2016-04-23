@@ -160,3 +160,188 @@ render function
 | nowMs | <code>number</code> | current time in milliseconds |
 
 
+
+<a name="module_DataTypes"></a>
+
+## DataTypes
+
+* [DataTypes](#module_DataTypes)
+    * [~MidiVisualizerState](#module_DataTypes..MidiVisualizerState)
+        * [new MidiVisualizerState(params)](#new_module_DataTypes..MidiVisualizerState_new)
+    * [~RendererState](#module_DataTypes..RendererState)
+        * [new RendererState(params)](#new_module_DataTypes..RendererState_new)
+    * [~D3RendererState](#module_DataTypes..D3RendererState) ⇐ <code>RendererState</code>
+        * [new D3RendererState()](#new_module_DataTypes..D3RendererState_new)
+    * [~ThreeJsRendererState](#module_DataTypes..ThreeJsRendererState) ⇐ <code>RendererState</code>
+        * [new ThreeJsRendererState()](#new_module_DataTypes..ThreeJsRendererState_new)
+    * [~AnimEvent](#module_DataTypes..AnimEvent)
+        * [new AnimEvent([id])](#new_module_DataTypes..AnimEvent_new)
+    * [~RenderEvent](#module_DataTypes..RenderEvent)
+        * [new RenderEvent()](#new_module_DataTypes..RenderEvent_new)
+    * [~D3RenderEvent](#module_DataTypes..D3RenderEvent) ⇐ <code>RenderEvent</code>
+        * [new D3RenderEvent()](#new_module_DataTypes..D3RenderEvent_new)
+    * [~ThreeJsRenderEvent](#module_DataTypes..ThreeJsRenderEvent) ⇐ <code>RenderEvent</code>
+        * [new ThreeJsRenderEvent()](#new_module_DataTypes..ThreeJsRenderEvent_new)
+
+<a name="module_DataTypes..MidiVisualizerState"></a>
+
+### DataTypes~MidiVisualizerState
+**Kind**: inner class of <code>[DataTypes](#module_DataTypes)</code>  
+<a name="new_module_DataTypes..MidiVisualizerState_new"></a>
+
+#### new MidiVisualizerState(params)
+top-level data type representing state of MidiVisualizer
+
+**Returns**: MidiVisualizerState  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| params | <code>object</code> |  | properties to set |
+| params.audioPlayer | <code>AudioPlayer</code> |  | AudioPlayer instance managing audio to sync with |
+| params.renderer | <code>Renderer</code> |  | Renderer used to draw visualization |
+| params.midi | <code>Midi</code> |  | Midi data to visualize |
+| [params.animEventsByTimeMs] | <code>object</code> | <code>{}</code> | AnimEvent to render, grouped by millisecond-based mark where they should be rendered |
+| [params.isPlaying] | <code>boolean</code> | <code>false</code> | flag indicating whether currently playing |
+
+<a name="module_DataTypes..RendererState"></a>
+
+### DataTypes~RendererState
+**Kind**: inner class of <code>[DataTypes](#module_DataTypes)</code>  
+<a name="new_module_DataTypes..RendererState_new"></a>
+
+#### new RendererState(params)
+top-level data type representing state of Renderer
+
+**Returns**: RendererState  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| params | <code>object</code> |  | properties to set |
+| params.id | <code>string</code> |  | unique identifier for renderer |
+| params.root | <code>HTMLElement</code> |  | HTMLElement to use as root node for renderer canvas placement |
+| params.window | <code>Window</code> |  | Window we are rendering in (note, Window must have a 'document') |
+| [params.width] | <code>number</code> | <code>0</code> | width for rendering canvas |
+| [params.height] | <code>number</code> | <code>0</code> | height for rendering canvas |
+| [param.renderEvents] | <code>Array.&lt;RenderEvents&gt;</code> | <code>[]</code> | RenderEvents to render |
+| [params.scales] | <code>Array.&lt;object&gt;</code> | <code>[]</code> | Scales for normalizing position/sizing |
+| [params.isPlaying] | <code>boolean</code> | <code>false</code> | flag indicating whether currently playing |
+
+<a name="module_DataTypes..D3RendererState"></a>
+
+### DataTypes~D3RendererState ⇐ <code>RendererState</code>
+**Kind**: inner class of <code>[DataTypes](#module_DataTypes)</code>  
+**Extends:** <code>RendererState</code>  
+<a name="new_module_DataTypes..D3RendererState_new"></a>
+
+#### new D3RendererState()
+data type representing state of Renderer that uses D3
+
+**Returns**: D3RendererState  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| params.svg | <code>SVGElement</code> | SVGElement for renderering |
+
+<a name="module_DataTypes..ThreeJsRendererState"></a>
+
+### DataTypes~ThreeJsRendererState ⇐ <code>RendererState</code>
+**Kind**: inner class of <code>[DataTypes](#module_DataTypes)</code>  
+**Extends:** <code>RendererState</code>  
+<a name="new_module_DataTypes..ThreeJsRendererState_new"></a>
+
+#### new ThreeJsRendererState()
+data type representing state of Renderer that uses D3
+
+**Returns**: ThreeJsRendererState  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| params.THREE | <code>THREEJS</code> | ThreeJs object |
+| params.camera | <code>Camera</code> | ThreeJs Camera to use |
+| params.scene | <code>Scene</code> | ThreeJs Scene to use |
+| params.renderer | <code>Renderer</code> | Renderer monad to use |
+
+<a name="module_DataTypes..AnimEvent"></a>
+
+### DataTypes~AnimEvent
+**Kind**: inner class of <code>[DataTypes](#module_DataTypes)</code>  
+<a name="new_module_DataTypes..AnimEvent_new"></a>
+
+#### new AnimEvent([id])
+data type representing individual animation event
+
+**Returns**: AnimEvent  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| params.event | <code>MidiEvent</code> |  | MidiEvent being renderered |
+| [params.track] | <code>number</code> | <code>0</code> | index of midi track event belongs to |
+| [params.startTimeMicroSec] | <code>number</code> | <code>0</code> | offset in microseconds from beginning of song when event starts |
+| [params.lengthMicroSec] | <code>number</code> | <code>0</code> | length of event in microseconds |
+| [params.microSecPerBeat] | <code>number</code> | <code>500000</code> | number of microseconds per beat |
+| [id] | <code>string</code> | <code>&quot;&lt;track&gt;-&lt;event.note || startTimeInMicroSec&gt;&quot;</code> | unique ID of event |
+
+<a name="module_DataTypes..RenderEvent"></a>
+
+### DataTypes~RenderEvent
+**Kind**: inner class of <code>[DataTypes](#module_DataTypes)</code>  
+<a name="new_module_DataTypes..RenderEvent_new"></a>
+
+#### new RenderEvent()
+base data type representing individual render event
+
+**Returns**: RenderEvent  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| params.id | <code>id</code> |  | unique string identifier for event |
+| params.track | <code>number</code> |  | index of midi track event belongs to |
+| params.subtype | <code>string</code> |  | midi event subtype |
+| params.x | <code>number</code> |  | x position for element |
+| params.y | <code>number</code> |  | y position for element |
+| params.lengthMicroSec | <code>number</code> |  | length of event in microseconds |
+| params.microSecPerBeat | <code>number</code> |  | number of microseconds per beat |
+| [params.z] | <code>number</code> | <code>0</code> | z position for element |
+| [params.microSecPerBeat] | <code>number</code> | <code>500000</code> | number of microseconds per beat |
+| [params.color] | <code>string</code> | <code>&quot;&#x27;#FFFFFF&#x27;&quot;</code> | color of element to render |
+
+<a name="module_DataTypes..D3RenderEvent"></a>
+
+### DataTypes~D3RenderEvent ⇐ <code>RenderEvent</code>
+**Kind**: inner class of <code>[DataTypes](#module_DataTypes)</code>  
+**Extends:** <code>RenderEvent</code>  
+<a name="new_module_DataTypes..D3RenderEvent_new"></a>
+
+#### new D3RenderEvent()
+data type representing individual render event using D3
+
+**Returns**: D3RenderEvent  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [params.path] | <code>string</code> | SVG path string (required if no 'radius' given) |
+| [params.radius] | <code>number</code> | radius to use for rendering circle (required if no 'path' given) |
+| [params.scale] | <code>d3.Scale</code> | D3.Scale (required if 'path' is given) |
+
+<a name="module_DataTypes..ThreeJsRenderEvent"></a>
+
+### DataTypes~ThreeJsRenderEvent ⇐ <code>RenderEvent</code>
+**Kind**: inner class of <code>[DataTypes](#module_DataTypes)</code>  
+**Extends:** <code>RenderEvent</code>  
+<a name="new_module_DataTypes..ThreeJsRenderEvent_new"></a>
+
+#### new ThreeJsRenderEvent()
+data type representing individual render event using ThreeJS
+
+**Returns**: ThreeJsRenderEvent  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [params.scale] | <code>number</code> | <code>1</code> | scaling factor |
+| [params.zRot] | <code>number</code> | <code>0</code> | z-rotation |
+| [params.xRot] | <code>number</code> | <code>0</code> | x-rotation |
+| [params.yRot] | <code>number</code> | <code>0</code> | y-rotation |
+| [params.note] | <code>number</code> |  | midi note value (0-127) |
+| [params.shape] | <code>number</code> |  | ??? |
+
+

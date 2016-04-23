@@ -10,7 +10,7 @@
     "lint": "./node_modules/eslint/bin/eslint.js src",
     "test": "./node_modules/mocha/bin/mocha test",
     "coverage": "./node_modules/gulp/bin/gulp.js coverage",
-    "doc": "./node_modules/jsdoc-to-markdown/bin/cli.js --template jsdoc.template.hbs src/**/*.js > README.md"
+    "doc": "./node_modules/jsdoc-to-markdown/bin/cli.js --template jsdoc.template.hbs 'src/**/*.js'> README.md"
   },
   "repository": {
     "type": "git",
