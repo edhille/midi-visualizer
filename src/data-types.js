@@ -9,7 +9,6 @@ var createDataType = require('fadt');
  * @param {object} params - properties to set
  * @param {AudioPlayer} params.audioPlayer - AudioPlayer instance managing audio to sync with
  * @param {Renderer} params.renderer - Renderer used to draw visualization
- * @param {Midi} params.midi - Midi data to visualize
  * @param {object} [params.animEventsByTimeMs={}] - AnimEvent to render, grouped by millisecond-based mark where they should be rendered
  * @param {boolean} [params.isPlaying=false] - flag indicating whether currently playing
  * @returns MidiVisualizerState
@@ -17,11 +16,9 @@ var createDataType = require('fadt');
 var MidiVisualizerState = createDataType(function (params) {
 	if (!params.audioPlayer) throw new TypeError('audioPlayer is required');
 	if (!params.renderer) throw new TypeError('renderer is required');
-	if (!params.midi) throw new TypeError('midi is required');
 
 	this.audioPlayer = params.audioPlayer;
 	this.renderer = params.renderer;
-	this.midi = params.midi;
 
 	this.animEventsByTimeMs = params.animEventsByTimeMs || {};
 	this.isPlaying = params.isPlaying || false;

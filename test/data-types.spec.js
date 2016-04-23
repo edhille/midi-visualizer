@@ -82,11 +82,6 @@ describe('data-types', function() {
 				done();
 			});
 
-			it('should have midi', function(done) {
-				expect(midiVisualizerState.midi).not.to.be.undefined;
-				done();
-			});
-
 			it('should have no animEvents', function(done) {
 				expect(midiVisualizerState.animEventsByTimeMs).to.have.eql({ 0: [] });
 				done();
@@ -336,7 +331,8 @@ describe('data-types', function() {
 				root: {},
 				camera: 'TEST-CAMERA',
 				scene: 'TEST-SCENE',
-				renderer: 'TEST-RENDERER'
+				renderer: 'TEST-RENDERER',
+				THREE: 'TEST-THREE'
 			};
 
 			rendererState = new ThreeJsRendererState(params);
