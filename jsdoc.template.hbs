@@ -16,7 +16,8 @@ const config = {
   },
   audio: {
     data: myFnToFetchAudioData()
-  }
+  },
+  renderer: setupMyCustomRenderer()
 };
 
 initMidiVisualizer(config).then((visualizer) => {
