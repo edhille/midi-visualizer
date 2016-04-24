@@ -4,24 +4,26 @@ A simple, functional-based midi visualization library
 
 ## Example
 
-  const initMidiVisualizer = import 'midi-visualizer';
-  const config = {
-    window: window,
-    root: document.getElementById('#my-root'),
-    width: 500,
-    height: 500,
-    midi: {
-      data: myFnToFetchMidiData()
-    },
-    audio: {
-      data: myFnToFetchAudioData()
-    }
-  };
+```
+const initMidiVisualizer = import 'midi-visualizer';
+const config = {
+  window: window,
+  root: document.getElementById('#my-root'),
+  width: 500,
+  height: 500,
+  midi: {
+    data: myFnToFetchMidiData()
+  },
+  audio: {
+    data: myFnToFetchAudioData()
+  }
+};
 
-  initMidiVisualizer(config).then((visualizer) => {
-    const playingVisualizer = visualizer.play();
-    // all your other fun operations...
-  }).catch((error) => console.error('Oh man, something bad happened:', error));
+initMidiVisualizer(config).then((visualizer) => {
+  const playingVisualizer = visualizer.play();
+  // all your other fun operations...
+}).catch((error) => console.error('Oh man, something bad happened:', error));
+```
 
 ## API Reference
 
