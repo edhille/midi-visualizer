@@ -8,7 +8,7 @@ var transformMidi = require('../midi-transformer');
 /** @constant
  *  @type {number}
  *  @name MAX_RAF_DELTA_MS
- *  @default
+ *  @default 16
  */
 var MAX_RAF_DELTA_MS = 16;
 

@@ -121,6 +121,7 @@ initializes MidiVisualizer monad
 
 ### RenderUtils~MAX_RAF_DELTA_MS : <code>number</code>
 **Kind**: inner constant of <code>[RenderUtils](#module_RenderUtils)</code>  
+**Default**: <code>16</code>  
 <a name="module_RenderUtils..play"></a>
 
 ### RenderUtils~play(state, player, renderFn, resumeFn) ⇒ <code>RendererState</code>
@@ -260,16 +261,67 @@ render function
 <a name="module_ThreeJsRenderer"></a>
 
 ## ThreeJsRenderer
-<a name="module_ThreeJsRenderer..generate"></a>
 
-### ThreeJsRenderer~generate(renderConfig) ⇒ <code>ThreeJsRenderer</code>
-generator to create ThreeJsRenderer
+* [ThreeJsRenderer](#module_ThreeJsRenderer)
+    * [~prepDOM(midi, config)](#module_ThreeJsRenderer..prepDOM) ⇒ <code>ThreeJsRendererState</code>
+    * [~resize(state, dimension)](#module_ThreeJsRenderer..resize) ⇒ <code>ThreeJsRendererState</code>
+    * [~cleanup(state, currentRunningEvents[, expiredEvents[)](#module_ThreeJsRenderer..cleanup) ⇒ <code>undefined</code>
+    * [~generate(renderConfig)](#module_ThreeJsRenderer..generate) ⇒ <code>function</code>
+
+<a name="module_ThreeJsRenderer..prepDOM"></a>
+
+### ThreeJsRenderer~prepDOM(midi, config) ⇒ <code>ThreeJsRendererState</code>
+handles initialization of DOM for renderer
 
 **Kind**: inner method of <code>[ThreeJsRenderer](#module_ThreeJsRenderer)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| renderConfig | <code>object</code> | configuration data for renderer |
+| midi | <code>Midi</code> | Midi instance of song information |
+| config | <code>object</code> | configuration information |
+| config.window | <code>Window</code> | Window where rendering will take place |
+| config.root | <code>HTMLElement</code> | DOM Element that will hold render canvas |
+| dimension.width | <code>number</code> | width of the rendering area |
+| dimension.height | <code>number</code> | height of the renderering area |
+
+<a name="module_ThreeJsRenderer..resize"></a>
+
+### ThreeJsRenderer~resize(state, dimension) ⇒ <code>ThreeJsRendererState</code>
+deals with resizing of the browser window
+
+**Kind**: inner method of <code>[ThreeJsRenderer](#module_ThreeJsRenderer)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| state | <code>ThreeJsRendererState</code> | current renderer state |
+| dimension | <code>object</code> | dimensions of render area |
+| dimension.width | <code>number</code> |  |
+| dimension.height | <code>number</code> |  |
+
+<a name="module_ThreeJsRenderer..cleanup"></a>
+
+### ThreeJsRenderer~cleanup(state, currentRunningEvents[, expiredEvents[) ⇒ <code>undefined</code>
+removes any object from the scene
+
+**Kind**: inner method of <code>[ThreeJsRenderer](#module_ThreeJsRenderer)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| state | <code>ThreeJsRendererState</code> | current renderer state |
+| currentRunningEvents[ | <code>RenderEvent</code> | array of RenderEvents currently active |
+| expiredEvents[ | <code>RenderEvent</code> | array of RenderEvents that are no longer active and should be cleaned up |
+
+<a name="module_ThreeJsRenderer..generate"></a>
+
+### ThreeJsRenderer~generate(renderConfig) ⇒ <code>function</code>
+generator to create ThreeJsRenderer
+
+**Kind**: inner method of <code>[ThreeJsRenderer](#module_ThreeJsRenderer)</code>  
+**Returns**: <code>function</code> - setupFn - TODO: doc...  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| renderConfig | <code>object</code> | TODO: doc... |
 
 
 

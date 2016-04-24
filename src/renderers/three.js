@@ -50,6 +50,18 @@ function genSongScales(dimension, midi) {
 	}, []);
 }
 
+/**
+ * @function
+ * @name prepDOM
+ * @description handles initialization of DOM for renderer
+ * @param {Midi} midi - Midi instance of song information
+ * @param {object} config - configuration information
+ * @param {Window} config.window - Window where rendering will take place
+ * @param {HTMLElement} config.root - DOM Element that will hold render canvas
+ * @param {number} dimension.width - width of the rendering area
+ * @param {number} dimension.height - height of the renderering area
+ * @return {ThreeJsRendererState}
+ */
 // Midi -> Config -> ThreeJsRendererState
 function prepDOM(midi, config) {
 	var w = config.window;
@@ -95,10 +107,21 @@ function prepDOM(midi, config) {
 	return state;
 }
 
+/**
+ * @function
+ * @name resize
+ * @description deals with resizing of the browser window
+ * @param {ThreeJsRendererState} state - current renderer state
+ * @param {object} dimension - dimensions of render area
+ * @param {number} dimension.width
+ * @param {number} dimension.height
+ * @return {ThreeJsRendererState}
+ */
+// ThreeJsRendererState -> {width,height} -> ThreeJsRendererState
 function resize(state, dimension) {
 	var renderer = state.renderer;
 	
-	renderer.sizeSize(dimension.width, dimension.height);
+	renderer.setSize(dimension.width, dimension.height);
 	renderer.render();
 
 	return state.next({
@@ -106,6 +129,15 @@ function resize(state, dimension) {
 	});
 }
 
+/**
+ * @function
+ * @name cleanup
+ * @description removes any object from the scene
+ * @param {ThreeJsRendererState} state - current renderer state
+ * @param {RenderEvent} currentRunningEvents[] - array of RenderEvents currently active
+ * @param {RenderEvent} expiredEvents[] - array of RenderEvents that are no longer active and should be cleaned up
+ * @return {undefined}
+ */
 // ThreeJsRendererState -> [RenderEvent] -> [RenderEvent] -> undefined
 function cleanup(state, currentRunningEvents, expiredEvents/*, nowMs */) {
 	// TODO: this is not currently being used...need an example that uses it...
@@ -131,8 +163,8 @@ function cleanup(state, currentRunningEvents, expiredEvents/*, nowMs */) {
  * @function
  * @name generate
  * @description generator to create ThreeJsRenderer
- * @param {object} renderConfig - configuration data for renderer
- * @return {ThreeJsRenderer}
+ * @param {object} renderConfig - TODO: doc...
+ * @return {function} setupFn - TODO: doc...
  */
 // Config -> (Midi -> Config -> Renderer)
 function generate(renderConfig) {
