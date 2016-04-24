@@ -1,3 +1,4 @@
+/** @module D3Renderer */
 'use strict';
 
 var d3 = require('d3');
@@ -143,6 +144,13 @@ function prepDOM(midi, config) {
 	});
 }
 
+/**
+ * @function
+ * @name generate
+ * @description generator to create D3Renderer
+ * @param {object} renderConfig - configuration data for renderer
+ * @return {D3Renderer}
+ */
 // Config -> (Midi -> Config -> Renderer)
 function generate(renderConfig) {
 	var renderer = monad();

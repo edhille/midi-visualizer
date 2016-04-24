@@ -161,6 +161,38 @@ render function
 
 
 
+<a name="module_ThreeJsRenderer"></a>
+
+## ThreeJsRenderer
+<a name="module_ThreeJsRenderer..generate"></a>
+
+### ThreeJsRenderer~generate(renderConfig) ⇒ <code>ThreeJsRenderer</code>
+generator to create ThreeJsRenderer
+
+**Kind**: inner method of <code>[ThreeJsRenderer](#module_ThreeJsRenderer)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| renderConfig | <code>object</code> | configuration data for renderer |
+
+
+
+<a name="module_D3Renderer"></a>
+
+## D3Renderer
+<a name="module_D3Renderer..generate"></a>
+
+### D3Renderer~generate(renderConfig) ⇒ <code>D3Renderer</code>
+generator to create D3Renderer
+
+**Kind**: inner method of <code>[D3Renderer](#module_D3Renderer)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| renderConfig | <code>object</code> | configuration data for renderer |
+
+
+
 <a name="module_DataTypes"></a>
 
 ## DataTypes
@@ -429,4 +461,10 @@ loads given audio data and invokes callback when done
 | [err] | <code>string</code> | <code>null</code> | string of error message (null if no error) |
 | [self] | <code>[AudioPlayer](#AudioPlayer)</code> |  | ref to AudioPlayer instance if loading successful (undefined otherwise) |
 
+
+
+<a name="midi-visualizer"></a>
+
+## midi-visualizer : <code>object</code>
+**Kind**: global namespace  
 

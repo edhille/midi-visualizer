@@ -1,3 +1,4 @@
+/** @module ThreeJsRenderer */
 'use strict';
 
 var THREE = require('three');
@@ -126,6 +127,13 @@ function cleanup(state, currentRunningEvents, expiredEvents/*, nowMs */) {
 	});
 }
 
+/**
+ * @function
+ * @name generate
+ * @description generator to create ThreeJsRenderer
+ * @param {object} renderConfig - configuration data for renderer
+ * @return {ThreeJsRenderer}
+ */
 // Config -> (Midi -> Config -> Renderer)
 function generate(renderConfig) {
 	var renderer = monad();
