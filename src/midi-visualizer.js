@@ -17,7 +17,8 @@ var MidiVisualizerState = require('./data-types').MidiVisualizerState;
  */
 
 /**
- * @function midiVisualizer.play
+ * @name midiVisualizer.play
+ * @function
  * @description put MidiVisualizer into "play" state
  * @param {number} playheadSec - offset in seconds to start playback
  * @return MidiVisualizer
@@ -35,7 +36,8 @@ function playVisualizer(state, playheadSec) {
 }
 
 /**
- * @method midiVisualizer.restart
+ * @name restart
+ * @function
  * @description put MidiVisualizer into "play" state
  * @param {number} playheadSec - offset in seconds to start playback
  * @return MidiVisualizer
@@ -52,7 +54,8 @@ function restartVisualizer(state, playheadSec) {
 }
 
 /**
- * @method midiVisualizer.pause
+ * @name pause
+ * @function
  * @description put MidiVisualizer into "pause" state
  * @return MidiVisualizer
  */
@@ -66,7 +69,8 @@ function pauseVisualizer(state) {
 }
 
 /**
- * @method midiVisualizer.stop
+ * @name stop
+ * @function
  * @description put MidiVisualizer into "stop" state
  * @return MidiVisualizer
  */
@@ -80,7 +84,8 @@ function stopVisualizer(state) {
 }
 
 /**
- * @method midiVisualizer.resize
+ * @name resize
+ * @function
  * @description handle resize of page MidiVisualizer is rendering into
  * @return MidiVisualizer
  */
@@ -98,8 +103,7 @@ midiVisualizer.lift('stop', stopVisualizer);
 midiVisualizer.lift('resize', resizeVisualizer);
 
 /**
- * @function
- * @name initMidiVisualizer
+ * @function midi-visualizer~initMidiVisualizer
  * @description initializes MidiVisualizer monad
  * @param {object} config - configuration data to set up MidiVisualizer
  * @param {UInt8Array} config.midi.data - array of unsigned 8-bit integers representing Midi data
@@ -109,7 +113,7 @@ midiVisualizer.lift('resize', resizeVisualizer);
  * @param {Renderer} config.render - Renderer strategy to use
  * @param {number} config.width - the width of our canvans
  * @param {number} config.height - the height of our canvans
- * @return {Promise} - promise that fulfills with MidiVisualizer instance
+ * @return {Promise(MidiVisualizer, Error)} promise that fulfills with MidiVisualizer instance
  */
 // Config -> Promise(Visualizer, Error)
 module.exports = function initMidiVisualizer(config) {

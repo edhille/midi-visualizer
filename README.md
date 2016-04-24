@@ -2,7 +2,100 @@
 
 A simple, functional-based midi visualization library
 
+## Example
+
+  const initMidiVisualizer = import 'midi-visualizer';
+  const config = {
+    window: window,
+    root: document.getElementById('#my-root'),
+    width: 500,
+    height: 500,
+    midi: {
+      data: myFnToFetchMidiData()
+    },
+    audio: {
+      data: myFnToFetchAudioData()
+    }
+  };
+
+  initMidiVisualizer(config).then((visualizer) => {
+    const playingVisualizer = visualizer.play();
+    // all your other fun operations...
+  }).catch((error) => console.error('Oh man, something bad happened:', error));
+
 ## API Reference
+
+<a name="module_midiVisualizer"></a>
+
+## midiVisualizer
+Monad managing visualization animation of midi data
+
+
+* [midiVisualizer](#module_midiVisualizer)
+    * [~restart(playheadSec)](#module_midiVisualizer..restart) ⇒
+    * [~pause()](#module_midiVisualizer..pause) ⇒
+    * [~stop()](#module_midiVisualizer..stop) ⇒
+    * [~resize()](#module_midiVisualizer..resize) ⇒
+
+<a name="module_midiVisualizer..restart"></a>
+
+### midiVisualizer~restart(playheadSec) ⇒
+put MidiVisualizer into "play" state
+
+**Kind**: inner method of <code>[midiVisualizer](#module_midiVisualizer)</code>  
+**Returns**: MidiVisualizer  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| playheadSec | <code>number</code> | offset in seconds to start playback |
+
+<a name="module_midiVisualizer..pause"></a>
+
+### midiVisualizer~pause() ⇒
+put MidiVisualizer into "pause" state
+
+**Kind**: inner method of <code>[midiVisualizer](#module_midiVisualizer)</code>  
+**Returns**: MidiVisualizer  
+<a name="module_midiVisualizer..stop"></a>
+
+### midiVisualizer~stop() ⇒
+put MidiVisualizer into "stop" state
+
+**Kind**: inner method of <code>[midiVisualizer](#module_midiVisualizer)</code>  
+**Returns**: MidiVisualizer  
+<a name="module_midiVisualizer..resize"></a>
+
+### midiVisualizer~resize() ⇒
+handle resize of page MidiVisualizer is rendering into
+
+**Kind**: inner method of <code>[midiVisualizer](#module_midiVisualizer)</code>  
+**Returns**: MidiVisualizer  
+
+
+<a name="midi-visualizer"></a>
+
+## midi-visualizer : <code>object</code>
+**Kind**: global namespace  
+<a name="midi-visualizer..initMidiVisualizer"></a>
+
+### midi-visualizer~initMidiVisualizer(config) ⇒ <code>Promise(MidiVisualizer, Error)</code>
+initializes MidiVisualizer monad
+
+**Kind**: inner method of <code>[midi-visualizer](#midi-visualizer)</code>  
+**Returns**: <code>Promise(MidiVisualizer, Error)</code> - promise that fulfills with MidiVisualizer instance  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| config | <code>object</code> | configuration data to set up MidiVisualizer |
+| config.midi.data | <code>UInt8Array</code> | array of unsigned 8-bit integers representing Midi data |
+| config.audio.data | <code>UInt8Array</code> | array of unsigned 8-bit integers representing audio data |
+| config.window | <code>Window</code> | Window of page holding the player |
+| config.root | <code>HTMLElement</code> | HTMLElement that will be the root node of the visualizer |
+| config.render | <code>Renderer</code> | Renderer strategy to use |
+| config.width | <code>number</code> | the width of our canvans |
+| config.height | <code>number</code> | the height of our canvans |
+
+
 
 <a name="module_RenderUtils"></a>
 
@@ -193,6 +286,92 @@ generator to create D3Renderer
 
 
 
+<a name="AudioPlayer"></a>
+
+## AudioPlayer
+**Kind**: global class  
+
+* [AudioPlayer](#AudioPlayer)
+    * [new AudioPlayer(params)](#new_AudioPlayer_new)
+    * _instance_
+        * [.getPlayheadTime()](#AudioPlayer+getPlayheadTime) ⇒
+        * [.play([startTimeOffset], [playheadSec])](#AudioPlayer+play)
+        * [.pause(stopAfter)](#AudioPlayer+pause)
+    * _static_
+        * [.getAudioContextFromWindow(window)](#AudioPlayer.getAudioContextFromWindow) ⇒
+    * _inner_
+        * [~loadDataCallback](#AudioPlayer..loadDataCallback) : <code>function</code>
+
+<a name="new_AudioPlayer_new"></a>
+
+### new AudioPlayer(params)
+manages audio playback
+
+**Returns**: AudioPlayer  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| params | <code>object</code> | settings for audio player |
+| params.window | <code>Window</code> | Window used to retrieve AudioContext |
+
+<a name="AudioPlayer+getPlayheadTime"></a>
+
+### audioPlayer.getPlayheadTime() ⇒
+gets the playhead time in milliseconds
+
+**Kind**: instance method of <code>[AudioPlayer](#AudioPlayer)</code>  
+**Returns**: playheadTimeMs  
+<a name="AudioPlayer+play"></a>
+
+### audioPlayer.play([startTimeOffset], [playheadSec])
+initiates playing of audio
+
+**Kind**: instance method of <code>[AudioPlayer](#AudioPlayer)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [startTimeOffset] | <code>number</code> | <code>0</code> | offset in seconds to wait before playing |
+| [playheadSec] | <code>number</code> | <code>0</code> | where to start playback within audio in seconds |
+
+<a name="AudioPlayer+pause"></a>
+
+### audioPlayer.pause(stopAfter)
+pauses playing of audio
+
+**Kind**: instance method of <code>[AudioPlayer](#AudioPlayer)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| stopAfter | <code>number</code> | number of seconds to wait before stopping |
+
+<a name="AudioPlayer.getAudioContextFromWindow"></a>
+
+### AudioPlayer.getAudioContextFromWindow(window) ⇒
+cross-browser fetch of AudioContext from given window
+
+**Kind**: static method of <code>[AudioPlayer](#AudioPlayer)</code>  
+**Returns**: AudioContext  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| window | <code>Window</code> | Window to fetch AudioContext from |
+
+<a name="AudioPlayer..loadDataCallback"></a>
+
+### AudioPlayer~loadDataCallback : <code>function</code>
+loads given audio data and invokes callback when done
+
+**Kind**: inner typedef of <code>[AudioPlayer](#AudioPlayer)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| audioData | <code>ArrayBuffer</code> |  | ArrayBuffer of data for audio to play |
+| callback | <code>[loadDataCallback](#AudioPlayer..loadDataCallback)</code> |  | callback to invoke when audioData is finished loading |
+| [err] | <code>string</code> | <code>null</code> | string of error message (null if no error) |
+| [self] | <code>[AudioPlayer](#AudioPlayer)</code> |  | ref to AudioPlayer instance if loading successful (undefined otherwise) |
+
+
+
 <a name="module_DataTypes"></a>
 
 ## DataTypes
@@ -375,96 +554,4 @@ data type representing individual render event using ThreeJS
 | [params.note] | <code>number</code> |  | midi note value (0-127) |
 | [params.shape] | <code>number</code> |  | ??? |
 
-
-
-<a name="AudioPlayer"></a>
-
-## AudioPlayer
-**Kind**: global class  
-
-* [AudioPlayer](#AudioPlayer)
-    * [new AudioPlayer(params)](#new_AudioPlayer_new)
-    * _instance_
-        * [.getPlayheadTime()](#AudioPlayer+getPlayheadTime) ⇒
-        * [.play([startTimeOffset], [playheadSec])](#AudioPlayer+play)
-        * [.pause(stopAfter)](#AudioPlayer+pause)
-    * _static_
-        * [.getAudioContextFromWindow(window)](#AudioPlayer.getAudioContextFromWindow) ⇒
-    * _inner_
-        * [~loadDataCallback](#AudioPlayer..loadDataCallback) : <code>function</code>
-
-<a name="new_AudioPlayer_new"></a>
-
-### new AudioPlayer(params)
-manages audio playback
-
-**Returns**: AudioPlayer  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| params | <code>object</code> | settings for audio player |
-| params.window | <code>Window</code> | Window used to retrieve AudioContext |
-
-<a name="AudioPlayer+getPlayheadTime"></a>
-
-### audioPlayer.getPlayheadTime() ⇒
-gets the playhead time in milliseconds
-
-**Kind**: instance method of <code>[AudioPlayer](#AudioPlayer)</code>  
-**Returns**: playheadTimeMs  
-<a name="AudioPlayer+play"></a>
-
-### audioPlayer.play([startTimeOffset], [playheadSec])
-initiates playing of audio
-
-**Kind**: instance method of <code>[AudioPlayer](#AudioPlayer)</code>  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [startTimeOffset] | <code>number</code> | <code>0</code> | offset in seconds to wait before playing |
-| [playheadSec] | <code>number</code> | <code>0</code> | where to start playback within audio in seconds |
-
-<a name="AudioPlayer+pause"></a>
-
-### audioPlayer.pause(stopAfter)
-pauses playing of audio
-
-**Kind**: instance method of <code>[AudioPlayer](#AudioPlayer)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| stopAfter | <code>number</code> | number of seconds to wait before stopping |
-
-<a name="AudioPlayer.getAudioContextFromWindow"></a>
-
-### AudioPlayer.getAudioContextFromWindow(window) ⇒
-cross-browser fetch of AudioContext from given window
-
-**Kind**: static method of <code>[AudioPlayer](#AudioPlayer)</code>  
-**Returns**: AudioContext  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| window | <code>Window</code> | Window to fetch AudioContext from |
-
-<a name="AudioPlayer..loadDataCallback"></a>
-
-### AudioPlayer~loadDataCallback : <code>function</code>
-loads given audio data and invokes callback when done
-
-**Kind**: inner typedef of <code>[AudioPlayer](#AudioPlayer)</code>  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| audioData | <code>ArrayBuffer</code> |  | ArrayBuffer of data for audio to play |
-| callback | <code>[loadDataCallback](#AudioPlayer..loadDataCallback)</code> |  | callback to invoke when audioData is finished loading |
-| [err] | <code>string</code> | <code>null</code> | string of error message (null if no error) |
-| [self] | <code>[AudioPlayer](#AudioPlayer)</code> |  | ref to AudioPlayer instance if loading successful (undefined otherwise) |
-
-
-
-<a name="midi-visualizer"></a>
-
-## midi-visualizer : <code>object</code>
-**Kind**: global namespace  
 
