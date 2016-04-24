@@ -36,7 +36,7 @@ Put visualizer in "play" state (where audio player is playing and animations are
 | Param | Type | Description |
 | --- | --- | --- |
 | state | <code>RendererState</code> | current monad state |
-| player | <code>AudioPlayer</code> | audio player used for audio playback we are syncing to |
+| player | <code>[AudioPlayer](#AudioPlayer)</code> | audio player used for audio playback we are syncing to |
 | renderFn | <code>RenderUtils~render</code> | callback for actual rendering |
 | resumeFn | <code>RenderUtils~resume</code> | callback for resuming playback after stopping |
 
@@ -197,9 +197,8 @@ top-level data type representing state of MidiVisualizer
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | params | <code>object</code> |  | properties to set |
-| params.audioPlayer | <code>AudioPlayer</code> |  | AudioPlayer instance managing audio to sync with |
+| params.audioPlayer | <code>[AudioPlayer](#AudioPlayer)</code> |  | AudioPlayer instance managing audio to sync with |
 | params.renderer | <code>Renderer</code> |  | Renderer used to draw visualization |
-| params.midi | <code>Midi</code> |  | Midi data to visualize |
 | [params.animEventsByTimeMs] | <code>object</code> | <code>{}</code> | AnimEvent to render, grouped by millisecond-based mark where they should be rendered |
 | [params.isPlaying] | <code>boolean</code> | <code>false</code> | flag indicating whether currently playing |
 
@@ -343,5 +342,91 @@ data type representing individual render event using ThreeJS
 | [params.yRot] | <code>number</code> | <code>0</code> | y-rotation |
 | [params.note] | <code>number</code> |  | midi note value (0-127) |
 | [params.shape] | <code>number</code> |  | ??? |
+
+
+
+<a name="AudioPlayer"></a>
+
+## AudioPlayer
+**Kind**: global class  
+
+* [AudioPlayer](#AudioPlayer)
+    * [new AudioPlayer(params)](#new_AudioPlayer_new)
+    * _instance_
+        * [.getPlayheadTime()](#AudioPlayer+getPlayheadTime) ⇒
+        * [.play([startTimeOffset], [playheadSec])](#AudioPlayer+play)
+        * [.pause(stopAfter)](#AudioPlayer+pause)
+    * _static_
+        * [.getAudioContextFromWindow(window)](#AudioPlayer.getAudioContextFromWindow) ⇒
+    * _inner_
+        * [~loadDataCallback](#AudioPlayer..loadDataCallback) : <code>function</code>
+
+<a name="new_AudioPlayer_new"></a>
+
+### new AudioPlayer(params)
+manages audio playback
+
+**Returns**: AudioPlayer  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| params | <code>object</code> | settings for audio player |
+| params.window | <code>Window</code> | Window used to retrieve AudioContext |
+
+<a name="AudioPlayer+getPlayheadTime"></a>
+
+### audioPlayer.getPlayheadTime() ⇒
+gets the playhead time in milliseconds
+
+**Kind**: instance method of <code>[AudioPlayer](#AudioPlayer)</code>  
+**Returns**: playheadTimeMs  
+<a name="AudioPlayer+play"></a>
+
+### audioPlayer.play([startTimeOffset], [playheadSec])
+initiates playing of audio
+
+**Kind**: instance method of <code>[AudioPlayer](#AudioPlayer)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [startTimeOffset] | <code>number</code> | <code>0</code> | offset in seconds to wait before playing |
+| [playheadSec] | <code>number</code> | <code>0</code> | where to start playback within audio in seconds |
+
+<a name="AudioPlayer+pause"></a>
+
+### audioPlayer.pause(stopAfter)
+pauses playing of audio
+
+**Kind**: instance method of <code>[AudioPlayer](#AudioPlayer)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| stopAfter | <code>number</code> | number of seconds to wait before stopping |
+
+<a name="AudioPlayer.getAudioContextFromWindow"></a>
+
+### AudioPlayer.getAudioContextFromWindow(window) ⇒
+cross-browser fetch of AudioContext from given window
+
+**Kind**: static method of <code>[AudioPlayer](#AudioPlayer)</code>  
+**Returns**: AudioContext  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| window | <code>Window</code> | Window to fetch AudioContext from |
+
+<a name="AudioPlayer..loadDataCallback"></a>
+
+### AudioPlayer~loadDataCallback : <code>function</code>
+loads given audio data and invokes callback when done
+
+**Kind**: inner typedef of <code>[AudioPlayer](#AudioPlayer)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| audioData | <code>ArrayBuffer</code> |  | ArrayBuffer of data for audio to play |
+| callback | <code>[loadDataCallback](#AudioPlayer..loadDataCallback)</code> |  | callback to invoke when audioData is finished loading |
+| [err] | <code>string</code> | <code>null</code> | string of error message (null if no error) |
+| [self] | <code>[AudioPlayer](#AudioPlayer)</code> |  | ref to AudioPlayer instance if loading successful (undefined otherwise) |
 
 

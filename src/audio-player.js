@@ -9,6 +9,13 @@ function calcPlayhead(currTime, lastStartTime, startOffset, duration) {
 	return (startOffset + currTime - lastStartTime) % duration;
 }
 
+/**
+ * @class AudioPlayer
+ * @description manages audio playback
+ * @param {object} params - settings for audio player
+ * @param {Window} params.window - Window used to retrieve AudioContext
+ * @return AudioPlayer
+ */
 function AudioPlayer(params) {
 	params = params || {};
 
@@ -88,16 +95,22 @@ Object.defineProperties(AudioPlayer, {
 	}
 });
 
+/**
+ * @method AudioPlayer#loadData
+ * @description loads given audio data and invokes callback when done
+ * @param {ArrayBuffer} audioData - ArrayBuffer of data for audio to play
+ * @param {AudioPlayer~loadDataCallback} callback - callback to invoke when audioData is finished loading
+ *
+ * @callback AudioPlayer~loadDataCallback
+ * @param {string} [err=null] - string of error message (null if no error)
+ * @param {AudioPlayer} [self] - ref to AudioPlayer instance if loading successful (undefined otherwise)
+ */
 AudioPlayer.prototype.loadData = function loadData(audioData, callback) { /* jshint expr: true */
 	var self = this;
 
-	if (!existy(audioData)) {
-		throw new Error('must provide an AudioData source');
-	}
+	if (!existy(audioData)) throw new Error('must provide an AudioData source');
 
-	if (!existy(callback) && typeof callback !== 'function') {
-		throw new Error('callback required');
-	}
+	if (!existy(callback) && typeof callback !== 'function') throw new Error('callback required');
 
 	if (self.isLoading) {
 		callback('Already loading audio data');
@@ -122,12 +135,23 @@ AudioPlayer.prototype.loadData = function loadData(audioData, callback) { /* jsh
 	}
 };
 
+/**
+ * @method AudioPlayer#getPlayheadTime
+ * @description gets the playhead time in milliseconds
+ * @return playheadTimeMs
+ */
 AudioPlayer.prototype.getPlayheadTime = function getPlayheadTime() {
 	if (!this.isLoaded || this.isLoading) return 0;
 
 	return calcPlayhead(this.context.currentTime, this.lastStartTime, this.startOffset, this.buffer.duration) * SEC_TO_MS;
 };
 
+/**
+ * @method AudioPlayer#play
+ * @description initiates playing of audio
+ * @param {number} [startTimeOffset=0] - offset in seconds to wait before playing
+ * @param {number} [playheadSec=0] - where to start playback within audio in seconds
+ */
 AudioPlayer.prototype.play = function play(startTimeOffset, playheadSec) {
 	var currTime;
 
@@ -162,6 +186,11 @@ AudioPlayer.prototype.play = function play(startTimeOffset, playheadSec) {
 	return this.isPlaying;
 };
 
+/**
+ * @method AudioPlayer#pause
+ * @description pauses playing of audio
+ * @param {number} stopAfter - number of seconds to wait before stopping
+ */
 AudioPlayer.prototype.pause = function pause( /* AudioBufferSourceNode.stop params */ ) {
 	if (!this.isLoaded) return false; // nothing to play...
 	if (!this.isPlaying) return true; // already paused
@@ -172,6 +201,13 @@ AudioPlayer.prototype.pause = function pause( /* AudioBufferSourceNode.stop para
 	return this.audioSource.stop.apply(this.audioSource, arguments);
 };
 
+/**
+ * @method
+ * @static
+ * @description cross-browser fetch of AudioContext from given window
+ * @param {Window} window - Window to fetch AudioContext from
+ * @return AudioContext
+ */
 AudioPlayer.getAudioContextFromWindow = function getAudioContextFromWindow(window) {
 	return window.AudioContext ||
 		window.webkitAudioContext ||
