@@ -266,7 +266,9 @@ render function
     * [~prepDOM(midi, config)](#module_ThreeJsRenderer..prepDOM) ⇒ <code>ThreeJsRendererState</code>
     * [~resize(state, dimension)](#module_ThreeJsRenderer..resize) ⇒ <code>ThreeJsRendererState</code>
     * [~cleanup(state, currentRunningEvents[, expiredEvents[)](#module_ThreeJsRenderer..cleanup) ⇒ <code>undefined</code>
-    * [~generate(renderConfig)](#module_ThreeJsRenderer..generate) ⇒ <code>function</code>
+    * [~generateReturnFn(midi, config)](#module_ThreeJsRenderer..generateReturnFn) ⇒
+    * [~generate(renderConfig, frameRenderer, cleanupFn)](#module_ThreeJsRenderer..generate) ⇒ <code>ThreeJsRenderer~generateReturnFn</code>
+    * [~frameRenderCb](#module_ThreeJsRenderer..frameRenderCb) ⇒
 
 <a name="module_ThreeJsRenderer..prepDOM"></a>
 
@@ -311,23 +313,95 @@ removes any object from the scene
 | currentRunningEvents[ | <code>RenderEvent</code> | array of RenderEvents currently active |
 | expiredEvents[ | <code>RenderEvent</code> | array of RenderEvents that are no longer active and should be cleaned up |
 
-<a name="module_ThreeJsRenderer..generate"></a>
+<a name="module_ThreeJsRenderer..generateReturnFn"></a>
 
-### ThreeJsRenderer~generate(renderConfig) ⇒ <code>function</code>
-generator to create ThreeJsRenderer
+### ThreeJsRenderer~generateReturnFn(midi, config) ⇒
+function returned to user for creating instance of ThreeJsRenderer
 
 **Kind**: inner method of <code>[ThreeJsRenderer](#module_ThreeJsRenderer)</code>  
-**Returns**: <code>function</code> - setupFn - TODO: doc...  
+**Returns**: ThreeJsRenderer  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| renderConfig | <code>object</code> | TODO: doc... |
+| midi | <code>Midi</code> | Midi data to be renderered |
+| config | <code>object</code> | configuration information |
+| config.window | <code>Window</code> | Window where rendering will take place |
+| config.root | <code>HTMLElement</code> | DOM Element that will hold render canvas |
+| dimension.width | <code>number</code> | width of the rendering area |
+| dimension.height | <code>number</code> | height of the renderering area |
+
+<a name="module_ThreeJsRenderer..generate"></a>
+
+### ThreeJsRenderer~generate(renderConfig, frameRenderer, cleanupFn) ⇒ <code>ThreeJsRenderer~generateReturnFn</code>
+generator to create ThreeJsRenderer
+
+**Kind**: inner method of <code>[ThreeJsRenderer](#module_ThreeJsRenderer)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| renderConfig | <code>object</code> | configuration information for setup |
+| frameRenderer | <code>ThreeJsRenderer~frameRenderCb</code> | callback for rendering events |
+| cleanupFn | <code>[cleanupCb](#ThreeJsRenderer..cleanupCb)</code> | callback for cleaning up THREEJS |
+
+<a name="module_ThreeJsRenderer..frameRenderCb"></a>
+
+### ThreeJsRenderer~frameRenderCb ⇒
+callback for actual rendering of frame
+
+**Kind**: inner typedef of <code>[ThreeJsRenderer](#module_ThreeJsRenderer)</code>  
+**Returns**: undefined  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| eventsToAdd[ | <code>ThreeJsRenderEvent</code> | events that are queued up to be rendered in the next frame |
+| scene | <code>THREEJS~Scene</code> | ThreeJS scene events should be renderered in |
+| camera | <code>THREEJS~Camera</code> | ThreeJS camera for given scene |
+| THREE | <code>THREEJS</code> | ThreeJS |
 
 
 
 <a name="module_D3Renderer"></a>
 
 ## D3Renderer
+
+* [D3Renderer](#module_D3Renderer)
+    * [~prepDOM(midi, config)](#module_D3Renderer..prepDOM) ⇒ <code>D3RendererState</code>
+    * [~generateReturnFn(midi, config)](#module_D3Renderer..generateReturnFn) ⇒
+    * [~generate(renderConfig)](#module_D3Renderer..generate) ⇒ <code>D3Renderer</code>
+
+<a name="module_D3Renderer..prepDOM"></a>
+
+### D3Renderer~prepDOM(midi, config) ⇒ <code>D3RendererState</code>
+handles initialization of DOM for renderer
+
+**Kind**: inner method of <code>[D3Renderer](#module_D3Renderer)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| midi | <code>Midi</code> | Midi instance of song information |
+| config | <code>object</code> | configuration information |
+| config.window | <code>Window</code> | Window where rendering will take place |
+| config.root | <code>HTMLElement</code> | DOM Element that will hold render canvas |
+| dimension.width | <code>number</code> | width of the rendering area |
+| dimension.height | <code>number</code> | height of the renderering area |
+
+<a name="module_D3Renderer..generateReturnFn"></a>
+
+### D3Renderer~generateReturnFn(midi, config) ⇒
+function returned to user for creating instance of D3Renderer
+
+**Kind**: inner method of <code>[D3Renderer](#module_D3Renderer)</code>  
+**Returns**: D3Renderer  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| midi | <code>Midi</code> | Midi data to be renderered |
+| config | <code>object</code> | configuration information |
+| config.window | <code>Window</code> | Window where rendering will take place |
+| config.root | <code>HTMLElement</code> | DOM Element that will hold render canvas |
+| dimension.width | <code>number</code> | width of the rendering area |
+| dimension.height | <code>number</code> | height of the renderering area |
+
 <a name="module_D3Renderer..generate"></a>
 
 ### D3Renderer~generate(renderConfig) ⇒ <code>D3Renderer</code>
@@ -338,6 +412,7 @@ generator to create D3Renderer
 | Param | Type | Description |
 | --- | --- | --- |
 | renderConfig | <code>object</code> | configuration data for renderer |
+| renderConfig.frameRenderer | <code>frameRenderCb</code> | callback for rendering individual frames |
 
 
 
@@ -607,6 +682,6 @@ data type representing individual render event using ThreeJS
 | [params.xRot] | <code>number</code> | <code>0</code> | x-rotation |
 | [params.yRot] | <code>number</code> | <code>0</code> | y-rotation |
 | [params.note] | <code>number</code> |  | midi note value (0-127) |
-| [params.shape] | <code>number</code> |  | ??? |
+| [params.shape] | <code>THREEJS~Object3D</code> |  | ThreeJs Object3D of shape representing this event |
 
 

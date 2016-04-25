@@ -163,8 +163,42 @@ function cleanup(state, currentRunningEvents, expiredEvents/*, nowMs */) {
  * @function
  * @name generate
  * @description generator to create ThreeJsRenderer
- * @param {object} renderConfig - TODO: doc...
- * @return {function} setupFn - TODO: doc...
+ * @param {object} renderConfig - configuration information for setup
+ * @param {ThreeJsRenderer~frameRenderCb} frameRenderer - callback for rendering events
+ * @param {ThreeJsRenderer~cleanupCb} cleanupFn - callback for cleaning up THREEJS
+ * @return {ThreeJsRenderer~generateReturnFn}
+ */
+/**
+ * @name frameRenderCb
+ * @callback
+ * @description callback for actual rendering of frame
+ * @param {ThreeJsRenderEvent} eventsToAdd[] - events that are queued up to be rendered in the next frame
+ * @param {THREEJS~Scene} scene - ThreeJS scene events should be renderered in
+ * @param {THREEJS~Camera} camera - ThreeJS camera for given scene
+ * @param {THREEJS} THREE - ThreeJS
+ * @return undefined
+ */
+/**
+ * @name ThreeJsRenderer~cleanupCb
+ * @callback
+ * @description callback to allow for customized cleanup of expired events
+ * @param {ThreeJsRenderState} state - current state of renderer
+ * @param {ThreeJsRendererEvent} currentRunningEvents[] - ThreeJsRenderEvents currently in animation
+ * @param {ThreeJsRendererEvent} expiredEvents[] - ThreeJsRenderEvents ready to be cleaned up
+ * @param {number} nowMs - current render time in milliseconds
+ * @return undefined
+ */
+/**
+ * @name generateReturnFn
+ * @function
+ * @description function returned to user for creating instance of ThreeJsRenderer
+ * @param {Midi} midi - Midi data to be renderered
+ * @param {object} config - configuration information
+ * @param {Window} config.window - Window where rendering will take place
+ * @param {HTMLElement} config.root - DOM Element that will hold render canvas
+ * @param {number} dimension.width - width of the rendering area
+ * @param {number} dimension.height - height of the renderering area
+ * @return ThreeJsRenderer
  */
 // Config -> (Midi -> Config -> Renderer)
 function generate(renderConfig) {

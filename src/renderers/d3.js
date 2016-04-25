@@ -74,6 +74,18 @@ function transform(datum) {
 	}
 }
 
+/**
+ * @function
+ * @name prepDOM
+ * @description handles initialization of DOM for renderer
+ * @param {Midi} midi - Midi instance of song information
+ * @param {object} config - configuration information
+ * @param {Window} config.window - Window where rendering will take place
+ * @param {HTMLElement} config.root - DOM Element that will hold render canvas
+ * @param {number} dimension.width - width of the rendering area
+ * @param {number} dimension.height - height of the renderering area
+ * @return {D3RendererState}
+ */
 // Midi -> Config -> D3RendererState
 function prepDOM(midi, config) {
 	// TODO: Handle resize...
@@ -149,7 +161,26 @@ function prepDOM(midi, config) {
  * @name generate
  * @description generator to create D3Renderer
  * @param {object} renderConfig - configuration data for renderer
+ * @param {frameRenderCb} renderConfig.frameRenderer - callback for rendering individual frames
  * @return {D3Renderer}
+ */
+/**
+ * @callback D3Renderer~frameRenderCb
+ * @param {D3RendererState} state - current D3RendererState
+ * @param {object} shapes[] - D3 shapes to be renderered
+ * @return undefined
+ */
+/**
+ * @name generateReturnFn
+ * @function
+ * @description function returned to user for creating instance of D3Renderer
+ * @param {Midi} midi - Midi data to be renderered
+ * @param {object} config - configuration information
+ * @param {Window} config.window - Window where rendering will take place
+ * @param {HTMLElement} config.root - DOM Element that will hold render canvas
+ * @param {number} dimension.width - width of the rendering area
+ * @param {number} dimension.height - height of the renderering area
+ * @return D3Renderer
  */
 // Config -> (Midi -> Config -> Renderer)
 function generate(renderConfig) {

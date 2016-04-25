@@ -181,7 +181,7 @@ var D3RenderEvent = createDataType(function (params) {
  * @param {number} [params.xRot=0] - x-rotation
  * @param {number} [params.yRot=0] - y-rotation
  * @param {number} [params.note] - midi note value (0-127)
- * @param {number} [params.shape] - ???
+ * @param {THREEJS~Object3D} [params.shape] - ThreeJs Object3D of shape representing this event
  * @returns ThreeJsRenderEvent
  */
 var ThreeJsRenderEvent = createDataType(function (params) {
@@ -191,9 +191,9 @@ var ThreeJsRenderEvent = createDataType(function (params) {
 
 	this.z = params.z;
 	
-	// TODO: rotation needs three dimensions..
 	this.zRot = params.zRot || 0;
 	this.xRot = params.xRot || 0;
+	this.yRot = params.yRot || 0;
 
 	// TODO: need to test this
 	this.shape = params.shape;
