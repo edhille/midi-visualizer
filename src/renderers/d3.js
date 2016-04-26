@@ -88,7 +88,6 @@ function transform(datum) {
  */
 // Midi -> Config -> D3RendererState
 function prepDOM(midi, config) {
-	// TODO: Handle resize...
 	var w = config.window;
 	var d = w.document;
 	var e = d.documentElement;
@@ -153,6 +152,30 @@ function prepDOM(midi, config) {
 		height: y,
 		scales: config.scalesTuner ? config.scalesTuner(songScales, x, y) : songScales,
 		svg: svg
+	});
+}
+/**
+ * @description deals with resizing of the browser window
+ * @param {D3RendererState} state - current renderer state
+ * @param {object} dimension - dimensions of render area
+ * @param {number} dimension.width
+ * @param {number} dimension.height
+ * @return {D3RendererState}
+ */
+// D3RendererState -> {width,height} -> D3RendererState
+function resize(state, dimension) {
+	var width = dimension.width;
+	var height = dimension.height;
+
+	return state.next({
+		width: width,
+		height: height,
+		scales: state.scales.map(function (scale) {
+			scale.y.range([25, height]);
+			scale.x.range([25, width]);
+
+			return scale;
+		})
 	});
 }
 
@@ -222,6 +245,9 @@ function generate(renderConfig) {
 	});
 	renderer.lift('pause', renderUtils.pause);
 	renderer.lift('stop', renderUtils.stop);
+	renderer.lift('resize', function (state, dimension) {
+		return renderConfig.resize ? renderConfig.resize(state, dimension, renderer) : resize(state, dimension, renderer);
+	});
 
 	var setupFn = function setupRenderer(midi, config) {
 		var rendererState = renderConfig.prepDOM(midi, config);
@@ -241,7 +267,7 @@ function generate(renderConfig) {
 
 module.exports = {
 	prepDOM: prepDOM,
-	resize: function () { throw new Error('Implement'); },
+	resize: resize,
 	generate: generate,
 	D3: d3
 };

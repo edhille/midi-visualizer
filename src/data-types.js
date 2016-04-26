@@ -136,8 +136,10 @@ var RenderEvent = createDataType(function (params) {
 	if (typeof params.y === 'undefined') throw new TypeError('no y passed in');
 	if (typeof params.lengthMicroSec === 'undefined') throw new TypeError('no lengthMicroSec passed in');
 	if (typeof params.startTimeMicroSec === 'undefined') throw new TypeError('no startTimeMicroSec passed in');
+	if (typeof params.event === 'undefined') throw new TypeError('no event passed in');
 
 	this.id = params.id;
+	this.event = params.event;
 	this.track = params.track;
 	this.subtype = params.subtype; // should be "on" or "off"
 

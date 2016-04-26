@@ -387,6 +387,12 @@ describe('data-types', function() {
 			expect(function () { new ThreeJsRendererState(params); }).to.throw(TypeError);
 			done();
 		});
+
+		it('should throw an error if no THREE', function (done) {
+			delete params.THREE;
+			expect(function () { new ThreeJsRendererState(params); }).to.throw(TypeError);
+			done();
+		});
 	});
 
 	describe('AnimEvent', function() {
@@ -607,9 +613,22 @@ describe('data-types', function() {
 											done();
 										});
 
-										it('should not throw error', function (done) {
-											expect(function () { new RenderEvent(params); }).not.to.throw(TypeError);
+										it('should throw error', function (done) {
+											expect(function () { new RenderEvent(params); }).to.throw(TypeError);
 											done();
+										});
+
+										describe('and an event', function () {
+											
+											beforeEach(function (done) {
+												params.event = 'TEST-EVENT';
+												done();
+											});
+
+											it('should not throw error', function (done) {
+												expect(function () { new RenderEvent(params); }).not.to.throw(TypeError);
+												done();
+											});
 										});
 									});
 								});
@@ -627,6 +646,7 @@ describe('data-types', function() {
 				renderEvent = new RenderEvent({
 					id: 'TEST-ID',
 					track: 1,
+					event: 'TEST-EVENT',
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
@@ -668,6 +688,7 @@ describe('data-types', function() {
 				params = {
 					id: 'TEST-ID',
 					track: 1,
+					event: 'TEST-EVENT',
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
@@ -694,6 +715,7 @@ describe('data-types', function() {
 				params = {
 					id: 'TEST-ID',
 					track: 1,
+					event: 'TEST-EVENT',
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
@@ -718,6 +740,7 @@ describe('data-types', function() {
 				params = {
 					id: 'TEST-ID',
 					track: 1,
+					event: 'TEST-EVENT',
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
@@ -741,6 +764,7 @@ describe('data-types', function() {
 				params = {
 					id: 'TEST-ID',
 					track: 1,
+					event: 'TEST-EVENT',
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
@@ -763,6 +787,14 @@ describe('data-types', function() {
 			
 			beforeEach(function (done) {
 				params = {
+					id: 'TEST-ID',
+					track: 1,
+					event: 'TEST-EVENT',
+					subtype: 'TEST-SUBTYPE',
+					x: 0,
+					y: 0,
+					lengthMicroSec: 0,
+					startTimeMicroSec: 0,
 					path: 'TEST-PATH',
 					radius: 3.14
 				};
@@ -782,6 +814,7 @@ describe('data-types', function() {
 				params = {
 					id: 'TEST-ID',
 					track: 1,
+					event: 'TEST-EVENT',
 					subtype: 'TEST-SUBTYPE',
 					x: 0,
 					y: 0,
@@ -820,6 +853,7 @@ describe('data-types', function() {
 				params = {
 					id: 'TEST-ID',
 					track: 1,
+					event: 'TEST-EVENT',
 					type: 'note',
 					subtype: 'on',
 					x: 0,

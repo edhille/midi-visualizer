@@ -7,9 +7,10 @@
     "test": "test"
   },
   "scripts": {
+    "clean": "rm -Rf ./coverage",
     "lint": "./node_modules/eslint/bin/eslint.js src",
     "test": "./node_modules/mocha/bin/mocha test",
-    "coverage": "./node_modules/gulp/bin/gulp.js coverage",
+    "local-coverage": "npm run clean && ./node_modules/istanbul/lib/cli.js cover _mocha test/**.spec.js",
     "doc": "./node_modules/jsdoc-to-markdown/bin/cli.js --template jsdoc.template.hbs 'src/**/*.js'> README.md"
   },
   "repository": {
@@ -31,8 +32,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "del": "^2.2.0",
-    "gulp": "^3.8.11",
-    "gulp-spawn-mocha": "^2.0.1",
+    "istanbul": "^0.4.3",
     "jsdoc": "^3.3.0-beta3",
     "jsdoc-to-markdown": "^1.3.3",
     "mocha": "^2.4.5",
