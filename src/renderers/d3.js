@@ -154,6 +154,7 @@ function prepDOM(midi, config) {
 		svg: svg
 	});
 }
+
 /**
  * @description deals with resizing of the browser window
  * @param {D3RendererState} state - current renderer state
