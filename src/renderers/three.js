@@ -120,11 +120,16 @@ function prepDOM(midi, config) {
 // ThreeJsRendererState -> {width,height} -> ThreeJsRendererState
 function resize(state, dimension) {
 	var renderer = state.renderer;
-	
+	var camera = state.camera;
+
+	camera.aspect = dimension.width / dimension.height;
+	camera.updateProjectionMatrix();
+
 	renderer.setSize(dimension.width, dimension.height);
-	renderer.render();
 
 	return state.next({
+		width: dimension.width,
+		height: dimension.height,
 		renderer: renderer
 	});
 }
