@@ -231,7 +231,7 @@ function generate(renderConfig) {
 	function play(state, player) {
 		return renderUtils.play(state, player, function _render(state, currentRunningEvents, newEvents, nowMs) {
 			return renderUtils.render(state, renderConfig.cleanupFn || funtils.noop, rafFn, currentRunningEvents, newEvents, nowMs);
-		}, renderConfig.resumeFn || funtils.noop);
+		}, renderConfig.resume || funtils.noop);
 	}
 	renderer.lift('play', play);
 	renderer.lift('restart', function _restart(state, player) {
