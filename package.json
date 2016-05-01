@@ -10,6 +10,7 @@
     "clean": "rm -Rf ./coverage",
     "lint": "./node_modules/eslint/bin/eslint.js src",
     "test": "./node_modules/mocha/bin/mocha test",
+    "ci-coverage": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
     "local-coverage": "npm run clean && ./node_modules/istanbul/lib/cli.js cover _mocha test/**.spec.js",
     "doc": "./node_modules/jsdoc-to-markdown/bin/cli.js --template jsdoc.template.hbs 'src/**/*.js'> README.md"
   },
