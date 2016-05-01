@@ -1,6 +1,7 @@
 # midi-visualizer
-#
+
 [![Build Status](https://travis-ci.org/edhille/midi-visualizer.svg?branch=master)](https://travis-ci.org/edhille/midi-visualizer)
+[![Coverage Status](https://coveralls.io/repos/github/edhille/midi-visualizer/badge.svg?branch=master)](https://coveralls.io/github/edhille/midi-visualizer?branch=master)
 
 A simple, functional-based midi visualization library
 
