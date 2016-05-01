@@ -1,4 +1,6 @@
 # midi-visualizer
+#
+[![Build Status](https://travis-ci.org/edhille/midi-visualizer.svg?branch=master)](https://travis-ci.org/edhille/midi-visualizer)
 
 A simple, functional-based midi visualization library
 
@@ -366,6 +368,7 @@ callback for actual rendering of frame
 
 * [D3Renderer](#module_D3Renderer)
     * [~prepDOM(midi, config)](#module_D3Renderer..prepDOM) ⇒ <code>D3RendererState</code>
+    * [~resize(state, dimension)](#module_D3Renderer..resize) ⇒ <code>D3RendererState</code>
     * [~generateReturnFn(midi, config)](#module_D3Renderer..generateReturnFn) ⇒
     * [~generate(renderConfig)](#module_D3Renderer..generate) ⇒ <code>D3Renderer</code>
 
@@ -384,6 +387,20 @@ handles initialization of DOM for renderer
 | config.root | <code>HTMLElement</code> | DOM Element that will hold render canvas |
 | dimension.width | <code>number</code> | width of the rendering area |
 | dimension.height | <code>number</code> | height of the renderering area |
+
+<a name="module_D3Renderer..resize"></a>
+
+### D3Renderer~resize(state, dimension) ⇒ <code>D3RendererState</code>
+deals with resizing of the browser window
+
+**Kind**: inner method of <code>[D3Renderer](#module_D3Renderer)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| state | <code>D3RendererState</code> | current renderer state |
+| dimension | <code>object</code> | dimensions of render area |
+| dimension.width | <code>number</code> |  |
+| dimension.height | <code>number</code> |  |
 
 <a name="module_D3Renderer..generateReturnFn"></a>
 
