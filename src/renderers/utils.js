@@ -48,6 +48,7 @@ module.exports = function closure() {
 
 			if (nowMs < lastPlayheadTimeMs) {
 				resumeFn(state, nowMs);
+				currentRunningEvents = [];
 				lastPlayheadTimeMs = nowMs;
 			}
 
