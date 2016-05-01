@@ -32,6 +32,7 @@
   "homepage": "https://github.com/edhille/midi-visualizer",
   "devDependencies": {
     "chai": "^3.5.0",
+    "coveralls": "^2.11.9",
     "del": "^2.2.0",
     "istanbul": "^0.4.3",
     "jsdoc": "^3.3.0-beta3",
