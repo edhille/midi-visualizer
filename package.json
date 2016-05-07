@@ -7,6 +7,7 @@
     "test": "test"
   },
   "scripts": {
+    "preinstall": "ln -s ./scripts/commit-msg ./.git/hooks/commit-msg",
     "clean": "rm -Rf ./coverage",
     "lint": "./node_modules/eslint/bin/eslint.js src",
     "test": "./node_modules/mocha/bin/mocha test",
