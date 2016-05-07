@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "preinstall": "ln -s ./scripts/commit-msg ./.git/hooks/commit-msg",
+    "preinstall": "if test -d ./.git && test ! -h ./.git/hooks/commit-msg; then ln -s ./scripts/commit-msg ./.git/hooks/commit-msg; fi;",
     "clean": "rm -Rf ./coverage",
     "lint": "./node_modules/eslint/bin/eslint.js src",
     "test": "./node_modules/mocha/bin/mocha test",
@@ -47,8 +47,8 @@
     "d3": "^3.5.5",
     "es6-promise": "^3.1.2",
     "eslint": "^2.2.0",
-    "fadt": "^2.0.0",
-    "func-midi-parser": "^1.0.3",
+    "fadt": "^2.2.2",
+    "func-midi-parser": "^1.1.0",
     "funtils": "^0.4.0",
     "lodash": "^4.5.0",
     "three": "^0.74.0"
