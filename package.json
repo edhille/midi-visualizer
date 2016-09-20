@@ -35,25 +35,25 @@
   "homepage": "https://github.com/edhille/midi-visualizer",
   "devDependencies": {
     "chai": "^3.5.0",
-    "coveralls": "^2.11.9",
-    "del": "^2.2.0",
-    "istanbul": "^0.4.3",
-    "jsdoc": "^3.3.0-beta3",
-    "jsdoc-to-markdown": "^1.3.3",
-    "mocha": "^2.4.5",
+    "coveralls": "^2.11.14",
+    "del": "^2.2.2",
+    "istanbul": "^0.4.5",
+    "jsdoc": "^3.4.1",
+    "jsdoc-to-markdown": "^1.3.7",
+    "mocha": "^3.0.2",
     "npm-check-updates": "^2.8.0",
-    "rewire": "^2.3.1",
-    "sinon": "^1.14.1",
+    "rewire": "^2.5.2",
+    "sinon": "^1.17.6",
     "through2": "^2.0.1"
   },
   "dependencies": {
-    "d3": "^3.5.5",
-    "es6-promise": "^3.1.2",
-    "eslint": "^2.2.0",
+    "d3": "^4.2.4",
+    "es6-promise": "^3.3.1",
+    "eslint": "^3.5.0",
     "fadt": "^2.2.2",
     "func-midi-parser": "^1.1.0",
     "funtils": "^0.5.0",
-    "lodash": "^4.5.0",
-    "three": "^0.74.0"
+    "lodash": "^4.16.0",
+    "three": "^0.81.0"
   }
 }
