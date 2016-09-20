@@ -7,6 +7,10 @@ then
 		echo 'You have unstaged README updates that need to be committed'
 		git status -s
 		exit 1
+	elif npm run check-deps >/dev/null 2>&1
+	then
+		echo 'You have outdated dependencies'
+		exit 1
 	fi
 else
 	exit 1
