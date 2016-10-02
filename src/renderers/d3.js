@@ -68,8 +68,7 @@ function transform(datum) {
 		this.setAttribute('transform', newTransform);
 		break;
 	default:
-		/*eslint-disable no-console*/
-		console.error('do not know how to position "' + this.tagName + '"');
+		console.error('do not know how to position "' + this.tagName + '"'); // eslint-disable-line no-console
 		break;
 	}
 }
@@ -119,9 +118,9 @@ function prepDOM(midi, config) {
 		if (track.events.length === 0) return scales;
 
 		var trackScale = scales[index] = {
-			x: d3.scale.linear(),
-			y: d3.scale.linear(),
-			note: d3.scale.linear()
+			x: d3.scaleLinear(),
+			y: d3.scaleLinear(),
+			note: d3.scaleLinear()
 		};
 
 		var onNotes = track.events.filter(isNoteOnEvent);
@@ -137,8 +136,8 @@ function prepDOM(midi, config) {
 		trackScale.note.range([50, 100]);
 		trackScale.note.domain(trackScale.x.domain());
 
-		trackScale.hue = d3.scale.linear().range([0,360]).domain([0,8]);
-		trackScale.velocity = d3.scale.linear().range([30,60]).domain([0, 256]);
+		trackScale.hue = d3.scaleLinear().range([0,360]).domain([0,8]);
+		trackScale.velocity = d3.scaleLinear().range([30,60]).domain([0, 256]);
 
 		return scales;
 	}, []);
@@ -214,7 +213,7 @@ function generate(renderConfig) {
 
 	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// D3JsRendererState -> [RenderEvent] -> undefined
-	function rafFn(state, eventsToAdd, currentRunningEvents) {
+	function rafFn(state, eventsToAdd, currentRunningEvents, newEvents, nowMs) {
 		if (eventsToAdd && eventsToAdd.length > 0 && eventsToAdd[0] instanceof D3RenderEvent) {
 			var shapes = state.svg.selectAll('.stage').selectAll('.shape').data(currentRunningEvents, getId);
 			var enter = shapes.enter().append(partial(getShape, state.document)); 
@@ -224,7 +223,7 @@ function generate(renderConfig) {
 			enter.each(sizeElem);
 			enter.each(transform);
 
-			renderConfig.frameRenderer(state, shapes);
+			renderConfig.frameRenderer(nowMs, state, shapes);
 		}
 	}
 

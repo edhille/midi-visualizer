@@ -25,9 +25,9 @@ function genSongScales(dimension, midi) {
 		if (track.events.length === 0) return scales;
 
 		var trackScale = scales[index] = {
-			x: scale.linear(),
-			y: scale.linear(),
-			note: scale.linear()
+			x: scale.scaleLinear(),
+			y: scale.scaleLinear(),
+			note: scale.scaleLinear()
 		};
 
 		var onNotes = track.events.filter(isNoteOnEvent);
@@ -43,8 +43,8 @@ function genSongScales(dimension, midi) {
 		trackScale.note.range([50, 100]);
 		trackScale.note.domain(trackScale.x.domain());
 
-		trackScale.hue = scale.linear().range([0,360]).domain([0,8]);
-		trackScale.velocity = scale.linear().range([30,60]).domain([0, 256]);
+		trackScale.hue = scale.scaleLinear().range([0,360]).domain([0,8]);
+		trackScale.velocity = scale.scaleLinear().range([30,60]).domain([0, 256]);
 
 		return scales;
 	}, []);
@@ -213,8 +213,8 @@ function generate(renderConfig) {
 
 	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// ThreeJsRendererState -> [RenderEvent] -> [RenderEvent] -> undefined
-	function rafFn(state, eventsToAdd/*, currentEvents*/) {
-		var shapes = renderConfig.frameRenderer(eventsToAdd, state.scene, state.camera, THREE);
+	function rafFn(state, eventsToAdd, currentEvents, newEvents, nowMs) {
+		var shapes = renderConfig.frameRenderer(nowMs, eventsToAdd, state.scene, state.camera, THREE);
 		var geometry = new THREE.Object3D();
 
 		shapes.map(function (shape) {

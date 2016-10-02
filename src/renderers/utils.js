@@ -280,7 +280,7 @@ module.exports = function closure() {
 				// TODO: should we be passing the state in, or just what is needed?
 				//       this is happening outside of "state" (i.e. in an async "set-and-forget" animation renderer),
 				//       so perhaps this should not include state?!?
-				rafFn(state, eventsToAdd, currentRunningEvents);
+				rafFn(state, eventsToAdd, currentRunningEvents, [], nowMs);
 			} else {
 				console.error('skipping render due to ' + delta + 'ms delay');
 			}
@@ -302,7 +302,7 @@ module.exports = function closure() {
 		maxNote: maxNote,
 		minNote: minNote,
 		isNoteOnEvent: isNoteOnEvent,
-		scale: d3.scale,
+		scale: d3,
 
 		MAX_RAF_DELTA: MAX_RAF_DELTA_MS
 	};
