@@ -5,11 +5,12 @@
 
 require('es6-promise').polyfill();
 
-var AudioPlayer = require('./audio-player');
-var midiParser = require('func-midi-parser');
-var utils = require('funtils');
-var monad = utils.monad;
-var MidiVisualizerState = require('./data-types').MidiVisualizerState;
+// TODO: how to mock/stub/DI AudioPlayer and midiParser in const-friendly way...
+let AudioPlayer = require('./audio-player');
+let midiParser = require('func-midi-parser');
+const utils = require('funtils');
+const monad = utils.monad;
+const MidiVisualizerState = require('./data-types').MidiVisualizerState;
 
 /**
  * @module midiVisualizer
@@ -95,7 +96,7 @@ function resizeVisualizer(state, dimensions) {
 	});
 }
 
-var midiVisualizer = monad();
+const midiVisualizer = monad();
 midiVisualizer.lift('play', playVisualizer);
 midiVisualizer.lift('restart', restartVisualizer);
 midiVisualizer.lift('pause', pauseVisualizer);
@@ -119,16 +120,16 @@ midiVisualizer.lift('resize', resizeVisualizer);
 module.exports = function initMidiVisualizer(config) {
 	return new Promise(function _initPromise(resolve, reject) {
 		try {
-			var midiData = config.midi.data;
-			var midi = midiParser.parse(new Uint8Array(midiData));
-			var audioData = config.audio.data;
-			var audioPlayer = new AudioPlayer({ window: config.window });
+			const midiData = config.midi.data;
+			const midi = midiParser.parse(new Uint8Array(midiData));
+			const audioData = config.audio.data;
+			const audioPlayer = new AudioPlayer({ window: config.window });
 
 			audioPlayer.loadData(audioData, function _setStage(err, audioPlayer) {
 				if (err) return reject(err);
 
 				try {
-					var state = new MidiVisualizerState({
+					const state = new MidiVisualizerState({
 						root: config.root,
 						width: config.width,
 						height: config.height,
