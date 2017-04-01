@@ -14,9 +14,9 @@ const MAX_RAF_DELTA_MS = 16;
 
 module.exports = function closure() {
 	// Some things we need to keep track of between play/pause calls
-	const lastRafId = null;
-	const lastPlayheadTimeMs = 0;
-	const currentRunningEvents = [];
+	let lastRafId = null;
+	let lastPlayheadTimeMs = 0;
+	let currentRunningEvents = [];
 
 	/**
 	 * @name play
@@ -233,7 +233,7 @@ module.exports = function closure() {
 	 */
 	// RendererState -> (RendererState -> [RenderEvent] -> undefined) -> (RendererState -> [RenderEvent] -> undefined) -> [RenderEvent] -> [RenderEvent] -> Int -> [RenderEvent]
 	function render(state, cleanupFn, rafFn, currentRunningEvents, renderEvents, nowMs) {
-		const expiredEvents = [];
+		let expiredEvents = [];
 		const eventsToAdd = [];
 		const nowMicroSec = nowMs * 1000;
 

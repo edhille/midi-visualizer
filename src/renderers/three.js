@@ -243,7 +243,7 @@ function generate(renderConfig) {
 	renderer.lift('resize', resize);
 
 	const setupFn = function setupRenderer(midi, config) {
-		const rendererState = renderConfig.prepDOM(midi, config);
+		let rendererState = renderConfig.prepDOM(midi, config);
 		const animEvents = transformMidi(midi);
 
 		rendererState = rendererState.next({

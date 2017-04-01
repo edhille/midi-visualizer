@@ -96,7 +96,7 @@ function prepDOM(midi, config) {
 	if (!x) throw new TypeError('unable to calculate width');
 	if (!y) throw new TypeError('unable to calculate height');
 
-	const svg = d3.select('.' + DOM_ID);
+	let svg = d3.select('.' + DOM_ID);
 	
 	/* istanbul ignore else */
 	if (svg.empty()) {
@@ -250,7 +250,7 @@ function generate(renderConfig) {
 	});
 
 	const setupFn = function setupRenderer(midi, config) {
-		const rendererState = renderConfig.prepDOM(midi, config);
+		let rendererState = renderConfig.prepDOM(midi, config);
 		const animEvents = transformMidi(midi);
 
 		rendererState = rendererState.next({
