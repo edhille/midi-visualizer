@@ -1,33 +1,33 @@
 'use strict';
 
-var _ = require('lodash');
-var types = require('./data-types');
-var AnimEvent = types.AnimEvent;
-var midiParser = require('func-midi-parser');
-var MidiNoteEvent = midiParser.types.MidiNoteEvent;
-var MidiNoteOnEvent = midiParser.types.MidiNoteOnEvent;
-var MidiNoteOffEvent = midiParser.types.MidiNoteOffEvent;
-var MidiMetaTempoEvent = midiParser.types.MidiMetaTempoEvent;
+const _ = require('lodash');
+const types = require('./data-types');
+const AnimEvent = types.AnimEvent;
+const midiParser = require('func-midi-parser');
+const MidiNoteEvent = midiParser.types.MidiNoteEvent;
+const MidiNoteOnEvent = midiParser.types.MidiNoteOnEvent;
+const MidiNoteOffEvent = midiParser.types.MidiNoteOffEvent;
+const MidiMetaTempoEvent = midiParser.types.MidiMetaTempoEvent;
 
 function trackEventFilter(event) {
 	return event instanceof MidiNoteEvent || event instanceof MidiMetaTempoEvent;
 }
 
 function transformMidi(midi) {
-	var tempo = 500000; // default of 120bpm
-	var tickInMicroSec = tempo / midi.header.timeDivision;
-	var totalTimeMicroSec = 0;
+	let tempo = 500000; // default of 120bpm
+	let tickInMicroSec = tempo / midi.header.timeDivision;
+	let totalTimeMicroSec = 0;
 
-	var eventsByTime = midi.tracks.reduce(function _reduceTrack(eventsByTime, track, trackIndex) {
-		var elapsedTimeInMicroSec = 0;
-		var activeNotes = {};
-		var trackEventsByTime = track.events.reduce(function _reduceEvent(eventsByTime, event) {
-			var eventTimeInMicroSec = 0;
-			var eventTimeInMs = 0;
-			var startTimeMicroSec = 0;
-			var startTimeMs = 0;
-			var startNote = {};
-			var newEvent = {};
+	const eventsByTime = midi.tracks.reduce(function _reduceTrack(eventsByTime, track, trackIndex) {
+		let elapsedTimeInMicroSec = 0;
+		const activeNotes = {};
+		const trackEventsByTime = track.events.reduce(function _reduceEvent(eventsByTime, event) {
+			let eventTimeInMicroSec = 0;
+			let eventTimeInMs = 0;
+			let startTimeMicroSec = 0;
+			let startTimeMs = 0;
+			let startNote = {};
+			let newEvent = {};
 
 			if (event instanceof MidiMetaTempoEvent) {
 				// NOTE: this "should" be the first event in a track if not, 
@@ -109,11 +109,11 @@ function transformMidi(midi) {
 	}, {});
 
 	// add empty events for every 1/32 note to allow for non-note events in renderering
-	var totalTimeMs = Math.floor(totalTimeMicroSec / 1000);
-	var thirtySecondNoteInMs = Math.floor(tempo / 8000);
+	const totalTimeMs = Math.floor(totalTimeMicroSec / 1000);
+	const thirtySecondNoteInMs = Math.floor(tempo / 8000);
 	
 	return _.range(0, totalTimeMs + 1, thirtySecondNoteInMs).reduce(function _registerEmptyRenderEvent(eventsByTime, timeMs) {
-		var events = eventsByTime[timeMs] || [];
+		const events = eventsByTime[timeMs] || [];
 		eventsByTime[timeMs] = events.concat([new AnimEvent({
 			event: { subtype: 'timer' },
 			track: 0,

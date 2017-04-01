@@ -2,21 +2,21 @@
 
 'use strict';
 
-var d3 = require('d3');
-var transformMidi = require('../midi-transformer');
+const d3 = require('d3');
+const transformMidi = require('../midi-transformer');
 
 /** @constant
  *  @type {number}
  *  @name MAX_RAF_DELTA_MS
  *  @default 16
  */
-var MAX_RAF_DELTA_MS = 16;
+const MAX_RAF_DELTA_MS = 16;
 
 module.exports = function closure() {
 	// Some things we need to keep track of between play/pause calls
-	var lastRafId = null;
-	var lastPlayheadTimeMs = 0;
-	var currentRunningEvents = [];
+	const lastRafId = null;
+	const lastPlayheadTimeMs = 0;
+	const currentRunningEvents = [];
 
 	/**
 	 * @name play
@@ -32,14 +32,14 @@ module.exports = function closure() {
 	 */
 	// (RendererState -> AudioPlayer -> [RenderEvent] -> [RenderEvent]) -> RendererState -> Int -> (RendererState -> undefined) -> RendererState
 	function play(state, player, renderFn, resumeFn) {
-		var stateSnapshot = state.copy();
-		var raf = stateSnapshot.window.requestAnimationFrame;
-		var songLengthMs = player.lengthMs;
+		const stateSnapshot = state.copy();
+		const raf = stateSnapshot.window.requestAnimationFrame;
+		const songLengthMs = player.lengthMs;
 
 		function animate(/* now */) {
 			if (!player.isPlaying) return;
 
-			var nowMs = player.getPlayheadTime();
+			const nowMs = player.getPlayheadTime();
 
 			if (nowMs >= songLengthMs) {
 				lastRafId = null;
@@ -52,14 +52,14 @@ module.exports = function closure() {
 				lastPlayheadTimeMs = nowMs;
 			}
 
-			var eventKeys = Object.keys(stateSnapshot.renderEvents)
+			const eventKeys = Object.keys(stateSnapshot.renderEvents)
 								.map(Number)
 								.filter(function (eventTimeMs) {
 									return lastPlayheadTimeMs < eventTimeMs && eventTimeMs <= nowMs;
 								});
 
 			if (eventKeys.length > 0) {
-				var events = eventKeys.reduce(function (events, key) { return events.concat(stateSnapshot.renderEvents[key]); }, []);
+				const events = eventKeys.reduce(function (events, key) { return events.concat(stateSnapshot.renderEvents[key]); }, []);
 
 				/* istanbul ignore else */
 				if (events.length > 0) {
@@ -120,12 +120,12 @@ module.exports = function closure() {
 	 */
 	// RendererState -> [(RendererState -> AnimEvent -> [RenderEvent])] -> [AnimEvent] -> [RenderEvent]
 	function transformEvents(state, trackTransformers, animEvents) {
-		var renderEvents = {};
+		const renderEvents = {};
 
 		Object.keys(animEvents).map(function _convertAnimEvents(timeInMs) {
 			renderEvents[timeInMs] = renderEvents[timeInMs] || [];
 			animEvents[timeInMs].forEach(function _convertEvent(event) {
-				var transformFn = trackTransformers[event.track];
+				const transformFn = trackTransformers[event.track];
 				if (transformFn) {
 					// renderEvents[timeInMs] = renderEvents[timeInMs].concat(transformFn(state, event));
 					renderEvents[timeInMs].push.apply(renderEvents[timeInMs], transformFn(state, event));
@@ -152,7 +152,7 @@ module.exports = function closure() {
 	 */
 	// RendererState -> Midi -> Config -> RendererState
 	function mapEvents(rendererState, midi, config) {
-		var animEvents = transformMidi(midi);
+		const animEvents = transformMidi(midi);
 
 		return rendererState.next({
 			renderEvents: transformEvents(rendererState, config.transformers, animEvents)
@@ -233,13 +233,13 @@ module.exports = function closure() {
 	 */
 	// RendererState -> (RendererState -> [RenderEvent] -> undefined) -> (RendererState -> [RenderEvent] -> undefined) -> [RenderEvent] -> [RenderEvent] -> Int -> [RenderEvent]
 	function render(state, cleanupFn, rafFn, currentRunningEvents, renderEvents, nowMs) {
-		var expiredEvents = [];
-		var eventsToAdd = [];
-		var nowMicroSec = nowMs * 1000;
+		const expiredEvents = [];
+		const eventsToAdd = [];
+		const nowMicroSec = nowMs * 1000;
 
 		renderEvents.forEach(function (event) {
-			var id = event.id;
-			var matchIndices = currentRunningEvents.reduce(function (matchIndices, event, index) {
+			const id = event.id;
+			const matchIndices = currentRunningEvents.reduce(function (matchIndices, event, index) {
 				return event.id === id ? matchIndices.concat([index]) : matchIndices;
 			}, []);
 
@@ -269,10 +269,10 @@ module.exports = function closure() {
 
 		expiredEvents = expiredEvents.concat(currentRunningEvents.filter(function (event) { return event.startTimeMicroSec > nowMicroSec; }));
 
-		var timestamp = state.window.performance.now();
+		const timestamp = state.window.performance.now();
 
 		state.window.requestAnimationFrame(function (now) {
-			var delta = now - timestamp;
+			const delta = now - timestamp;
 
 			cleanupFn(state, currentRunningEvents, expiredEvents, nowMs);
 

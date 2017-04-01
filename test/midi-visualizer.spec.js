@@ -2,15 +2,15 @@
 /* globals describe: true, beforeEach: true, afterEach: true, it: true */
 'use strict';
 
-var rewire = require('rewire');
-var chai = require('chai');
-var expect = chai.expect;
-var sinon = require('sinon');
+const rewire = require('rewire');
+const chai = require('chai');
+const expect = chai.expect;
+const sinon = require('sinon');
 
-var midiVisualizer = rewire('../src/midi-visualizer');
+const midiVisualizer = rewire('../src/midi-visualizer');
 
 function stubAudioLoader(loadDataStub) {
-	var stub = sinon.stub();
+	const stub = sinon.stub();
 
 	stub.returns({
 		loadData: loadDataStub
@@ -28,7 +28,7 @@ function stubAudioPlayer() {
 }
 
 function stubLoadData(audioPlayerStub) {
-	var stub = sinon.stub();
+	const stub = sinon.stub();
 
 	stub.callsArgWith(1, null, audioPlayerStub);
 
@@ -42,7 +42,7 @@ function stubMidiParser() {
 }
 
 function stubRenderer() {
-	var stub = sinon.stub({
+	const stub = sinon.stub({
 		play: function() { },
 		pause: function() { },
 		stop: function() { },
@@ -62,8 +62,8 @@ function stubRenderer() {
 describe('midi-visualizer', function() {
 
 	describe('with valid instantaion', function() {
-		var testVisualizer, config, setupError;
-		var audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub;
+		let testVisualizer, config, setupError;
+		let audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub;
 
 		beforeEach(function(done) {
 			setupError = null;
@@ -125,7 +125,7 @@ describe('midi-visualizer', function() {
 		});
 
 		describe('#play', function() {
-			var state;
+			let state;
 
 			beforeEach(function(done) {
 				testVisualizer = testVisualizer.play();
@@ -151,7 +151,7 @@ describe('midi-visualizer', function() {
 			});
 
 			describe('#pause', function() {
-				var state;
+				let state;
 
 				beforeEach(function(done) {
 					testVisualizer = testVisualizer.pause();
@@ -174,7 +174,7 @@ describe('midi-visualizer', function() {
 			});
 
 			describe('#stop', function() {
-				var state;
+				let state;
 
 				beforeEach(function(done) {
 					testVisualizer = testVisualizer.stop();
@@ -196,7 +196,7 @@ describe('midi-visualizer', function() {
 				});
 
 				describe('#restart', function () {
-					var state;
+					let state;
 
 					beforeEach(function(done) {
 						testVisualizer = testVisualizer.restart();
@@ -221,7 +221,7 @@ describe('midi-visualizer', function() {
 		});
 
 		describe('#resize', function () {
-			var state;
+			let state;
 
 			beforeEach(function(done) {
 				testVisualizer = testVisualizer.resize({ width: 100, height: 200 });
@@ -238,8 +238,8 @@ describe('midi-visualizer', function() {
 	});
 
 	describe('with invalid instantiation', function () {
-		var testVisualizer, config, setupError;
-		var audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub;
+		let testVisualizer, config, setupError;
+		let audioLoaderStub, audioPlayerStub, midiParserStub, rendererStub, loadDataStub;
 
 		beforeEach(function(done) {
 			midiParserStub = stubMidiParser();

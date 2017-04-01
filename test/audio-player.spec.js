@@ -2,14 +2,14 @@
 /* globals describe: true, beforeEach: true, afterEach: true, it: true */
 'use strict';
 
-var chai = require('chai');
-var expect = chai.expect;
-var sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
+const sinon = require('sinon');
 
-var AudioPlayer = require('../src/audio-player.js');
+const AudioPlayer = require('../src/audio-player.js');
 
 function setupMockAudioSource(mockAudioContext) {
-	var mockAudioSource = {
+	const mockAudioSource = {
 		connect: sinon.spy(),
 		start: sinon.spy(),
 		stop: sinon.spy()
@@ -28,7 +28,7 @@ function setupMockAudioContext(mockAudioContext) {
 }
 
 function loadPlayer(audioPlayer, callback, mockAudioContext) {
-	var mockAudioSource = setupMockAudioSource(mockAudioContext);
+	const mockAudioSource = setupMockAudioSource(mockAudioContext);
 
 	setupMockAudioContext(mockAudioContext);
 
@@ -51,7 +51,7 @@ describe('AudioPlayer', function() {
 		});
 
 		describe('when there is a msAudioContext', function () {
-			var mockWindow;
+			let mockWindow;
 
 			beforeEach(function (done) {
 				mockWindow = {
@@ -139,7 +139,7 @@ describe('AudioPlayer', function() {
 	});
 
 	describe('construction with an AudioContext', function() {
-		var MockContextClass, mockAudioContext, audioPlayer;
+		let MockContextClass, mockAudioContext, audioPlayer;
 
 		beforeEach(function(done) {
 			mockAudioContext = {
@@ -241,7 +241,7 @@ describe('AudioPlayer', function() {
 		describe('#play', function() {
 
 			describe('when not yet loaded', function() {
-				var playReturn;
+				let playReturn;
 
 				beforeEach(function(done) {
 					setupMockAudioSource(mockAudioContext);
@@ -262,7 +262,7 @@ describe('AudioPlayer', function() {
 			});
 
 			describe('when already playing', function() {
-				var playReturn;
+				let playReturn;
 
 				beforeEach(function(done) {
 					loadPlayer(audioPlayer, function() {
@@ -288,7 +288,7 @@ describe('AudioPlayer', function() {
 			});
 
 			describe('when loaded', function() {
-				var playReturn, mockAudioSource;
+				let playReturn, mockAudioSource;
 
 				beforeEach(function(done) {
 					mockAudioSource = loadPlayer(audioPlayer, function() {
@@ -320,7 +320,7 @@ describe('AudioPlayer', function() {
 		describe('#pause', function() {
 
 			describe('when not yet loaded', function() {
-				var pauseReturn;
+				let pauseReturn;
 
 				beforeEach(function(done) {
 					pauseReturn = audioPlayer.pause();
@@ -334,7 +334,7 @@ describe('AudioPlayer', function() {
 			});
 
 			describe('when not playing', function() {
-				var pauseReturn;
+				let pauseReturn;
 
 				beforeEach(function(done) {
 					loadPlayer(audioPlayer, function() {
@@ -351,7 +351,7 @@ describe('AudioPlayer', function() {
 			});
 
 			describe('when loaded and playing', function() {
-				var pauseReturn, mockAudioSource;
+				let pauseReturn, mockAudioSource;
 
 				beforeEach(function(done) {
 					mockAudioSource = loadPlayer(audioPlayer, function(e) {
@@ -396,7 +396,7 @@ describe('AudioPlayer', function() {
 				});
 
 				describe('playing', function() {
-					var mockAudioSource;
+					let mockAudioSource;
 
 					beforeEach(function(done) {
 						mockAudioSource = setupMockAudioSource(mockAudioContext);

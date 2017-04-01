@@ -1,12 +1,12 @@
 'use strict';
 
-var utils = require('funtils');
-var existy = utils.existy;
+const utils = require('funtils');
+const existy = utils.existy;
 
-var SEC_TO_MS = 1000;
+const SEC_TO_MS = 1000;
 
 function calcPlayhead(currTimeSec, lastStartTime, lastPlayheadOffsetSec, startOffsetSec, durationSec) {
-	var calculatedTimeSec = startOffsetSec + lastPlayheadOffsetSec + (currTimeSec - lastStartTime);
+	const calculatedTimeSec = startOffsetSec + lastPlayheadOffsetSec + (currTimeSec - lastStartTime);
 	return calculatedTimeSec % durationSec;
 }
 
@@ -20,7 +20,7 @@ function calcPlayhead(currTimeSec, lastStartTime, lastPlayheadOffsetSec, startOf
 function AudioPlayer(params) {
 	params = params || {};
 
-	var ContextClass = AudioPlayer.getAudioContextFromWindow(params.window);
+	const ContextClass = AudioPlayer.getAudioContextFromWindow(params.window);
 
 	if (ContextClass) {
 		this.context = new ContextClass();
@@ -114,7 +114,7 @@ Object.defineProperties(AudioPlayer, {
  * @param {AudioPlayer} [self] - ref to AudioPlayer instance if loading successful (undefined otherwise)
  */
 AudioPlayer.prototype.loadData = function loadData(audioData, callback) { /* jshint expr: true */
-	var self = this;
+	const self = this;
 
 	if (!existy(audioData)) throw new Error('must provide an AudioData source');
 
@@ -177,7 +177,7 @@ AudioPlayer.prototype.play = function play(startTimeOffsetSec, playheadSec) {
 	if (typeof playheadSec !== 'undefined') this.lastPlayheadOffsetSec = playheadSec;
 	this.lastStartTimeSec = this.context.currentTime;
 
-	var newPlayheadSec = calcPlayhead(this.context.currentTime, this.lastStartTimeSec, this.lastPlayheadOffsetSec, this.startOffsetSec, this.buffer.duration);
+	const newPlayheadSec = calcPlayhead(this.context.currentTime, this.lastStartTimeSec, this.lastPlayheadOffsetSec, this.startOffsetSec, this.buffer.duration);
 
 	this.audioSource.start(this.startOffsetSec, newPlayheadSec); 
 

@@ -1,18 +1,18 @@
 /** @module ThreeJsRenderer */
 'use strict';
 
-var THREE = require('three');
-var funtils = require('funtils');
-var monad = funtils.monad;
-var renderUtils = require('./utils');
-var scale = renderUtils.scale;
-var maxNote = renderUtils.maxNote;
-var minNote = renderUtils.minNote;
-var isNoteOnEvent = renderUtils.isNoteOnEvent;
-var transformMidi = require('../midi-transformer');
-var ThreeJsRendererState = require('../data-types').ThreeJsRendererState;
+const THREE = require('three');
+const funtils = require('funtils');
+const monad = funtils.monad;
+const renderUtils = require('./utils');
+const scale = renderUtils.scale;
+const maxNote = renderUtils.maxNote;
+const minNote = renderUtils.minNote;
+const isNoteOnEvent = renderUtils.isNoteOnEvent;
+const transformMidi = require('../midi-transformer');
+const ThreeJsRendererState = require('../data-types').ThreeJsRendererState;
 
-var DOM_ID = 'threejs';
+const DOM_ID = 'threejs';
 
 function toggleStage(root, id) {
 	[].map.call(root.getElementsByClassName(DOM_ID) || [], function (node) {
@@ -24,15 +24,15 @@ function genSongScales(dimension, midi) {
 	return midi.tracks.reduce(function (scales, track, index) {
 		if (track.events.length === 0) return scales;
 
-		var trackScale = scales[index] = {
+		const trackScale = scales[index] = {
 			x: scale.scaleLinear(),
 			y: scale.scaleLinear(),
 			note: scale.scaleLinear()
 		};
 
-		var onNotes = track.events.filter(isNoteOnEvent);
-		var highestNote = onNotes.reduce(maxNote, 0);
-		var lowestNote = onNotes.reduce(minNote, highestNote);
+		const onNotes = track.events.filter(isNoteOnEvent);
+		const highestNote = onNotes.reduce(maxNote, 0);
+		const lowestNote = onNotes.reduce(minNote, highestNote);
 
 		trackScale.y.range([25, dimension.height]);
 		trackScale.y.domain([lowestNote, highestNote]);
@@ -64,34 +64,34 @@ function genSongScales(dimension, midi) {
  */
 // Midi -> Config -> ThreeJsRendererState
 function prepDOM(midi, config) {
-	var w = config.window;
-	var d = w.document;
-	var e = d.documentElement;
-	var x = config.width || w.innerWidth || e.clientWidth;
-	var y = config.height || w.innerHeight|| e.clientHeight;
+	const w = config.window;
+	const d = w.document;
+	const e = d.documentElement;
+	const x = config.width || w.innerWidth || e.clientWidth;
+	const y = config.height || w.innerHeight|| e.clientHeight;
 
 	if (!x) throw new TypeError('unable to calculate width');
 	if (!y) throw new TypeError('unable to calculate height');
 
-	var scene = new THREE.Scene();
+	const scene = new THREE.Scene();
 	/* istanbul ignore next */ // not important to check both sides of this ternary
-	var camera = new THREE.PerspectiveCamera(45, x / y, 0.1, x > y ? x*2 : y*2);
-	var renderer = new THREE.WebGLRenderer();
+	const camera = new THREE.PerspectiveCamera(45, x / y, 0.1, x > y ? x*2 : y*2);
+	const renderer = new THREE.WebGLRenderer();
 
 	renderer.setSize(x, y);
    
-	var domElement = renderer.domElement;
+	const domElement = renderer.domElement;
 	domElement.className = DOM_ID;
 	
 	// TODO: get a real UUID implementation..
-	var id = domElement.getAttribute('id') || Date.now().toString().split('').map(function (char) { return (Math.random() * char).toString(16); }).join('');
+	const id = domElement.getAttribute('id') || Date.now().toString().split('').map(function (char) { return (Math.random() * char).toString(16); }).join('');
 	domElement.setAttribute('id', id);
 
 	toggleStage(config.root, id);
 
 	config.root.appendChild(domElement);
 
-	var state = new ThreeJsRendererState({
+	const state = new ThreeJsRendererState({
 		id: id,
 		root: config.root,
 		window: w,
@@ -119,8 +119,8 @@ function prepDOM(midi, config) {
  */
 // ThreeJsRendererState -> {width,height} -> ThreeJsRendererState
 function resize(state, dimension) {
-	var renderer = state.renderer;
-	var camera = state.camera;
+	const renderer = state.renderer;
+	const camera = state.camera;
 
 	camera.aspect = dimension.width / dimension.height;
 	camera.updateProjectionMatrix();
@@ -149,7 +149,7 @@ function cleanup(state, currentRunningEvents, expiredEvents/*, nowMs */) {
 	/*eslint-disable no-console*/
 	console.error('cleanup');
 	expiredEvents.map(function (event) {
-		var obj = state.scene.getObjectByName(event.id);
+		const obj = state.scene.getObjectByName(event.id);
 
 		if (obj) {
 			console.error('removing', obj);
@@ -207,15 +207,15 @@ function cleanup(state, currentRunningEvents, expiredEvents/*, nowMs */) {
  */
 // Config -> (Midi -> Config -> Renderer)
 function generate(renderConfig) {
-	var renderer = monad();
+	const renderer = monad();
 
 	renderer.DOM_ID = DOM_ID;
 
 	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// ThreeJsRendererState -> [RenderEvent] -> [RenderEvent] -> undefined
 	function rafFn(state, eventsToAdd, currentEvents, newEvents, nowMs) {
-		var shapes = renderConfig.frameRenderer(nowMs, eventsToAdd, state.scene, state.camera, THREE);
-		var geometry = new THREE.Object3D();
+		const shapes = renderConfig.frameRenderer(nowMs, eventsToAdd, state.scene, state.camera, THREE);
+		const geometry = new THREE.Object3D();
 
 		shapes.map(function (shape) {
 			geometry.add(shape);
@@ -242,9 +242,9 @@ function generate(renderConfig) {
 	renderer.lift('stop', renderUtils.stop);
 	renderer.lift('resize', resize);
 
-	var setupFn = function setupRenderer(midi, config) {
-		var rendererState = renderConfig.prepDOM(midi, config);
-		var animEvents = transformMidi(midi);
+	const setupFn = function setupRenderer(midi, config) {
+		const rendererState = renderConfig.prepDOM(midi, config);
+		const animEvents = transformMidi(midi);
 
 		rendererState = rendererState.next({
 			renderEvents: renderConfig.mapEvents(rendererState, animEvents)

@@ -1,19 +1,19 @@
 /** @module D3Renderer */
 'use strict';
 
-var d3 = require('d3');
-var funtils = require('funtils');
-var monad = funtils.monad;
-var partial = funtils.partial;
-var renderUtils = require('./utils');
-var maxNote = renderUtils.maxNote;
-var minNote = renderUtils.minNote;
-var isNoteOnEvent = renderUtils.isNoteOnEvent;
-var transformMidi = require('../midi-transformer');
-var D3RenderEvent = require('../data-types').D3RenderEvent;
-var D3RendererState = require('../data-types').D3RendererState;
+const d3 = require('d3');
+const funtils = require('funtils');
+const monad = funtils.monad;
+const partial = funtils.partial;
+const renderUtils = require('./utils');
+const maxNote = renderUtils.maxNote;
+const minNote = renderUtils.minNote;
+const isNoteOnEvent = renderUtils.isNoteOnEvent;
+const transformMidi = require('../midi-transformer');
+const D3RenderEvent = require('../data-types').D3RenderEvent;
+const D3RendererState = require('../data-types').D3RendererState;
 
-var DOM_ID = 'd3-stage';
+const DOM_ID = 'd3-stage';
 
 function getId(d) { return d.id; }
 function getColor(d) { return d.color; }
@@ -23,8 +23,8 @@ function getX(d) { return d.x; }
 function getScale(d) { return d.scale; }
 
 function getShape(document, datum) {
-	var type = datum.path ? 'path' : 'circle';
-	var elem = document.createElementNS('http://www.w3.org/2000/svg', type);
+	const type = datum.path ? 'path' : 'circle';
+	const elem = document.createElementNS('http://www.w3.org/2000/svg', type);
 
 	elem.classList.add('shape');
 
@@ -51,8 +51,8 @@ function sizeElem(datum) {
 }
 
 function transform(datum) {
-	var x = getX(datum);
-	var y = getY(datum);
+	const x = getX(datum);
+	const y = getY(datum);
 
 	switch (this.tagName) {
 	case 'circle':
@@ -60,10 +60,10 @@ function transform(datum) {
 		this.setAttribute('cx', x);
 		break;
 	case 'path':
-		var scale = getScale(datum);
-		var box = this.getBBox();
+		const scale = getScale(datum);
+		const box = this.getBBox();
 		// (the grouping is actually needed here...)
-		var newTransform = 'matrix(' + scale + ', 0, 0, ' + scale + ', ' + (x - box.width*scale/2) + ', ' + (y - box.height*scale/2) + ')'; 
+		const newTransform = 'matrix(' + scale + ', 0, 0, ' + scale + ', ' + (x - box.width*scale/2) + ', ' + (y - box.height*scale/2) + ')'; 
 
 		this.setAttribute('transform', newTransform);
 		break;
@@ -87,16 +87,16 @@ function transform(datum) {
  */
 // Midi -> Config -> D3RendererState
 function prepDOM(midi, config) {
-	var w = config.window;
-	var d = w.document;
-	var e = d.documentElement;
-	var x = config.width || w.innerWidth || e.clientWidth;
-	var y = config.height || w.innerHeight|| e.clientHeight;
+	const w = config.window;
+	const d = w.document;
+	const e = d.documentElement;
+	const x = config.width || w.innerWidth || e.clientWidth;
+	const y = config.height || w.innerHeight|| e.clientHeight;
 
 	if (!x) throw new TypeError('unable to calculate width');
 	if (!y) throw new TypeError('unable to calculate height');
 
-	var svg = d3.select('.' + DOM_ID);
+	const svg = d3.select('.' + DOM_ID);
 	
 	/* istanbul ignore else */
 	if (svg.empty()) {
@@ -105,27 +105,27 @@ function prepDOM(midi, config) {
 		svg.attr('id', DOM_ID);
 		svg.classed(DOM_ID, true);
 
-		var g = svg.append('g');
+		const g = svg.append('g');
 
 		g.classed('stage', true);
 
-		var defs = svg.append('defs');
+		const defs = svg.append('defs');
 
 		defs.attr('id', 'defs');
 	}
 
-	var songScales = midi.tracks.reduce(function (scales, track, index) {
+	const songScales = midi.tracks.reduce(function (scales, track, index) {
 		if (track.events.length === 0) return scales;
 
-		var trackScale = scales[index] = {
+		const trackScale = scales[index] = {
 			x: d3.scaleLinear(),
 			y: d3.scaleLinear(),
 			note: d3.scaleLinear()
 		};
 
-		var onNotes = track.events.filter(isNoteOnEvent);
-		var highestNote = onNotes.reduce(maxNote, 0);
-		var lowestNote = onNotes.reduce(minNote, highestNote);
+		const onNotes = track.events.filter(isNoteOnEvent);
+		const highestNote = onNotes.reduce(maxNote, 0);
+		const lowestNote = onNotes.reduce(minNote, highestNote);
 
 		trackScale.y.range([25, y]);
 		trackScale.y.domain([lowestNote, highestNote]);
@@ -164,8 +164,8 @@ function prepDOM(midi, config) {
  */
 // D3RendererState -> {width,height} -> D3RendererState
 function resize(state, dimension) {
-	var width = dimension.width;
-	var height = dimension.height;
+	const width = dimension.width;
+	const height = dimension.height;
 
 	return state.next({
 		width: width,
@@ -207,7 +207,7 @@ function resize(state, dimension) {
  */
 // Config -> (Midi -> Config -> Renderer)
 function generate(renderConfig) {
-	var renderer = monad();
+	const renderer = monad();
 
 	renderer.DOM_ID = DOM_ID;
 
@@ -215,8 +215,8 @@ function generate(renderConfig) {
 	// D3JsRendererState -> [RenderEvent] -> undefined
 	function rafFn(state, eventsToAdd, currentRunningEvents, newEvents, nowMs) {
 		if (eventsToAdd && eventsToAdd.length > 0 && eventsToAdd[0] instanceof D3RenderEvent) {
-			var shapes = state.svg.selectAll('.stage').selectAll('.shape').data(currentRunningEvents, getId);
-			var enter = shapes.enter().append(partial(getShape, state.document)); 
+			const shapes = state.svg.selectAll('.stage').selectAll('.shape').data(currentRunningEvents, getId);
+			const enter = shapes.enter().append(partial(getShape, state.document)); 
 
 			enter.attr('fill', getColor);
 			enter.attr('id', getId);
@@ -234,7 +234,7 @@ function generate(renderConfig) {
 	}
 	renderer.lift('play', play);
 	renderer.lift('restart', function _restart(state, player) {
-		var id = state.id;
+		const id = state.id;
 
 		// ensure the DOM node for this instance is the only one visible
 		[].map.call(state.root.getElementsByClassName(DOM_ID), function (node) {
@@ -249,9 +249,9 @@ function generate(renderConfig) {
 		return renderConfig.resize ? renderConfig.resize(state, dimension, renderer) : resize(state, dimension, renderer);
 	});
 
-	var setupFn = function setupRenderer(midi, config) {
-		var rendererState = renderConfig.prepDOM(midi, config);
-		var animEvents = transformMidi(midi);
+	const setupFn = function setupRenderer(midi, config) {
+		const rendererState = renderConfig.prepDOM(midi, config);
+		const animEvents = transformMidi(midi);
 
 		rendererState = rendererState.next({
 			renderEvents: renderConfig.mapEvents(rendererState, animEvents)

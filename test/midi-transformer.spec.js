@@ -2,19 +2,19 @@
 /* globals describe: true, beforeEach: true, afterEach: true, it: true */
 'use strict';
 
-var chai = require('chai');
-var expect = chai.expect;
-var sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
+const sinon = require('sinon');
 
-var _ = require('lodash');
+const _ = require('lodash');
 
-var midiParser = require('func-midi-parser');
-var MidiNoteOnEvent = midiParser.types.MidiNoteOnEvent;
-var MidiNoteOffEvent = midiParser.types.MidiNoteOffEvent;
-var MidiMetaTempoEvent = midiParser.types.MidiMetaTempoEvent;
-var MidiMetaInstrumentNameEvent = midiParser.types.MidiMetaInstrumentNameEvent;
+const midiParser = require('func-midi-parser');
+const MidiNoteOnEvent = midiParser.types.MidiNoteOnEvent;
+const MidiNoteOffEvent = midiParser.types.MidiNoteOffEvent;
+const MidiMetaTempoEvent = midiParser.types.MidiMetaTempoEvent;
+const MidiMetaInstrumentNameEvent = midiParser.types.MidiMetaInstrumentNameEvent;
 
-var transformMidi = require('../src/midi-transformer');
+const transformMidi = require('../src/midi-transformer');
 
 function generateMidiData() {
 	return {
@@ -58,10 +58,10 @@ function generateMidiData() {
 
 describe('midi-transformer', function() {
 
-	var animEventsByTimeMs, consoleSpy;
+	let animEventsByTimeMs, consoleSpy;
 
 	beforeEach(function(done) {
-		var midiData = generateMidiData();
+		const midiData = generateMidiData();
 
 		consoleSpy = sinon.stub(console, 'error');
 

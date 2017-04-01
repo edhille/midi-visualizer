@@ -1,7 +1,7 @@
 /* jshint expr: true */
 'use strict';
 
-var sinon = require('sinon');
+const sinon = require('sinon');
 
 function createMockMidi() {
 	return {

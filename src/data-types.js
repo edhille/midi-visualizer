@@ -1,7 +1,7 @@
 /** @module DataTypes */
 'use strict';
 
-var createDataType = require('fadt');
+const createDataType = require('fadt');
 
 /**
  * @class MidiVisualizerState
@@ -13,7 +13,7 @@ var createDataType = require('fadt');
  * @param {boolean} [params.isPlaying=false] - flag indicating whether currently playing
  * @returns MidiVisualizerState
  */
-var MidiVisualizerState = createDataType(function (params) {
+const MidiVisualizerState = createDataType(function (params) {
 	if (!params.audioPlayer) throw new TypeError('audioPlayer is required');
 	if (!params.renderer) throw new TypeError('renderer is required');
 
@@ -38,7 +38,7 @@ var MidiVisualizerState = createDataType(function (params) {
  * @param {boolean} [params.isPlaying=false] - flag indicating whether currently playing
  * @returns RendererState
  */
-var RendererState = createDataType(function (params) {
+const RendererState = createDataType(function (params) {
 	if (!params.id) throw new TypeError('id required');
 	if (!params.root) throw new TypeError('root required');
 	if (!params.window) throw new TypeError('window required');
@@ -63,7 +63,7 @@ var RendererState = createDataType(function (params) {
  * @param {SVGElement} params.svg - SVGElement for renderering
  * @returns D3RendererState
  */
-var D3RendererState = createDataType(function (params) {
+const D3RendererState = createDataType(function (params) {
 	if(!params.svg) throw new TypeError('svg is required');
 
 	this.svg = params.svg;
@@ -79,7 +79,7 @@ var D3RendererState = createDataType(function (params) {
  * @param {Renderer} params.renderer - Renderer monad to use
  * @returns ThreeJsRendererState
  */
-var ThreeJsRendererState = createDataType(function (params) {
+const ThreeJsRendererState = createDataType(function (params) {
 	if (!params.THREE) throw new TypeError('THREE is required');
 	if (!params.camera) throw new TypeError('camera is required');
 	if (!params.scene) throw new TypeError('scene is required');
@@ -102,7 +102,7 @@ var ThreeJsRendererState = createDataType(function (params) {
  * @param {string} [id=<track>-<event.note || startTimeInMicroSec>] - unique ID of event
  * @returns AnimEvent
  */
-var AnimEvent = createDataType(function (params) {
+const AnimEvent = createDataType(function (params) {
 	if (!params.event) throw new TypeError('no MidiEvent passed in');
 
 	this.event = params.event;
@@ -128,7 +128,7 @@ var AnimEvent = createDataType(function (params) {
  * @param {string} [params.color='#FFFFFF'] - color of element to render
  * @returns RenderEvent
  */
-var RenderEvent = createDataType(function (params) {
+const RenderEvent = createDataType(function (params) {
 	if (typeof params.id === 'undefined') throw new TypeError('no id passed in');
 	if (typeof params.track === 'undefined') throw new TypeError('no track passed in');
 	if (typeof params.subtype === 'undefined') throw new TypeError('no subtype passed in');
@@ -164,7 +164,7 @@ var RenderEvent = createDataType(function (params) {
  * @param {d3.Scale} [params.scale] - D3.Scale (required if 'path' is given)
  * @returns D3RenderEvent
  */
-var D3RenderEvent = createDataType(function (params) {
+const D3RenderEvent = createDataType(function (params) {
 	if (typeof params.path !== 'undefined' && typeof params.radius !== 'undefined') throw new TypeError('cannot have path and radius');
 	if (typeof params.path === 'undefined' && typeof params.radius === 'undefined') throw new TypeError('no path or radius passed in');
 	if (typeof params.scale === 'undefined' && typeof params.path !== 'undefined') throw new TypeError('scale required if path passed in');
@@ -186,7 +186,7 @@ var D3RenderEvent = createDataType(function (params) {
  * @param {THREEJS~Object3D} [params.shape] - ThreeJs Object3D of shape representing this event
  * @returns ThreeJsRenderEvent
  */
-var ThreeJsRenderEvent = createDataType(function (params) {
+const ThreeJsRenderEvent = createDataType(function (params) {
 	if (typeof params.z === 'undefined') throw new TypeError('no z passed in');
 
 	this.scale = params.scale || 1;

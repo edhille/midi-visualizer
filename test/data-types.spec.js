@@ -2,24 +2,24 @@
 /* globals describe: true, beforeEach: true, afterEach: true, it: true */
 'use strict';
 
-var chai = require('chai');
-var expect = chai.expect;
-var sinon = require('sinon');
+const chai = require('chai');
+const expect = chai.expect;
+const sinon = require('sinon');
 
-var types = require('../src/data-types');
-var MidiVisualizerState = types.MidiVisualizerState;
-var RendererState = types.RendererState;
-var D3RendererState = types.D3RendererState;
-var ThreeJsRendererState = types.ThreeJsRendererState;
-var AnimEvent = types.AnimEvent;
-var RenderEvent = types.RenderEvent;
-var D3RenderEvent = types.D3RenderEvent;
-var ThreeJsRenderEvent = types.ThreeJsRenderEvent;
+const types = require('../src/data-types');
+const MidiVisualizerState = types.MidiVisualizerState;
+const RendererState = types.RendererState;
+const D3RendererState = types.D3RendererState;
+const ThreeJsRendererState = types.ThreeJsRendererState;
+const AnimEvent = types.AnimEvent;
+const RenderEvent = types.RenderEvent;
+const D3RenderEvent = types.D3RenderEvent;
+const ThreeJsRenderEvent = types.ThreeJsRenderEvent;
 
 describe('data-types', function() {
 
 	describe('MidiVisualizerState', function() {
-		var midiVisualizerState;
+		let midiVisualizerState;
 
 		describe('no params instantiation', function() {
 			it('should throw an error regarding a missing "audioPlayer"', function(done) {
@@ -90,7 +90,7 @@ describe('data-types', function() {
 	});
 
 	describe('RendererState', function() {
-		var rendererState;
+		let rendererState;
 
 		describe('no params instantiation', function() {
 			it('should throw a TypeError', function (done) {
@@ -265,7 +265,7 @@ describe('data-types', function() {
 	});
 
 	describe('D3RendererState', function () {
-		var rendererState;
+		let rendererState;
 		
 		describe('missing svg param instantiation', function () {
 			
@@ -322,7 +322,7 @@ describe('data-types', function() {
 	});
 
 	describe('ThreeJsRendererState', function () {
-		var rendererState, params;
+		let rendererState, params;
 		
 		beforeEach(function (done) {
 			params = {
@@ -396,7 +396,7 @@ describe('data-types', function() {
 	});
 
 	describe('AnimEvent', function() {
-		var animEvent;
+		let animEvent;
 
 		describe('no params instantiation', function() {
 			it('should throw if we do not have any params', function (done) {
@@ -413,7 +413,7 @@ describe('data-types', function() {
 		});
 
 		describe('minimal params instantiation', function() {
-			var params;
+			let params;
 
 			beforeEach(function(done) {
 				params = { event: { note: 127 }};
@@ -521,7 +521,7 @@ describe('data-types', function() {
 		});
 
 		describe('missing required params', function () {
-			var params;
+			let params;
 
 			beforeEach(function (done) {
 				params = {};
@@ -640,7 +640,7 @@ describe('data-types', function() {
 		});
 
 		describe('minimal params instantiation', function () {
-			var renderEvent;
+			let renderEvent;
 
 			beforeEach(function (done) {
 				renderEvent = new RenderEvent({
@@ -682,7 +682,7 @@ describe('data-types', function() {
 		});
 
 		describe('with a scale, path and radius', function () {
-			var params;
+			let params;
 
 			beforeEach(function (done) {
 				params = {
@@ -709,7 +709,7 @@ describe('data-types', function() {
 		});
 
 		describe('with a scale, but no path or radius', function () {
-			var params;
+			let params;
 
 			beforeEach(function (done) {
 				params = {
@@ -734,7 +734,7 @@ describe('data-types', function() {
 		});
 
 		describe('with a path, no radius and no scale', function () {
-			var params;
+			let params;
 
 			beforeEach(function (done) {
 				params = {
@@ -758,7 +758,7 @@ describe('data-types', function() {
 		});
 
 		describe('with a radius (but not a path) and no scale', function () {
-			var params;
+			let params;
 			
 			beforeEach(function (done) {
 				params = {
@@ -783,7 +783,7 @@ describe('data-types', function() {
 		});
 
 		describe('with a path and radius', function () {
-			var params;
+			let params;
 			
 			beforeEach(function (done) {
 				params = {
@@ -808,7 +808,7 @@ describe('data-types', function() {
 		});
 				
 		describe('with a path and a scale', function () {
-			var params;
+			let params;
 			
 			beforeEach(function (done) {
 				params = {
@@ -847,7 +847,7 @@ describe('data-types', function() {
 		});
 
 		describe('with params', function () {
-			var params;
+			let params;
 
 			beforeEach(function (done) {
 				params = {
