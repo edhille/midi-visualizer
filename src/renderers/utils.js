@@ -55,7 +55,7 @@ module.exports = function closure() {
 			const eventKeys = Object.keys(stateSnapshot.renderEvents)
 								.map(Number)
 								.filter(function (eventTimeMs) {
-									return lastPlayheadTimeMs < eventTimeMs && eventTimeMs <= nowMs;
+									return lastPlayheadTimeMs <= eventTimeMs && eventTimeMs <= nowMs;
 								});
 
 			if (eventKeys.length > 0) {
