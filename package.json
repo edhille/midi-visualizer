@@ -37,10 +37,10 @@
   },
   "homepage": "https://github.com/edhille/midi-visualizer",
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "^4.0.2",
     "coveralls": "^2.13.1",
-    "del": "^2.2.2",
-    "eslint": "^3.19.0",
+    "del": "^3.0.0",
+    "eslint": "^4.0.0",
     "istanbul": "^0.4.5",
     "jsdoc": "^3.4.3",
     "jsdoc-to-markdown": "^3.0.0",
@@ -57,6 +57,6 @@
     "func-midi-parser": "^2.0.0",
     "funtils": "^0.5.0",
     "lodash": "^4.17.4",
-    "three": "^0.84.0"
+    "three": "^0.85.2"
   }
 }
