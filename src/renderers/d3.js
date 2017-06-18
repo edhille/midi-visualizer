@@ -179,6 +179,8 @@ function resize(state, dimension) {
 	});
 }
 
+function shouldSetShapes(events) { events && events.length > 0 && events[0] instanceof D3RenderEvent; }
+
 /**
  * @function
  * @name generate
@@ -212,19 +214,17 @@ function generate(renderConfig) {
 	renderer.DOM_ID = DOM_ID;
 
 	/* istanbul ignore next */ // we cannot reach this without insane mockery
-	// D3JsRendererState -> [RenderEvent] -> undefined
+	// D3JsRendererState -> [RenderEvent] -> [RenderEvent] -> [RenderEvent] -> undefined
 	function rafFn(state, eventsToAdd, currentRunningEvents, newEvents, nowMs) {
-		if (eventsToAdd && eventsToAdd.length > 0 && eventsToAdd[0] instanceof D3RenderEvent) {
-			const shapes = state.svg.selectAll('.stage').selectAll('.shape').data(currentRunningEvents, getId);
-			const enter = shapes.enter().append(partial(getShape, state.document)); 
+		const shapes = state.svg.selectAll('.stage').selectAll('.shape').data(currentRunningEvents, getId);
+		const enter = shapes.enter().append(partial(getShape, state.document)); 
 
-			enter.attr('fill', getColor);
-			enter.attr('id', getId);
-			enter.each(sizeElem);
-			enter.each(transform);
+		enter.attr('fill', getColor);
+		enter.attr('id', getId);
+		enter.each(sizeElem);
+		enter.each(transform);
 
-			renderConfig.frameRenderer(nowMs, state, shapes);
-		}
+		renderConfig.frameRenderer(nowMs, state, shapes);
 	}
 
 	function play(state, player) {
