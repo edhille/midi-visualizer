@@ -57,8 +57,9 @@ module.exports = function closure() {
 			let eventKeys = [];
 			for (let i = 0; i < allEventKeys.length; ++i) {
 				const eventTimeMs = Number(allEventKeys[i]);
-				if (lastPlayheadTimeMs <= eventTimeMs && eventTimeMs <= nowMs) continue;
-				eventKeys.push(eventTimeMs);
+				if (lastPlayheadTimeMs <= eventTimeMs && eventTimeMs <= nowMs){
+					eventKeys.push(eventTimeMs);
+				}
 			}
 
 			if (eventKeys.length > 0) {
