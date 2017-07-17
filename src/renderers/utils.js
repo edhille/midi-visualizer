@@ -52,11 +52,14 @@ module.exports = function closure() {
 				lastPlayheadTimeMs = nowMs;
 			}
 
-			const eventKeys = Object.keys(stateSnapshot.renderEvents)
-								.map(Number)
-								.filter(function (eventTimeMs) {
-									return lastPlayheadTimeMs <= eventTimeMs && eventTimeMs <= nowMs;
-								});
+			// NOTE: using for loop here for performance reasons..
+			const allEventKeys = Object.keys(stateSnapshot.renderEvents);
+			let eventKeys = [];
+			for (let i = 0; i < allEventKeys.length; ++i) {
+				const eventTimeMs = Number(allEventKeys[i]);
+				if (lastPlayheadTimeMs <= eventTimeMs && eventTimeMs <= nowMs) continue;
+				eventKeys.push(eventTimeMs);
+			}
 
 			if (eventKeys.length > 0) {
 				const events = eventKeys.reduce(function (events, key) { return events.concat(stateSnapshot.renderEvents[key]); }, []);
