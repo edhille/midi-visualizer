@@ -3,7 +3,7 @@
 'use strict';
 
 const d3 = require('d3');
-const transformMidi = require('../midi-transformer');
+const { transformMidi } = require('../midi-transformer');
 
 /** @constant
  *  @type {number}
@@ -46,7 +46,9 @@ module.exports = function closure() {
 				return;
 			}
 
-			if (nowMs < lastPlayheadTimeMs) {
+			const playDelta = nowMs - lastPlayheadTimeMs;
+
+			if (nowMs < lastPlayheadTimeMs || playDelta > MAX_RAF_DELTA_MS * 10) {
 				resumeFn(state, nowMs);
 				currentRunningEvents = [];
 				lastPlayheadTimeMs = nowMs;
@@ -55,6 +57,7 @@ module.exports = function closure() {
 			// NOTE: using for loop here for performance reasons..
 			const allEventKeys = Object.keys(stateSnapshot.renderEvents);
 			let eventKeys = [];
+
 			for (let i = 0; i < allEventKeys.length; ++i) {
 				const eventTimeMs = Number(allEventKeys[i]);
 				if (lastPlayheadTimeMs <= eventTimeMs && eventTimeMs <= nowMs){
@@ -124,14 +127,22 @@ module.exports = function closure() {
 	 */
 	// RendererState -> [(RendererState -> AnimEvent -> [RenderEvent])] -> [AnimEvent] -> [RenderEvent]
 	function transformEvents(state, trackTransformers, animEvents) {
+		// TODO: if we want to move to groupByTime(render.mapEvents(mapToAnimEvents(midi)))
+		//       we have to figure out why this function returns undefined values
+		//       (also, the above approach appears to be very time-consuming, so we may need something else...)
 		const renderEvents = {};
 
-		Object.keys(animEvents).map(function _convertAnimEvents(timeInMs) {
+		let count = 0;
+		const precount = Object.values(animEvents).reduce((count, arr) => count + arr.length, 0);
+		console.group('tranformEvents');
+		console.log(`animEvents precount: ${precount}`);
+		Object.keys(animEvents).map(timeInMs => {
 			renderEvents[timeInMs] = renderEvents[timeInMs] || [];
-			animEvents[timeInMs].forEach(function _convertEvent(event) {
+			count += animEvents[timeInMs].length;
+			animEvents[timeInMs].forEach(event => {
 				const transformFn = trackTransformers[event.track];
 				if (transformFn) {
-					// renderEvents[timeInMs] = renderEvents[timeInMs].concat(transformFn(state, event));
+					// we have to add to the events to prevent losing events not returned in the transform...
 					renderEvents[timeInMs].push.apply(renderEvents[timeInMs], transformFn(state, event));
 				} else {
 					/*eslint-disable no-console*/
@@ -139,6 +150,9 @@ module.exports = function closure() {
 				}
 			});
 		});
+
+		console.log(`animEvents postcount: ${count}`);
+		console.groupEnd();
 
 		return renderEvents;
 	}
@@ -156,9 +170,11 @@ module.exports = function closure() {
 	 */
 	// RendererState -> Midi -> Config -> RendererState
 	function mapEvents(rendererState, midi, config) {
+		console.log('going to transform in mapEvents');
 		const animEvents = transformMidi(midi);
 
 		return rendererState.next({
+			animEventsByTimeMs: animEvents,
 			renderEvents: transformEvents(rendererState, config.transformers, animEvents)
 		});
 	}
@@ -255,11 +271,11 @@ module.exports = function closure() {
 				}
 				break;
 			case 'off':
-				expiredEvents = expiredEvents.concat(currentRunningEvents.filter(function (elem, index) {
+				expiredEvents = expiredEvents.concat(currentRunningEvents.filter(function (_elem, index) {
 					return matchIndices.indexOf(index) > -1;
 				}));
 
-				currentRunningEvents = currentRunningEvents.filter(function (elem, index) {
+				currentRunningEvents = currentRunningEvents.filter(function (_elem, index) {
 					return -1 === matchIndices.indexOf(index);
 				});
 				break;

@@ -14,7 +14,7 @@ const MidiNoteOffEvent = midiParser.types.MidiNoteOffEvent;
 const MidiMetaTempoEvent = midiParser.types.MidiMetaTempoEvent;
 const MidiMetaInstrumentNameEvent = midiParser.types.MidiMetaInstrumentNameEvent;
 
-const transformMidi = require('../src/midi-transformer');
+const { transformMidi } = require('../src/midi-transformer');
 
 function generateMidiData() {
 	return {
@@ -89,9 +89,9 @@ describe('midi-transformer', function() {
 	});
 
 	it('should have calculated length in microseconds of each note', function(done) {
-		expect(animEventsByTimeMs[0][0].lengthMicroSec).to.equal(10000);
-		expect(animEventsByTimeMs[10][1].lengthMicroSec).to.equal(20000);
-		expect(animEventsByTimeMs[30][1].lengthMicroSec).to.equal(20000);
+		expect(animEventsByTimeMs[0].filter(e => e.event.subtype === 'on')[0].lengthMicroSec).to.equal(10000);
+		expect(animEventsByTimeMs[10].filter(e => e.event.subtype === 'on')[0].lengthMicroSec).to.equal(20000);
+		expect(animEventsByTimeMs[30].filter(e => e.event.subtype === 'on')[0].lengthMicroSec).to.equal(20000);
 		done();
 	});
 

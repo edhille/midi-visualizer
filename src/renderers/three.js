@@ -9,7 +9,7 @@ const scale = renderUtils.scale;
 const maxNote = renderUtils.maxNote;
 const minNote = renderUtils.minNote;
 const isNoteOnEvent = renderUtils.isNoteOnEvent;
-const transformMidi = require('../midi-transformer');
+const { transformMidi, mapToAnimEvents, groupByTime } = require('../midi-transformer');
 const ThreeJsRendererState = require('../data-types').ThreeJsRendererState;
 
 const DOM_ID = 'threejs';
@@ -43,7 +43,7 @@ function genSongScales(dimension, midi) {
 		trackScale.note.range([50, 100]);
 		trackScale.note.domain(trackScale.x.domain());
 
-		trackScale.hue = scale.scaleLinear().range([0,360]).domain([0,8]);
+		trackScale.hue = scale.scaleLinear().range([0,360]).domain(trackScale.x.domain());
 		trackScale.velocity = scale.scaleLinear().range([30,60]).domain([0, 256]);
 
 		return scales;
@@ -248,6 +248,7 @@ function generate(renderConfig) {
 
 		rendererState = rendererState.next({
 			renderEvents: renderConfig.mapEvents(rendererState, animEvents)
+			// renderEvents: groupByTime(renderConfig.mapEvents(rendererState, mapToAnimEvents(midi)))
 		});
 
 		return renderer(rendererState);

@@ -54,6 +54,9 @@ const RendererState = createDataType(function (params) {
 	this.renderEvents = params.renderEvents || [];
 	this.scales = params.scales || [];
 	this.isPlaying = params.isPlaying || false;
+
+	// TODO: codify
+	this.animEventsByTimeMs = params.animEventsByTimeMs || {};
 });
 
 /**
@@ -67,6 +70,7 @@ const D3RendererState = createDataType(function (params) {
 	if(!params.svg) throw new TypeError('svg is required');
 
 	this.svg = params.svg;
+	this.d3 = params.d3; // TODO: require
 }, RendererState);
 
 /**
@@ -126,6 +130,7 @@ const AnimEvent = createDataType(function (params) {
  * @param {number} [params.z=0] - z position for element
  * @param {number} [params.microSecPerBeat=500000] - number of microseconds per beat
  * @param {string} [params.color='#FFFFFF'] - color of element to render
+ * @param {string} [params.opacity=1.0] - opacity of element
  * @returns RenderEvent
  */
 const RenderEvent = createDataType(function (params) {
@@ -153,6 +158,7 @@ const RenderEvent = createDataType(function (params) {
 	this.microSecPerBeat = params.microSecPerBeat || 500000;
 
 	this.color = params.color || '#FFFFFF';
+	this.opacity = params.opacity || 1.0;
 });
 
 /**
@@ -162,16 +168,20 @@ const RenderEvent = createDataType(function (params) {
  * @param {string} [params.path] - SVG path string (required if no 'radius' given)
  * @param {number} [params.radius] - radius to use for rendering circle (required if no 'path' given)
  * @param {d3.Scale} [params.scale] - D3.Scale (required if 'path' is given)
+ * @param {d3.Transition} [params.transition] - D3.Transition to use for element transition
  * @returns D3RenderEvent
  */
 const D3RenderEvent = createDataType(function (params) {
 	if (typeof params.path !== 'undefined' && typeof params.radius !== 'undefined') throw new TypeError('cannot have path and radius');
-	if (typeof params.path === 'undefined' && typeof params.radius === 'undefined') throw new TypeError('no path or radius passed in');
+	// if (typeof params.path === 'undefined' && typeof params.radius === 'undefined') throw new TypeError('no path or radius passed in');
 	if (typeof params.scale === 'undefined' && typeof params.path !== 'undefined') throw new TypeError('scale required if path passed in');
 
 	this.path = params.path;
+	this.line = params.line; // TODO: check for this...
+	this.circle = params.circle; // TODO: check for this...
 	this.radius = params.radius;
 	this.scale = params.scale;
+	this.transition = params.transition;
 }, RenderEvent);
 
 /**

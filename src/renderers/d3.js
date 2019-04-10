@@ -9,30 +9,44 @@ const renderUtils = require('./utils');
 const maxNote = renderUtils.maxNote;
 const minNote = renderUtils.minNote;
 const isNoteOnEvent = renderUtils.isNoteOnEvent;
-const transformMidi = require('../midi-transformer');
-const D3RenderEvent = require('../data-types').D3RenderEvent;
+const { transformMidi } = require('../midi-transformer');
+// const D3RenderEvent = require('../data-types').D3RenderEvent;
 const D3RendererState = require('../data-types').D3RendererState;
 
 const DOM_ID = 'd3-stage';
 
 function getId(d) { return d.id; }
 function getColor(d) { return d.color; }
+function getOpacity(d) { return d.opacity; }
 function getR(d) { return d.radius; }
 function getY(d) { return d.y; }
 function getX(d) { return d.x; }
 function getScale(d) { return d.scale; }
 
 function getShape(document, datum) {
-	const type = datum.path ? 'path' : 'circle';
-	const elem = document.createElementNS('http://www.w3.org/2000/svg', type);
+	if (datum.path) {
+		const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
-	elem.classList.add('shape');
-
-	if (type === 'path') {
+		elem.classList.add('shape');
+		elem.classList.add(getId(datum));
 		elem.setAttribute('d', datum.path);
-	}
 
-	return elem;
+		return elem;
+	} else if (datum.line) {
+		const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+		elem.classList.add(getId(datum));
+		elem.classList.add('line');
+
+		return elem;
+	} else {
+		const elem = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+		elem.classList.add(getId(datum));
+		elem.classList.add('shape');
+
+		return elem;
+	}
 }
 
 function sizeElem(datum) {
@@ -53,6 +67,7 @@ function sizeElem(datum) {
 function transform(datum) {
 	const x = getX(datum);
 	const y = getY(datum);
+	let scale, box, newTransform;
 
 	switch (this.tagName) {
 	case 'circle':
@@ -60,12 +75,16 @@ function transform(datum) {
 		this.setAttribute('cx', x);
 		break;
 	case 'path':
-		const scale = getScale(datum);
-		const box = this.getBBox();
-		// (the grouping is actually needed here...)
-		const newTransform = 'matrix(' + scale + ', 0, 0, ' + scale + ', ' + (x - box.width*scale/2) + ', ' + (y - box.height*scale/2) + ')'; 
+		if (datum.path) {
+			scale = getScale(datum);
+			box = this.getBBox();
+			// (the grouping is actually needed here...)
+			newTransform = 'matrix(' + scale + ', 0, 0, ' + scale + ', ' + (x - box.width*scale/2) + ', ' + (y - box.height*scale/2) + ')'; 
 
-		this.setAttribute('transform', newTransform);
+			this.setAttribute('transform', newTransform);
+		} else if (datum.line) {
+			console.log('transform line', datum.line);
+		}
 		break;
 	default:
 		console.error('do not know how to position "' + this.tagName + '"'); // eslint-disable-line no-console
@@ -150,7 +169,8 @@ function prepDOM(midi, config) {
 		width: x,
 		height: y,
 		scales: config.scalesTuner ? config.scalesTuner(songScales, x, y) : songScales,
-		svg: svg
+		svg: svg,
+		d3: d3,
 	});
 }
 
@@ -179,7 +199,7 @@ function resize(state, dimension) {
 	});
 }
 
-function shouldSetShapes(events) { events && events.length > 0 && events[0] instanceof D3RenderEvent; }
+// function shouldSetShapes(events) { events && events.length > 0 && events[0] instanceof D3RenderEvent; }
 
 /**
  * @function
@@ -215,16 +235,54 @@ function generate(renderConfig) {
 
 	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// D3JsRendererState -> [RenderEvent] -> [RenderEvent] -> [RenderEvent] -> undefined
-	function rafFn(state, eventsToAdd, currentRunningEvents, newEvents, nowMs) {
-		const shapes = state.svg.selectAll('.stage').selectAll('.shape').data(currentRunningEvents, getId);
-		const enter = shapes.enter().append(partial(getShape, state.document)); 
+	function rafFn(state, _eventsToAdd, currentRunningEvents, _newEvents, nowMs) {
+		const stage = state.svg.selectAll('.stage');
+		const all = stage.selectAll('.line,.shape').data(currentRunningEvents, getId);//.enter().append(partial(getShape, document));
+		// const lineFn = d3.line();
 
-		enter.attr('fill', getColor);
-		enter.attr('id', getId);
-		enter.each(sizeElem);
-		enter.each(transform);
+		// all.each(function (d) {
+		// 	const node = d3.selectAll('.' + getId(d));
+		// 	if (d.line) {
+		// 		node.attr('class', 'line');
+		// 		node.attr('stroke', getColor(d));
+		// 		node.attr('stroke-width', 5); // TODO: attribute-driven
+		// 		node.attr('d', lineFn(d.line));
+		// 	} else if (d.circle) {
+		// 		node.attr('fill', getColor(d));
+		// 		node.attr('opacity', getOpacity(d));
+		// 		sizeElem.call(this, d);
+		// 		transform.call(this, d);
+		// 	}
 
-		renderConfig.frameRenderer(nowMs, state, shapes);
+		// 	if (d.transition) {
+		// 		node.select('#' + getId(d)).transition(d.transition);
+		// 	}
+		// });
+		
+		// const lines = all.filter(d => d.line);
+		// const lineEnter = lines.append('path');
+		// const lineFn = d3.line();
+		// lineEnter.attr('id', getId);
+		// lineEnter.attr('class', 'line');
+		// lineEnter.attr('stroke', getColor);
+		// lineEnter.attr('stroke-width', 5); // TODO: attribute-driven
+		// lineEnter.attr('d', d => lineFn(d.line));
+
+		// const shapes = all.filter(d => d.circle);
+		// const shapeEnter = shapes.append(partial(getShape, state.document)); 
+		// shapeEnter.attr('id', getId);
+		// shapeEnter.attr('fill', getColor);
+		// shapeEnter.attr('opacity', getOpacity);
+		// shapeEnter.each(sizeElem);
+		// shapeEnter.each(transform);
+
+		// currentRunningEvents.map(e => {
+		// 	if (e.transition) {
+		// 		shapeEnter.select('#' + e.id).transition(e.transition);
+		// 	}
+		// });
+
+		renderConfig.frameRenderer(nowMs, state, all);
 	}
 
 	function play(state, player) {
@@ -251,10 +309,15 @@ function generate(renderConfig) {
 
 	const setupFn = function setupRenderer(midi, config) {
 		let rendererState = renderConfig.prepDOM(midi, config);
+		// TODO: we really want to keep the nidi, so we can transform again I think...
+		//       we're essentially doubling the events added by the track transforms...
+		console.log('going to transform setup');
 		const animEvents = transformMidi(midi);
 
 		rendererState = rendererState.next({
+			animEventsByTimeMs: animEvents,
 			renderEvents: renderConfig.mapEvents(rendererState, animEvents)
+			// renderEvents: groupByTime(renderConfig.mapEvents(rendererState, mapToAnimEvents(midi)))
 		});
 
 		return renderer(rendererState);
