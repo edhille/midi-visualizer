@@ -165,7 +165,8 @@ function prepDOM(midi, config) {
 		id: DOM_ID,
 		window: w,
 		root: config.root,
-		raf: config.raf,
+		// I _think_ this is wrong (need to verify whether THREEJS renderer needs this...)
+		// raf: config.raf,
 		width: x,
 		height: y,
 		scales: config.scalesTuner ? config.scalesTuner(songScales, x, y) : songScales,
@@ -304,6 +305,7 @@ function generate(renderConfig) {
 	renderer.lift('pause', renderUtils.pause);
 	renderer.lift('stop', renderUtils.stop);
 	renderer.lift('resize', function (state, dimension) {
+		if (state.height === dimension.height && state.width === dimension.width) return state;
 		return renderConfig.resize ? renderConfig.resize(state, dimension, renderer) : resize(state, dimension, renderer);
 	});
 
@@ -311,7 +313,6 @@ function generate(renderConfig) {
 		let rendererState = renderConfig.prepDOM(midi, config);
 		// TODO: we really want to keep the nidi, so we can transform again I think...
 		//       we're essentially doubling the events added by the track transforms...
-		console.log('going to transform setup');
 		const animEvents = transformMidi(midi);
 
 		rendererState = rendererState.next({

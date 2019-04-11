@@ -37,11 +37,16 @@ module.exports = function closure() {
 		const songLengthMs = player.lengthMs;
 
 		function animate(/* now */) {
-			if (!player.isPlaying) return;
+			if (!player.isPlaying) {
+				window.cancelAnimationFrame(lastRafId);
+				lastRafId = null;
+				return;
+			}
 
 			const nowMs = player.getPlayheadTime();
 
 			if (nowMs >= songLengthMs) {
+				window.cancelAnimationFrame(lastRafId);
 				lastRafId = null;
 				return;
 			}
@@ -132,13 +137,8 @@ module.exports = function closure() {
 		//       (also, the above approach appears to be very time-consuming, so we may need something else...)
 		const renderEvents = {};
 
-		let count = 0;
-		const precount = Object.values(animEvents).reduce((count, arr) => count + arr.length, 0);
-		console.group('tranformEvents');
-		console.log(`animEvents precount: ${precount}`);
 		Object.keys(animEvents).map(timeInMs => {
 			renderEvents[timeInMs] = renderEvents[timeInMs] || [];
-			count += animEvents[timeInMs].length;
 			animEvents[timeInMs].forEach(event => {
 				const transformFn = trackTransformers[event.track];
 				if (transformFn) {
@@ -150,9 +150,6 @@ module.exports = function closure() {
 				}
 			});
 		});
-
-		console.log(`animEvents postcount: ${count}`);
-		console.groupEnd();
 
 		return renderEvents;
 	}
@@ -170,7 +167,6 @@ module.exports = function closure() {
 	 */
 	// RendererState -> Midi -> Config -> RendererState
 	function mapEvents(rendererState, midi, config) {
-		console.log('going to transform in mapEvents');
 		const animEvents = transformMidi(midi);
 
 		return rendererState.next({
@@ -289,20 +285,20 @@ module.exports = function closure() {
 
 		expiredEvents = expiredEvents.concat(currentRunningEvents.filter(function (event) { return event.startTimeMicroSec > nowMicroSec; }));
 
-		const timestamp = state.window.performance.now();
+		const timestampMs = state.window.performance.now();
 
-		state.window.requestAnimationFrame(function (now) {
-			const delta = now - timestamp;
+		state.window.requestAnimationFrame(function (nowMs) {
+			const deltaMs = nowMs - timestampMs;
 
 			cleanupFn(state, currentRunningEvents, expiredEvents, nowMs);
 
-			if (delta < MAX_RAF_DELTA_MS) {
+			if (deltaMs < MAX_RAF_DELTA_MS) {
 				// TODO: should we be passing the state in, or just what is needed?
 				//       this is happening outside of "state" (i.e. in an async "set-and-forget" animation renderer),
 				//       so perhaps this should not include state?!?
 				rafFn(state, eventsToAdd, currentRunningEvents, [], nowMs);
 			} else {
-				console.error('skipping render due to ' + delta + 'ms delay');
+				console.error('skipping render due to ' + deltaMs + 'ms delay');
 			}
 		});
 
