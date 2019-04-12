@@ -93,6 +93,7 @@ function prepDOM(midi, config) {
 		scales: config.scalesTuner ? config.scalesTuner(songScales, x, y) : songScales,
 		svg: svg,
 		d3: d3,
+		animEventsByTimeMs: [],
 	});
 }
 

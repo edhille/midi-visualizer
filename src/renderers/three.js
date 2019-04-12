@@ -101,7 +101,8 @@ function prepDOM(midi, config) {
 		camera: camera,
 		scene: scene,
 		renderer: renderer,
-		THREE: THREE
+		THREE: THREE,
+		animEventsByTimeMs: [],
 	});
 
 	return state;
