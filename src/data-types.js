@@ -3,6 +3,9 @@
 
 const createDataType = require('fadt');
 
+const DEFAULT_STROKE = 1;
+const DEFAULT_STROKE_LINE_CAP = 'round';
+
 /**
  * @class MidiVisualizerState
  * @description top-level data type representing state of MidiVisualizer
@@ -43,6 +46,7 @@ const RendererState = createDataType(function (params) {
 	if (!params.root) throw new TypeError('root required');
 	if (!params.window) throw new TypeError('window required');
 	if (!params.window.document) throw new TypeError('window must have document property');
+	if (!params.animEventsByTimeMs) throw new TypeError('animEventsByTimeMs required');
 
 	this.id = params.id;
 	this.root = params.root;
@@ -55,7 +59,6 @@ const RendererState = createDataType(function (params) {
 	this.scales = params.scales || [];
 	this.isPlaying = params.isPlaying || false;
 
-	// TODO: codify
 	this.animEventsByTimeMs = params.animEventsByTimeMs || {};
 });
 
@@ -68,9 +71,10 @@ const RendererState = createDataType(function (params) {
  */
 const D3RendererState = createDataType(function (params) {
 	if(!params.svg) throw new TypeError('svg is required');
+	if(!params.d3) throw new TypeError('d3 is required');
 
 	this.svg = params.svg;
-	this.d3 = params.d3; // TODO: require
+	this.d3 = params.d3;
 }, RendererState);
 
 /**
@@ -172,15 +176,24 @@ const RenderEvent = createDataType(function (params) {
  * @returns D3RenderEvent
  */
 const D3RenderEvent = createDataType(function (params) {
-	if (typeof params.path !== 'undefined' && typeof params.radius !== 'undefined') throw new TypeError('cannot have path and radius');
-	// if (typeof params.path === 'undefined' && typeof params.radius === 'undefined') throw new TypeError('no path or radius passed in');
-	if (typeof params.scale === 'undefined' && typeof params.path !== 'undefined') throw new TypeError('scale required if path passed in');
+	if (
+		typeof params.path   === 'undefined' &&
+		typeof params.line   === 'undefined' &&
+		typeof params.circle === 'undefined'
+	) throw new TypeError('must provide either a "path", "line", or "circle"');
+
+	if (
+		typeof params.scale === 'undefined' &&
+		typeof params.path  !== 'undefined'
+	) throw new TypeError('scale required if path passed in');
 
 	this.path = params.path;
-	this.line = params.line; // TODO: check for this...
-	this.circle = params.circle; // TODO: check for this...
-	this.stroke = params.stroke; // TODO: check for this when we have a line...
-	this.radius = params.radius;
+	this.line = params.line;
+	this.circle = params.circle;
+
+	this.stroke = params.stroke || DEFAULT_STROKE;
+	this.strokeLineCap = params.strokeLineCap || DEFAULT_STROKE_LINE_CAP;
+
 	this.scale = params.scale;
 	this.transition = params.transition;
 }, RenderEvent);

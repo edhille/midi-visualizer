@@ -115,7 +115,8 @@ describe('data-types', function() {
 						height: 100,
 						renderEvents: [],
 						scales: [],
-						window: { document: {} }
+						window: { document: {} },
+						animEventsByTimeMs: [],
 					});
 				}).to.throw(TypeError);
 
@@ -132,7 +133,8 @@ describe('data-types', function() {
 						width: 100,
 						height: 100,
 						renderEvents: [],
-						scales: []
+						scales: [],
+						animEventsByTimeMs: [],
 					});
 				}).to.throw(TypeError);
 
@@ -149,7 +151,8 @@ describe('data-types', function() {
 						width: 100,
 						height: 100,
 						renderEvents: [],
-						scales: []
+						scales: [],
+						animEventsByTimeMs: [],
 					});
 				}).to.throw(TypeError);
 
@@ -167,7 +170,26 @@ describe('data-types', function() {
 						width: 100,
 						height: 100,
 						renderEvents: [],
-						scales: []
+						scales: [],
+						animEventsByTimeMs: [],
+					});
+				}).to.throw(TypeError);
+
+				done();
+			});
+		});
+
+		describe('animEventsByTimeMs param is missing', function() {
+			it('should throw a TypeError', function (done) {
+				expect(function () {
+					new RendererState({
+						id: 'TEST-ID',
+						root: {},
+						window: { document: {} },
+						width: 100,
+						height: 100,
+						renderEvents: [],
+						scales: [],
 					});
 				}).to.throw(TypeError);
 
@@ -180,7 +202,8 @@ describe('data-types', function() {
 				rendererState = new RendererState({
 					id: 'TEST-ID',
 					window: { document: {} },
-					root: {}
+					root: {},
+					animEventsByTimeMs: [],
 				});
 
 				done();
@@ -221,7 +244,8 @@ describe('data-types', function() {
 					width: 100,
 					height: 100,
 					renderEvents: ['not empty'],
-					scales: ['not empty']
+					scales: ['not empty'],
+					animEventsByTimeMs: [],
 				});
 
 				done();
@@ -278,7 +302,8 @@ describe('data-types', function() {
 						width: 100,
 						height: 100,
 						renderEvents: ['not empty'],
-						scales: ['not empty']
+						scales: ['not empty'],
+						animEventsByTimeMs: [],
 					});
 				}).to.throw(TypeError);
 
@@ -293,7 +318,9 @@ describe('data-types', function() {
 					id: 'TEST-ID',
 					window: { document: {} },
 					root: {},
-					svg: 'TEST-SVG'
+					svg: 'TEST-SVG',
+					animEventsByTimeMs: [],
+					d3: () => {},
 				});
 
 				done();
@@ -332,7 +359,8 @@ describe('data-types', function() {
 				camera: 'TEST-CAMERA',
 				scene: 'TEST-SCENE',
 				renderer: 'TEST-RENDERER',
-				THREE: 'TEST-THREE'
+				THREE: 'TEST-THREE',	
+				animEventsByTimeMs: [],
 			};
 
 			rendererState = new ThreeJsRendererState(params);
@@ -695,7 +723,6 @@ describe('data-types', function() {
 					lengthMicroSec: 0,
 					startTimeMicroSec: 0,
 					path: 'TEST-PATH',
-					radius: 10,
 					scales: ['TEST-SCALE']
 				};
 				done();
@@ -757,7 +784,7 @@ describe('data-types', function() {
 			});
 		});
 
-		describe('with a radius (but not a path) and no scale', function () {
+		describe('without line, path, or circle', function () {
 			let params;
 			
 			beforeEach(function (done) {
@@ -770,14 +797,13 @@ describe('data-types', function() {
 					y: 0,
 					lengthMicroSec: 0,
 					startTimeMicroSec: 0,
-					radius: 3.14
 				};
 
 				done();
 			});
 
-			it('should not throw an error', function (done) {
-				expect(function () { new D3RenderEvent(params); }).not.to.throw(TypeError);
+			it('should throw an error', function (done) {
+				expect(function () { new D3RenderEvent(params); }).to.throw(TypeError);
 				done();
 			});
 		});
