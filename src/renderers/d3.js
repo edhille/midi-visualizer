@@ -4,93 +4,16 @@
 const d3 = require('d3');
 const funtils = require('funtils');
 const monad = funtils.monad;
-const partial = funtils.partial;
 const renderUtils = require('./utils');
 const maxNote = renderUtils.maxNote;
 const minNote = renderUtils.minNote;
 const isNoteOnEvent = renderUtils.isNoteOnEvent;
 const { transformMidi } = require('../midi-transformer');
-// const D3RenderEvent = require('../data-types').D3RenderEvent;
 const D3RendererState = require('../data-types').D3RendererState;
 
 const DOM_ID = 'd3-stage';
 
 function getId(d) { return d.id; }
-function getColor(d) { return d.color; }
-function getOpacity(d) { return d.opacity; }
-function getR(d) { return d.radius; }
-function getY(d) { return d.y; }
-function getX(d) { return d.x; }
-function getScale(d) { return d.scale; }
-
-function getShape(document, datum) {
-	if (datum.path) {
-		const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-
-		elem.classList.add('shape');
-		elem.classList.add(getId(datum));
-		elem.setAttribute('d', datum.path);
-
-		return elem;
-	} else if (datum.line) {
-		const elem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-
-		elem.classList.add(getId(datum));
-		elem.classList.add('line');
-
-		return elem;
-	} else {
-		const elem = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-
-		elem.classList.add(getId(datum));
-		elem.classList.add('shape');
-
-		return elem;
-	}
-}
-
-function sizeElem(datum) {
-	switch (this.tagName) {
-	case 'circle':
-		this.setAttribute('r', getR(datum));
-		break;
-	case 'path':
-		// We don't size, but instead lump that into the transform()
-		break;
-	default:
-		/*eslint-disable no-console*/
-		console.error('do know how to size "' + this.tagName + '"');
-		break;
-	}
-}
-
-function transform(datum) {
-	const x = getX(datum);
-	const y = getY(datum);
-	let scale, box, newTransform;
-
-	switch (this.tagName) {
-	case 'circle':
-		this.setAttribute('cy', y);
-		this.setAttribute('cx', x);
-		break;
-	case 'path':
-		if (datum.path) {
-			scale = getScale(datum);
-			box = this.getBBox();
-			// (the grouping is actually needed here...)
-			newTransform = 'matrix(' + scale + ', 0, 0, ' + scale + ', ' + (x - box.width*scale/2) + ', ' + (y - box.height*scale/2) + ')'; 
-
-			this.setAttribute('transform', newTransform);
-		} else if (datum.line) {
-			console.log('transform line', datum.line);
-		}
-		break;
-	default:
-		console.error('do not know how to position "' + this.tagName + '"'); // eslint-disable-line no-console
-		break;
-	}
-}
 
 /**
  * @function
@@ -165,8 +88,6 @@ function prepDOM(midi, config) {
 		id: DOM_ID,
 		window: w,
 		root: config.root,
-		// I _think_ this is wrong (need to verify whether THREEJS renderer needs this...)
-		// raf: config.raf,
 		width: x,
 		height: y,
 		scales: config.scalesTuner ? config.scalesTuner(songScales, x, y) : songScales,
@@ -239,49 +160,6 @@ function generate(renderConfig) {
 	function rafFn(state, _eventsToAdd, currentRunningEvents, _newEvents, nowMs) {
 		const stage = state.svg.selectAll('.stage');
 		const all = stage.selectAll('.line,.shape').data(currentRunningEvents, getId);//.enter().append(partial(getShape, document));
-		// const lineFn = d3.line();
-
-		// all.each(function (d) {
-		// 	const node = d3.selectAll('.' + getId(d));
-		// 	if (d.line) {
-		// 		node.attr('class', 'line');
-		// 		node.attr('stroke', getColor(d));
-		// 		node.attr('stroke-width', 5); // TODO: attribute-driven
-		// 		node.attr('d', lineFn(d.line));
-		// 	} else if (d.circle) {
-		// 		node.attr('fill', getColor(d));
-		// 		node.attr('opacity', getOpacity(d));
-		// 		sizeElem.call(this, d);
-		// 		transform.call(this, d);
-		// 	}
-
-		// 	if (d.transition) {
-		// 		node.select('#' + getId(d)).transition(d.transition);
-		// 	}
-		// });
-		
-		// const lines = all.filter(d => d.line);
-		// const lineEnter = lines.append('path');
-		// const lineFn = d3.line();
-		// lineEnter.attr('id', getId);
-		// lineEnter.attr('class', 'line');
-		// lineEnter.attr('stroke', getColor);
-		// lineEnter.attr('stroke-width', 5); // TODO: attribute-driven
-		// lineEnter.attr('d', d => lineFn(d.line));
-
-		// const shapes = all.filter(d => d.circle);
-		// const shapeEnter = shapes.append(partial(getShape, state.document)); 
-		// shapeEnter.attr('id', getId);
-		// shapeEnter.attr('fill', getColor);
-		// shapeEnter.attr('opacity', getOpacity);
-		// shapeEnter.each(sizeElem);
-		// shapeEnter.each(transform);
-
-		// currentRunningEvents.map(e => {
-		// 	if (e.transition) {
-		// 		shapeEnter.select('#' + e.id).transition(e.transition);
-		// 	}
-		// });
 
 		renderConfig.frameRenderer(nowMs, state, all);
 	}
@@ -311,8 +189,6 @@ function generate(renderConfig) {
 
 	const setupFn = function setupRenderer(midi, config) {
 		let rendererState = renderConfig.prepDOM(midi, config);
-		// TODO: we really want to keep the nidi, so we can transform again I think...
-		//       we're essentially doubling the events added by the track transforms...
 		const animEvents = transformMidi(midi);
 
 		rendererState = rendererState.next({
