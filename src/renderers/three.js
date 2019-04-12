@@ -9,7 +9,7 @@ const scale = renderUtils.scale;
 const maxNote = renderUtils.maxNote;
 const minNote = renderUtils.minNote;
 const isNoteOnEvent = renderUtils.isNoteOnEvent;
-const { transformMidi, mapToAnimEvents, groupByTime } = require('../midi-transformer');
+const { transformMidi } = require('../midi-transformer');
 const ThreeJsRendererState = require('../data-types').ThreeJsRendererState;
 
 const DOM_ID = 'threejs';
