@@ -3,8 +3,6 @@
 
 'use strict';
 
-require('es6-promise').polyfill();
-
 // TODO: how to mock/stub/DI AudioPlayer and midiParser in const-friendly way...
 let AudioPlayer = require('./audio-player');
 let midiParser = require('func-midi-parser');
