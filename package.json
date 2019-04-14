@@ -1,6 +1,6 @@
 {
   "name": "func-midi-visualizer",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "A functional-based visualizer for midi data, syncrhonized with audio file",
   "engines": {
     "node": ">=6.0.0"
