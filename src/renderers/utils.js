@@ -2,6 +2,7 @@
 
 'use strict';
 
+const _ = require('lodash');
 const d3 = require('d3');
 const { transformMidi } = require('../midi-transformer');
 
@@ -60,18 +61,15 @@ module.exports = function closure() {
 			}
 
 			// NOTE: using for loop here for performance reasons..
-			const allEventKeys = Object.keys(stateSnapshot.renderEvents);
 			let eventKeys = [];
-
-			for (let i = 0; i < allEventKeys.length; ++i) {
-				const eventTimeMs = Number(allEventKeys[i]);
+			for (const eventTimeMs in stateSnapshot.renderEvents) {
 				if (lastPlayheadTimeMs <= eventTimeMs && eventTimeMs <= nowMs){
 					eventKeys.push(eventTimeMs);
 				}
 			}
 
 			if (eventKeys.length > 0) {
-				const events = eventKeys.reduce(function (events, key) { return events.concat(stateSnapshot.renderEvents[key]); }, []);
+				const events = _.reduce(eventKeys, (events, key) => events.concat(stateSnapshot.renderEvents[key]), []);
 
 				/* istanbul ignore else */
 				if (events.length > 0) {
@@ -137,9 +135,11 @@ module.exports = function closure() {
 		//       (also, the above approach appears to be very time-consuming, so we may need something else...)
 		const renderEvents = {};
 
-		Object.keys(animEvents).map(timeInMs => {
+		// NOTE: we switched to for..in loops here as that turned out to be the fastest way to do this
+		for (const timeInMs in animEvents) {
 			renderEvents[timeInMs] = renderEvents[timeInMs] || [];
-			animEvents[timeInMs].forEach(event => {
+			for (const eventIdx in animEvents[timeInMs]) {
+				const event = animEvents[timeInMs][eventIdx];
 				const transformFn = trackTransformers[event.track];
 				if (transformFn) {
 					// we have to add to the events to prevent losing events not returned in the transform...
@@ -148,8 +148,8 @@ module.exports = function closure() {
 					/*eslint-disable no-console*/
 					console.error('No transform for track "' + event.track + '"');
 				}
-			});
-		});
+			}
+		}
 
 		return renderEvents;
 	}

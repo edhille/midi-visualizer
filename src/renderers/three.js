@@ -148,15 +148,12 @@ function resize(state, dimension) {
 function cleanup(state, currentRunningEvents, expiredEvents/*, nowMs */) {
 	// TODO: this is not currently being used...need an example that uses it...
 	/*eslint-disable no-console*/
-	console.error('cleanup');
 	expiredEvents.map(function (event) {
 		const obj = state.scene.getObjectByName(event.id);
 
 		if (obj) {
-			console.error('removing', obj);
 			state.scene.remove(obj);
 			if (obj.dispose) {
-				console.error('disposing...');
 				obj.dispose();
 			}
 		} else {
@@ -214,7 +211,7 @@ function generate(renderConfig) {
 
 	/* istanbul ignore next */ // we cannot reach this without insane mockery
 	// ThreeJsRendererState -> [RenderEvent] -> [RenderEvent] -> undefined
-	function rafFn(state, eventsToAdd, currentEvents, newEvents, nowMs) {
+	function rafFn(state, eventsToAdd, _currentEvents, _newEvents, nowMs) {
 		const shapes = renderConfig.frameRenderer(nowMs, eventsToAdd, state.scene, state.camera, THREE);
 		const geometry = new THREE.Object3D();
 
